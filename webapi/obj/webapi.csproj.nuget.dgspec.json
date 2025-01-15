@@ -1,25 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "/Users/benedicte/benedicte/itkurs/webapi/webapi.csproj": {}
+    "C:\\Users\\magnu\\Documents\\GitHub\\Neighborhood\\webapi\\webapi.csproj": {}
   },
   "projects": {
-    "/Users/benedicte/benedicte/itkurs/webapi/webapi.csproj": {
+    "C:\\Users\\magnu\\Documents\\GitHub\\Neighborhood\\webapi\\webapi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/benedicte/benedicte/itkurs/webapi/webapi.csproj",
+        "projectUniqueName": "C:\\Users\\magnu\\Documents\\GitHub\\Neighborhood\\webapi\\webapi.csproj",
         "projectName": "webapi",
-        "projectPath": "/Users/benedicte/benedicte/itkurs/webapi/webapi.csproj",
-        "packagesPath": "/Users/benedicte/.nuget/packages/",
-        "outputPath": "/Users/benedicte/benedicte/itkurs/webapi/obj/",
+        "projectPath": "C:\\Users\\magnu\\Documents\\GitHub\\Neighborhood\\webapi\\webapi.csproj",
+        "packagesPath": "C:\\Users\\magnu\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\magnu\\Documents\\GitHub\\Neighborhood\\webapi\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/benedicte/.nuget/NuGet/NuGet.Config"
+          "C:\\Users\\magnu\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net9.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -36,7 +42,7 @@
         "restoreAuditProperties": {
           "enableAudit": "true",
           "auditLevel": "low",
-          "auditMode": "all"
+          "auditMode": "direct"
         },
         "SdkAnalysisLevel": "9.0.100"
       },
@@ -68,7 +74,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.100/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
