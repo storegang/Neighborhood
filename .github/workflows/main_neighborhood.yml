@@ -1,6 +1,3 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
-
 name: Build and deploy Node.js app to Azure Web App - Neighborhood
 
 on:
@@ -48,7 +45,7 @@ jobs:
       name: "Production"
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write
 
     steps:
       - name: Download artifact from build job
@@ -58,6 +55,13 @@ jobs:
 
       - name: Unzip artifact for deployment
         run: unzip release.zip
+
+      - name: Get Commit Details
+        id: commit_info
+        run: |
+          echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          echo "COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')" >> $GITHUB_ENV
+          echo "COMMIT_MESSAGE=$(git log -1 --pretty=format:'%s')" >> $GITHUB_ENV
 
       - name: Login to Azure
         uses: azure/login@v2
@@ -73,3 +77,12 @@ jobs:
           app-name: "Neighborhood"
           slot-name: "Production"
           package: .
+
+      - name: Add Deployment Info to Azure App Settings
+        run: |
+          az webapp config appsettings set --name "Neighborhood" --resource-group "YourResourceGroupName" --settings COMMIT_SHA=${{ env.COMMIT_SHA }} COMMIT_AUTHOR="${{ env.COMMIT_AUTHOR }}" COMMIT_MESSAGE="${{ env.COMMIT_MESSAGE }}"
+        env:
+          AZURE_CLIENT_ID: ${{ secrets.AZUREAPPSERVICE_CLIENTID_23BA531564BB4554816C5CB0910DBB80 }}
+          AZURE_TENANT_ID: ${{ secrets.AZUREAPPSERVICE_TENANTID_20F5F61B9D544437BB0EEFFE9356C6A0 }}
+          AZURE_SUBSCRIPTION_ID: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_C78F1744C3654432872F3CB4B2375780 }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZUREAPPSERVICE_CLIENTSECRET }}
