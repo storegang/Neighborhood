@@ -1,0 +1,69 @@
+name: Build and deploy Neighborhood Frontend
+
+on:
+  push:
+    branches:
+      - deploy-action
+
+permissions:
+  packages: read
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    outputs:
+      committer_name: ${{ steps.commit-info.outputs.committer_name }}
+      committer_email: ${{ steps.commit-info.outputs.committer_email }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get commit info
+        id: commit-info
+        run: |
+          echo "committer_name=$(git log -1 --pretty=format:'%an')" >> $GITHUB_OUTPUT
+          echo "committer_email=$(git log -1 --pretty=format:'%ae')" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ^9.5.0
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+          cache: pnpm
+
+      - name: Change to project directory
+        run: cd neighborhood-frontend
+
+      - name: Install dependencies
+        working-directory: neighborhood-frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        working-directory: neighborhood-frontend
+        run: pnpm test --if-present
+
+      - name: Build
+        working-directory: neighborhood-frontend
+        run: pnpm build
+
+      - name: ACR build
+        id: acr
+        uses: azure/acr-build@v1
+        with:
+          service_principal: ${{ secrets.service_principal }}
+          service_principal_password: ${{ secrets.service_principal_password }}
+          tenant: ${{ secrets.tenant }}
+          registry: ${{ secrets.registry }}
+          repository: ${{ secrets.repository }}
+          image: neighborhood-frontend
+          tag: ${{ github.ref_name }}-${{ github.sha }}
+          folder: neighborhood-frontend
+          branch: main
