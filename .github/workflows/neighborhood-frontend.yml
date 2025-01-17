@@ -68,7 +68,7 @@ jobs:
         with:
           context: neighborhood-frontend
           push: true
-          tags: neighborhoodregistry.azurecr.io/neighborhood-frontend:${{ github.ref_name }}-${{ github.sha }}
+          tags: neighborhoodregistry.azurecr.io/neighborhood-frontend:latest
 
       #- name: ACR build
       #  id: acr
