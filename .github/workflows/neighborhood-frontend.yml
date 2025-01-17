@@ -68,7 +68,7 @@ jobs:
         with:
           context: neighborhood-frontend
           push: true
-          tags: ${{ github.ref_name }}-${{ github.sha }}
+          tags: neighborhood-frontend:${{ github.ref_name }}-${{ github.sha }}
 
       #- name: ACR build
       #  id: acr
