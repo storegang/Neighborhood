@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'neighborhood-frontend/**'
+      - '.github/workflows/neighborhood-frontend.yml'
 
 permissions:
   packages: read
