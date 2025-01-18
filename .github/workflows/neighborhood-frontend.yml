@@ -1,4 +1,4 @@
-name: Build and deploy Neighborhood Frontend
+name: Build Frontend
 
 on:
   push:
@@ -14,6 +14,9 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    concurrency:
+      group: frontend-branch-${{ inputs.working-directory }}-${{ github.ref_name }}
+      cancel-in-progress: ${{ github.event_name == 'push' && github.workflow == 'Build Frontend' }}
 
     defaults:
       run:
