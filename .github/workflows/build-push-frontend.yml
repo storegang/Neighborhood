@@ -3,7 +3,7 @@ name: Build Frontend
 on:
   push:
     paths:
-      - '../../frontend/**'
+      - 'frontend/**'
       - 'build-push-build-push-frontend.yml'
 
 permissions:
