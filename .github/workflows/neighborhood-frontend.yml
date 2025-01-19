@@ -1,0 +1,77 @@
+name: Build Frontend
+
+on:
+  push:
+    paths:
+      - 'neighborhood-frontend/**'
+      - '.github/workflows/neighborhood-frontend.yml'
+
+permissions:
+  packages: read
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: frontend-branch-${{ inputs.working-directory }}-${{ github.ref_name }}
+      cancel-in-progress: ${{ github.event_name == 'push' && github.workflow == 'Build Frontend' }}
+
+    defaults:
+      run:
+        working-directory: neighborhood-frontend
+
+    outputs:
+      committer_name: ${{ steps.commit-info.outputs.committer_name }}
+      committer_email: ${{ steps.commit-info.outputs.committer_email }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get commit info
+        id: commit-info
+        run: |
+          echo "committer_name=$(git log -1 --pretty=format:'%an')" >> $GITHUB_OUTPUT
+          echo "committer_email=$(git log -1 --pretty=format:'%ae')" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ^9.5.0
+
+      - name: Set up Node.js version
+        uses: actions/setup-node@v3
+
+        with:
+          node-version: "20.x"
+
+      - name: Install dependencies
+        working-directory: neighborhood-frontend
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        working-directory: neighborhood-frontend
+        run: pnpm test --if-present
+
+      - name: Build
+        working-directory: neighborhood-frontend
+        run: pnpm build
+
+
+      - name: Docker Login
+        if: "contains(github.ref, 'deploy-action')"
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      - name: Build and Push to ACR
+        if: "contains(github.ref, 'deploy-action')"
+        uses: docker/build-push-action@v2
+        with:
+          context: neighborhood-frontend
+          push: true
+          tags: neighborhoodregistry.azurecr.io/neighborhood-frontend:latest
