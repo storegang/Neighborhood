@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'frontend/**'
-      - 'build-push-build-push-frontend.yml'
+      - '.github/workflows/build-push-frontend.yml'
 
 permissions:
   packages: read
@@ -43,22 +43,17 @@ jobs:
 
       - name: Set up Node.js version
         uses: actions/setup-node@v3
-
         with:
           node-version: "20.x"
 
       - name: Install dependencies
-        working-directory: frontend
         run: pnpm install --frozen-lockfile
 
       - name: Test
-        working-directory: frontend
         run: pnpm test --if-present
 
       - name: Build
-        working-directory: frontend
         run: pnpm build
-
 
       - name: Docker Login
         if: "contains(github.ref, 'deploy-action')"
