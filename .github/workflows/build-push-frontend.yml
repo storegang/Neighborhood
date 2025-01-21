@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - 'frontend/**'
-      - '.github/workflows/build-push-frontend.yml'
+      - 'build-push-build-push-frontend.yml'
 
 permissions:
   packages: read
