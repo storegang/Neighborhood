@@ -3,7 +3,7 @@
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { ReactNode } from "react"
-import { HeaderNav } from "@/app/components"
+import { HeaderNav, Footer } from "@/app/components"
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -23,13 +23,15 @@ export default function Layout({
     return (
         <html suppressHydrationWarning>
             <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+                className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
             >
                 <header>
                     <HeaderNav />{" "}
                 </header>
                 {children}
-                <footer></footer>
+                <footer className="mt-auto">
+                    <Footer />
+                </footer>
             </body>
         </html>
     )
