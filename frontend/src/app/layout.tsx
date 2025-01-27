@@ -1,4 +1,5 @@
-import type { Metadata } from "next"
+"use client"
+
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -19,19 +20,19 @@ export default function Layout({
     children: React.ReactNode
 }>) {
     return (
-        <html>
-            <ThemeProvider
-                attribute="class"
-                defaultTheme="system"
-                enableSystem
-                disableTransitionOnChange
+        <html suppressHydrationWarning>
+            <body
+                className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
-                <body
-                    className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+                <ThemeProvider
+                    attribute="class"
+                    defaultTheme="system"
+                    enableSystem
+                    disableTransitionOnChange
                 >
                     {children}
-                </body>
-            </ThemeProvider>
+                </ThemeProvider>
+            </body>
         </html>
     )
 }
