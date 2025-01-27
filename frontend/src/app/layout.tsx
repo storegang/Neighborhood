@@ -1,3 +1,6 @@
+
+"use client"
+
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { ReactNode } from "react"
@@ -18,7 +21,7 @@ export default function Layout({
     children: ReactNode
 }>) {
     return (
-        <html>
+        <html suppressHydrationWarning>
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased`}
             >
