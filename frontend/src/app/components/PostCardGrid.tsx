@@ -12,21 +12,6 @@ export const PostCardGrid: React.FC = () => {
                 "https://placecats.com/g/600/400",
             ],
         },
-        {
-            id: 2,
-            title: "Post Title 2",
-            description: "Post Description 2",
-            images: [
-                "https://placecats.com/millie/600/400",
-                "https://placecats.com/millie_neo/600/400",
-            ],
-        },
-        {
-            id: 3,
-            title: "Post Title 3",
-            description: "Post Description 3",
-            images: ["https://placecats.com/neo_2/600/400"],
-        },
     ]
 
     return (
