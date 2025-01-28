@@ -6,7 +6,7 @@ export const PostCardGrid: React.FC = () => {
             id: 1,
             title: "Post Title 1",
             description: "Post Description 1",
-            images: [
+            imageList: [
                 "https://placecats.com/600/400",
                 "https://placecats.com/neo/600/400",
                 "https://placecats.com/g/600/400",
@@ -21,7 +21,7 @@ export const PostCardGrid: React.FC = () => {
                     title={post.title}
                     description={post.description}
                     key={post.title}
-                    images={post.images}
+                    imageList={post.imageList}
                 />
             ))}
         </div>
