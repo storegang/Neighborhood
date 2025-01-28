@@ -1,11 +1,11 @@
 "use client"
 
-import { HeaderNav } from "@/app/components"
+import { PostCardGrid } from "@/app/components"
 
 export default function Home() {
     return (
         <>
-            <h1>Hi</h1>
+            <PostCardGrid />
         </>
     )
 }
