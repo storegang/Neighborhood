@@ -1,6 +1,8 @@
-﻿namespace webapi.Models;
+﻿using webapi.Models;
 
-public class Post
+namespace webapi.ViewModels;
+
+public class PostViewModel
 {
     public string Id { get; set; }
     public string Title { get; set; }

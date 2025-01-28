@@ -1,6 +1,8 @@
-﻿namespace webapi.Models;
+﻿using webapi.Models;
 
-public class Category
+namespace webapi.ViewModels;
+
+public class CategoryViewModel
 {
     public string Id { get; set; }
     public string Name { get; set; }

@@ -1,6 +1,8 @@
-﻿namespace webapi.Models;
+﻿using webapi.Models;
 
-public class Neighborhood
+namespace webapi.ViewModels;
+
+public class NeighborhoodViewModel
 {
     public string Id { get; set; }
     public string Name { get; set; }
