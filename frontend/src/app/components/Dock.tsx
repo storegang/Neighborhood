@@ -1,6 +1,9 @@
+"use client"
+
 import Image from "next/image"
 import { HomeIcon } from "@heroicons/react/24/outline"
 import { WrenchIcon } from "@heroicons/react/24/outline"
+import { usePathname } from "next/navigation"
 
 export const Dock: React.FC = () => {
     const links = [
@@ -8,9 +11,7 @@ export const Dock: React.FC = () => {
         { name: "Lend", href: "/lend" },
     ]
 
-    const currentPath = window.location.pathname
-
-    console.log({ currentPath })
+    const currentPath = usePathname()
 
     return (
         <div className="dock lg:hidden">
