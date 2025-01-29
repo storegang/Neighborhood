@@ -8,10 +8,17 @@ export const Dock: React.FC = () => {
         { name: "Lend", href: "/lend" },
     ]
 
+    const currentPath = window.location.pathname
+
+    console.log({ currentPath })
+
     return (
         <div className="dock lg:hidden">
             {links.map((link) => (
-                <button key={link.name}>
+                <button
+                    className={`${currentPath === link.href ? "dock-active" : ""}`}
+                    key={link.name}
+                >
                     <a href={link.href} className="dock-label">
                         {link.name === "Home" && (
                             <HomeIcon className="dock-icon" />
