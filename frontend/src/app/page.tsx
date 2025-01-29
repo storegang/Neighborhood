@@ -1,11 +1,11 @@
 "use client"
 
-import { PostCardGrid } from "@/app/components"
+import { Feed } from "./components"
 
 export default function Home() {
     return (
         <>
-            <PostCardGrid />
+            <Feed />
         </>
     )
 }

@@ -1,6 +1,4 @@
-export { HeaderNav } from "./HeaderNav"
-export { Footer } from "./Footer"
 export { PostCard } from "./PostCard"
-export { PostCardGrid } from "./PostCardGrid"
+export { Feed } from "./Feed"
 export { Carousel } from "./Carousel"
-export { Dock } from "./Dock"
+export { Dock } from "../../components/Dock"
