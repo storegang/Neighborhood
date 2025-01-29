@@ -15,7 +15,7 @@ export const Feed: React.FC = () => {
     ]
 
     return (
-        <div className="w-full">
+        <div className="w-full lg:w-96 mx-auto">
             {posts.map((post) => (
                 <PostCard
                     title={post.title}
