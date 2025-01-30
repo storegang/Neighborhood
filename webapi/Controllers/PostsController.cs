@@ -1,43 +1,87 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using webapi.Services;
+using webapi.Models;
+using webapi.ViewModels;
+using AutoMapper;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+namespace webapi.Controllers;
 
-namespace webapi.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class PostController(PostService postService, IMapper mapper) : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class PostsController : ControllerBase
+    private readonly PostService _postService = postService;
+    private readonly IMapper _mapper = mapper;
+
+    // GET: api/<PostController>
+    [HttpGet]
+    public ActionResult<IEnumerable<PostViewModel>> GetAll()
     {
-        // GET: api/<PostsController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        var posts = _postService.GetAllPosts();
+        var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(posts);
+        return Ok(postViewModels);
+    }
+
+    // GET api/<PostController>/5
+    [HttpGet("{id}")]
+    public ActionResult<PostViewModel> GetById(int id)
+    {
+        var post = _postService.GetPostById(id);
+
+        if (post == null)
         {
-            return new string[] { "value1", "value2" };
+            return NotFound();
         }
 
-        // GET api/<PostsController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        var postViewModel = _mapper.Map<Post, PostViewModel>(post);
+        return Ok(postViewModel);
+    }
+
+    // POST api/<PostController>
+    [HttpPost]
+    public ActionResult<PostViewModel> Create(PostViewModel postViewModel)
+    {
+        var post = _mapper.Map<PostViewModel, Post>(postViewModel);
+        _postService.CreatePost(post);
+
+        postViewModel.Id = post.Id;
+
+        return CreatedAtAction(nameof(GetById), new { id = postViewModel.Id }, postViewModel);
+    }
+
+    // PUT api/<PostController>/5
+    [HttpPut("{id}")]
+    public IActionResult Update(int id, PostViewModel postViewModel)
+    {
+        if (id != int.Parse(postViewModel.Id))
         {
-            return "value";
+            return BadRequest();
         }
 
-        // POST api/<PostsController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        var existingPost = _postService.GetPostById(id);
+        if (existingPost == null)
         {
+            return NotFound();
         }
 
-        // PUT api/<PostsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        var post = _mapper.Map<PostViewModel, Post>(postViewModel);
+        _postService.UpdatePost(post);
+
+        return NoContent();
+    }
+
+    // DELETE api/<PostController>/5
+    [HttpDelete("{id}")]
+    public IActionResult Delete(int id)
+    {
+        var existingPost = _postService.GetPostById(id);
+        if (existingPost == null)
         {
+            return NotFound();
         }
 
-        // DELETE api/<PostsController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+        _postService.DeletePost(id);
+
+        return NoContent();
     }
 }

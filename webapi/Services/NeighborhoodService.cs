@@ -1,0 +1,39 @@
+﻿using webapi.Models;
+using webapi.Repositories;
+
+namespace webapi.Services;
+
+public class NeighborhoodService(INeighborhoodRepository neighborhoodRepository)
+{
+    private readonly INeighborhoodRepository _neighborhoodRepository = neighborhoodRepository;
+
+    public ICollection<Neighborhood> GetAllNeighborhoods()
+    {
+        return _neighborhoodRepository.GetAll();
+    }
+
+    public Neighborhood GetNeighborhoodById(int id)
+    {
+        return _neighborhoodRepository.GetById(id);
+    }
+
+    public void CreateNeighborhood(Neighborhood neighborhood)
+    {
+        _neighborhoodRepository.Add(neighborhood);
+    }
+
+    public void UpdateNeighborhood(Neighborhood neighborhood)
+    {
+        _neighborhoodRepository.Update(neighborhood);
+    }
+
+    public void DeleteNeighborhood(int id)
+    {
+        Neighborhood neighborhood = _neighborhoodRepository.GetById(id);
+
+        if (neighborhood != null)
+        {
+            _neighborhoodRepository.Delete(neighborhood);
+        }
+    }
+}

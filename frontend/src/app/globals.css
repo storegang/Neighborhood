@@ -4,3 +4,10 @@
     themes: autumn --default;
 
 }
+
+@utility container {
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}

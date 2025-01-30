@@ -1,6 +1,8 @@
-﻿namespace webapi.Models;
+﻿using webapi.Models;
 
-public class Like
+namespace webapi.ViewModels;
+
+public class LikeViewModel
 {
     public string Id { get; set; }
     public User User { get; set; }

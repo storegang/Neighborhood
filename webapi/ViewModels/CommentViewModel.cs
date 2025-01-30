@@ -1,6 +1,8 @@
-﻿namespace webapi.Models;
+﻿using webapi.Models;
 
-public class Comment
+namespace webapi.ViewModels;
+
+public class CommentViewModel
 {
     public string Id { get; set; }
     public string Content { get; set; }

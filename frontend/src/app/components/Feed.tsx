@@ -1,6 +1,6 @@
 import { PostCard } from "./index"
 
-export const PostCardGrid: React.FC = () => {
+export const Feed: React.FC = () => {
     const posts = [
         {
             id: 1,
@@ -15,7 +15,7 @@ export const PostCardGrid: React.FC = () => {
     ]
 
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="w-full lg:w-96 mx-auto">
             {posts.map((post) => (
                 <PostCard
                     title={post.title}

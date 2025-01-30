@@ -3,7 +3,7 @@
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { ReactNode } from "react"
-import { HeaderNav, Footer } from "@/app/components"
+import { Dock, Footer, HeaderNav } from "@/components"
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -26,10 +26,11 @@ export default function Layout({
                 className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
             >
                 <header>
-                    <HeaderNav />{" "}
+                    <HeaderNav />
                 </header>
                 {children}
                 <footer className="mt-auto">
+                    <Dock />
                     <Footer />
                 </footer>
             </body>
