@@ -14,7 +14,7 @@ export const PostCard: React.FC<PostCardProps> = ({
     imageList,
 }) => {
     return (
-        <div className="card bg-base-100 w-96 shadow-sm">
+        <div className="card shadow-sm">
             <figure>
                 {imageList && imageList.length > 0 ? (
                     <Carousel imageList={imageList} />
