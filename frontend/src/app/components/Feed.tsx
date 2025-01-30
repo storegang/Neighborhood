@@ -1,23 +1,15 @@
 import { PostCard } from "./index"
 
-export const Feed: React.FC = () => {
-    const posts = [
-        {
-            id: 1,
-            title: "Post Title 1",
-            description: "Post Description 1",
-            imageList: [
-                "https://placecats.com/600/400",
-                "https://placecats.com/neo/600/400",
-                "https://placecats.com/g/600/400",
-            ],
-        },
-    ]
+import fakePosts from "../fakePosts.json"
 
+export const Feed: React.FC = () => {
     return (
         <div className="w-full lg:w-96 mx-auto">
-            {posts.map((post) => (
+            {fakePosts.posts.map((post) => (
                 <PostCard
+                    author={post.author}
+                    likes={post.likes}
+                    comments={post.comments}
                     title={post.title}
                     description={post.description}
                     key={post.title}

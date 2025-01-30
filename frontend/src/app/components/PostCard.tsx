@@ -1,37 +1,10 @@
-import { Carousel } from "./Carousel"
 import {
     ChatBubbleLeftIcon,
     HandThumbUpIcon,
 } from "@heroicons/react/24/outline"
 
-type Post = {
-    id?: number
-    author: {
-        id: number
-        name: string
-        avatar: string
-    }
-    title: string
-    description: string
-    imageList?: string[]
-    likes: {
-        count: number
-    }
-    comments: {
-        count: number
-        comments: Comment[]
-    }
-}
-
-type Comment = {
-    id: number
-    author: {
-        id: number
-        name: string
-        avatar: string
-    }
-    content: string
-}
+import { Carousel, CommentField } from "./index"
+import { Post } from "@/Models/Post"
 
 export const PostCard: React.FC<Post> = ({
     id,
@@ -63,11 +36,16 @@ export const PostCard: React.FC<Post> = ({
                 </div>
                 <h2 className="card-title">{title}</h2>
                 <p>{description}</p>
-                <div className="card-actions items-center justify-end">
-                    <HandThumbUpIcon className="hover:text-primary h-4 w-4 cursor-pointer text-gray-400" />
-                    {likes.count}
-                    <ChatBubbleLeftIcon className="hover:text-primary h-4 w-4 cursor-pointer text-gray-400" />
-                    {comments.count}
+                <div tabIndex={0} className="collapse">
+                    <div className="collapse-title card-actions items-center justify-end">
+                        <HandThumbUpIcon className="hover:text-primary h-4 w-4 cursor-pointer text-gray-400" />
+                        {likes.count}
+                        <ChatBubbleLeftIcon className="hover:text-primary h-4 w-4 cursor-pointer text-gray-400" />
+                        {comments.count}
+                    </div>
+                    <div className="collapse-content">
+                        <CommentField comments={comments.comments} />
+                    </div>
                 </div>
             </div>
         </div>
