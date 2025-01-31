@@ -12,7 +12,7 @@ public class CategoryService(ICategoryRepository categoryRepository)
         return _categoryRepository.GetAll();
     }
 
-    public Category GetCategoryById(int id)
+    public Category GetCategoryById(string id)
     {
         return _categoryRepository.GetById(id);
     }
@@ -27,7 +27,7 @@ public class CategoryService(ICategoryRepository categoryRepository)
         _categoryRepository.Update(category);
     }
 
-    public void DeleteCategory(int id)
+    public void DeleteCategory(string id)
     {
         Category category = _categoryRepository.GetById(id);
 

@@ -24,7 +24,7 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
 
     // GET api/<CommentController>/5
     [HttpGet("{id}")]
-    public ActionResult<CommentViewModel> GetById(int id)
+    public ActionResult<CommentViewModel> GetById(string id)
     {
         var comment = _commentService.GetCommentById(id);
         
@@ -41,29 +41,31 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
     [HttpPost]
     public ActionResult<CommentViewModel> Create(CommentViewModel commentViewModel)
     {
+        string newGuid;
+        do
+        {
+            newGuid = Guid.NewGuid().ToString();
+        }
+        while (_commentService.GetCommentById(newGuid) != null);
+
+        commentViewModel.Id = newGuid;
         var comment = _mapper.Map<CommentViewModel, Comment>(commentViewModel);
         _commentService.CreateComment(comment);
-
-        commentViewModel.Id = comment.Id;
 
         return CreatedAtAction(nameof(GetById), new { id = commentViewModel.Id }, commentViewModel);
     }
 
     // PUT api/<CommentController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(int id, CommentViewModel commentViewModel)
+    public IActionResult Update(string id, CommentViewModel commentViewModel)
     {
-        if (id != int.Parse(commentViewModel.Id))
-        {
-            return BadRequest();
-        }
-
         var existingComment = _commentService.GetCommentById(id);
         if (existingComment == null)
         {
             return NotFound();
         }
 
+        commentViewModel.Id = id;
         var comment = _mapper.Map<CommentViewModel, Comment>(commentViewModel);
         _commentService.UpdateComment(comment);
 
@@ -72,7 +74,7 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
 
     // DELETE api/<CommentController>/5
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public IActionResult Delete(string id)
     {
         var existingComment = _commentService.GetCommentById(id);
         if (existingComment == null)

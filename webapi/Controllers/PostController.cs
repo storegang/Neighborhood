@@ -24,7 +24,7 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
 
     // GET api/<PostController>/5
     [HttpGet("{id}")]
-    public ActionResult<PostViewModel> GetById(int id)
+    public ActionResult<PostViewModel> GetById(string id)
     {
         var post = _postService.GetPostById(id);
 
@@ -41,29 +41,31 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
     [HttpPost]
     public ActionResult<PostViewModel> Create(PostViewModel postViewModel)
     {
+        string newGuid;
+        do
+        {
+            newGuid = Guid.NewGuid().ToString();
+        }
+        while (_postService.GetPostById(newGuid) != null);
+
+        postViewModel.Id = newGuid;
         var post = _mapper.Map<PostViewModel, Post>(postViewModel);
         _postService.CreatePost(post);
-
-        postViewModel.Id = post.Id;
 
         return CreatedAtAction(nameof(GetById), new { id = postViewModel.Id }, postViewModel);
     }
 
     // PUT api/<PostController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(int id, PostViewModel postViewModel)
+    public IActionResult Update(string id, PostViewModel postViewModel)
     {
-        if (id != int.Parse(postViewModel.Id))
-        {
-            return BadRequest();
-        }
-
         var existingPost = _postService.GetPostById(id);
         if (existingPost == null)
         {
             return NotFound();
         }
 
+        postViewModel.Id = id;
         var post = _mapper.Map<PostViewModel, Post>(postViewModel);
         _postService.UpdatePost(post);
 
@@ -72,7 +74,7 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
 
     // DELETE api/<PostController>/5
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public IActionResult Delete(string id)
     {
         var existingPost = _postService.GetPostById(id);
         if (existingPost == null)

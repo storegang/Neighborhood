@@ -24,7 +24,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
 
     // GET api/<CategoryController>/5
     [HttpGet("{id}")]
-    public ActionResult<CategoryViewModel> GetById(int id)
+    public ActionResult<CategoryViewModel> GetById(string id)
     {
         var category = _categoryService.GetCategoryById(id);
         
@@ -41,29 +41,31 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
     [HttpPost]
     public ActionResult<CategoryViewModel> Create(CategoryViewModel categoryViewModel)
     {
+        string newGuid;
+        do
+        {
+            newGuid = Guid.NewGuid().ToString();
+        }
+        while (_categoryService.GetCategoryById(newGuid) != null);
+
+        categoryViewModel.Id = newGuid;
         var category = _mapper.Map<CategoryViewModel, Category>(categoryViewModel);
         _categoryService.CreateCategory(category);
-
-        categoryViewModel.Id = category.Id;
 
         return CreatedAtAction(nameof(GetById), new { id = categoryViewModel.Id }, categoryViewModel);
     }
 
     // PUT api/<CategoryController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(int id, CategoryViewModel categoryViewModel)
+    public IActionResult Update(string id, CategoryViewModel categoryViewModel)
     {
-        if (id != int.Parse(categoryViewModel.Id))
-        {
-            return BadRequest();
-        }
-
         var existingCategory = _categoryService.GetCategoryById(id);
         if (existingCategory == null)
         {
             return NotFound();
         }
 
+        categoryViewModel.Id = id;
         var category = _mapper.Map<CategoryViewModel, Category>(categoryViewModel);
         _categoryService.UpdateCategory(category);
 
@@ -72,7 +74,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
 
     // DELETE api/<CategoryController>/5
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public IActionResult Delete(string id)
     {
         var existingCategory = _categoryService.GetCategoryById(id);
         if (existingCategory == null)

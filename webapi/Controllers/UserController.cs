@@ -24,7 +24,7 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
 
     // GET api/<UserController>/5
     [HttpGet("{id}")]
-    public ActionResult<UserViewModel> GetById(int id)
+    public ActionResult<UserViewModel> GetById(string id)
     {
         var user = _userService.GetUserById(id);
         
@@ -41,29 +41,31 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
     [HttpPost]
     public ActionResult<UserViewModel> Create(UserViewModel userViewModel)
     {
+        string newGuid;
+        do
+        {
+            newGuid = Guid.NewGuid().ToString();
+        }
+        while (_userService.GetUserById(newGuid) != null);
+
+        userViewModel.Id = newGuid;
         var user = _mapper.Map<UserViewModel, User>(userViewModel);
         _userService.CreateUser(user);
-
-        userViewModel.Id = user.Id;
 
         return CreatedAtAction(nameof(GetById), new { id = userViewModel.Id }, userViewModel);
     }
 
     // PUT api/<UserController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(int id, UserViewModel userViewModel)
+    public IActionResult Update(string id, UserViewModel userViewModel)
     {
-        if (id != int.Parse(userViewModel.Id))
-        {
-            return BadRequest();
-        }
-
         var existingUser = _userService.GetUserById(id);
         if (existingUser == null)
         {
             return NotFound();
         }
 
+        userViewModel.Id = id;
         var user = _mapper.Map<UserViewModel, User>(userViewModel);
         _userService.UpdateUser(user);
 
@@ -72,7 +74,7 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
 
     // DELETE api/<UserController>/5
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public IActionResult Delete(string id)
     {
         var existingUser = _userService.GetUserById(id);
         if (existingUser == null)
