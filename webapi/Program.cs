@@ -7,6 +7,17 @@ using webapi.DataContexts;
 
 var builder = WebApplication.CreateBuilder(args);
 
+string localFrontendCorsPolicy = "AllowSpecificOrigin";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(localFrontendCorsPolicy,
+        builder => builder
+            .WithOrigins("http://localhost:3000")
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -40,6 +51,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors(localFrontendCorsPolicy);
 
 app.UseHttpsRedirection();
 
