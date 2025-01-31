@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using webapi.Controllers;
 using webapi.Repositories;
 using webapi.Services;
@@ -6,6 +7,18 @@ using webapi.Services;
 using webapi.DataContexts;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddUserSecrets<Program>();
+}
+
+var connectionString = builder.Configuration.GetConnectionString("ConnectionString");
+
+builder.Services.AddDbContext<NeighborhoodContext>(options =>
+{
+    options.UseSqlServer(connectionString);
+});
 
 string localFrontendCorsPolicy = "AllowSpecificOrigin";
 
