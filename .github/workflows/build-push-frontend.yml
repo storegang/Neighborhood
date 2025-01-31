@@ -3,8 +3,8 @@ name: Build Frontend
 on:
   push:
     paths:
-      - 'frontend/**'
-      - '.github/workflows/build-push-frontend.yml'
+      - "frontend/**"
+      - ".github/workflows/build-push-frontend.yml"
 
 permissions:
   packages: read
@@ -15,7 +15,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     concurrency:
-      group: frontend-branch-${{ inputs.working-directory }}-${{ github.ref_name }}
+      group: frontend-branch-${{ github.ref_name }}
       cancel-in-progress: ${{ github.event_name == 'push' && github.workflow == 'Build Frontend' }}
 
     defaults:
@@ -57,7 +57,7 @@ jobs:
         run: pnpm build
 
       - name: Docker Login
-        if: "contains(github.ref, 'deploy-action')"
+        if: ${{ contains(github.ref, 'deploy-action') }}
         uses: azure/docker-login@v1
         with:
           login-server: ${{ secrets.LOGIN_SERVER }}
@@ -65,7 +65,7 @@ jobs:
           password: ${{ secrets.ACR_PASSWORD }}
 
       - name: Build and Push to ACR
-        if: "contains(github.ref, 'deploy-action')"
+        if: contains(github.ref, 'deploy-action')
         uses: docker/build-push-action@v2
         with:
           context: frontend
