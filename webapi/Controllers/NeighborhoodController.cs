@@ -24,7 +24,7 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
 
     // GET api/<NeighborhoodController>/5
     [HttpGet("{id}")]
-    public ActionResult<NeighborhoodViewModel> GetById(int id)
+    public ActionResult<NeighborhoodViewModel> GetById(string id)
     {
         var neighborhood = _neighborhoodService.GetNeighborhoodById(id);
         
@@ -41,29 +41,31 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
     [HttpPost]
     public ActionResult<NeighborhoodViewModel> Create(NeighborhoodViewModel neighborhoodViewModel)
     {
+        string newGuid;
+        do
+        {
+            newGuid = Guid.NewGuid().ToString();
+        }
+        while (_neighborhoodService.GetNeighborhoodById(newGuid) != null);
+
+        neighborhoodViewModel.Id = newGuid;
         var neighborhood = _mapper.Map<NeighborhoodViewModel, Neighborhood>(neighborhoodViewModel);
         _neighborhoodService.CreateNeighborhood(neighborhood);
-
-        neighborhoodViewModel.Id = neighborhood.Id;
 
         return CreatedAtAction(nameof(GetById), new { id = neighborhoodViewModel.Id }, neighborhoodViewModel);
     }
 
     // PUT api/<NeighborhoodController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(int id, NeighborhoodViewModel neighborhoodViewModel)
+    public IActionResult Update(string id, NeighborhoodViewModel neighborhoodViewModel)
     {
-        if (id != int.Parse(neighborhoodViewModel.Id))
-        {
-            return BadRequest();
-        }
-
         var existingNeighborhood = _neighborhoodService.GetNeighborhoodById(id);
         if (existingNeighborhood == null)
         {
             return NotFound();
         }
 
+        neighborhoodViewModel.Id = id;
         var neighborhood = _mapper.Map<NeighborhoodViewModel, Neighborhood>(neighborhoodViewModel);
         _neighborhoodService.UpdateNeighborhood(neighborhood);
 
@@ -72,7 +74,7 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
 
     // DELETE api/<NeighborhoodController>/5
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public IActionResult Delete(string id)
     {
         var existingNeighborhood = _neighborhoodService.GetNeighborhoodById(id);
         if (existingNeighborhood == null)

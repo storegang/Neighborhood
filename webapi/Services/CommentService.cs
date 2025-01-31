@@ -12,7 +12,7 @@ public class CommentService(ICommentRepository commentRepository)
         return _commentRepository.GetAll();
     }
 
-    public Comment GetCommentById(int id)
+    public Comment GetCommentById(string id)
     {
         return _commentRepository.GetById(id);
     }
@@ -27,7 +27,7 @@ public class CommentService(ICommentRepository commentRepository)
         _commentRepository.Update(comment);
     }
 
-    public void DeleteComment(int id)
+    public void DeleteComment(string id)
     {
         Comment comment = _commentRepository.GetById(id);
 

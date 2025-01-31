@@ -12,7 +12,7 @@ public class NeighborhoodService(INeighborhoodRepository neighborhoodRepository)
         return _neighborhoodRepository.GetAll();
     }
 
-    public Neighborhood GetNeighborhoodById(int id)
+    public Neighborhood GetNeighborhoodById(string id)
     {
         return _neighborhoodRepository.GetById(id);
     }
@@ -27,7 +27,7 @@ public class NeighborhoodService(INeighborhoodRepository neighborhoodRepository)
         _neighborhoodRepository.Update(neighborhood);
     }
 
-    public void DeleteNeighborhood(int id)
+    public void DeleteNeighborhood(string id)
     {
         Neighborhood neighborhood = _neighborhoodRepository.GetById(id);
 

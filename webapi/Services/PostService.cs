@@ -12,7 +12,7 @@ public class PostService(IPostRepository postRepository)
         return _postRepository.GetAll();
     }
 
-    public Post GetPostById(int id)
+    public Post GetPostById(string id)
     {
         return _postRepository.GetById(id);
     }
@@ -27,7 +27,7 @@ public class PostService(IPostRepository postRepository)
         _postRepository.Update(post);
     }
 
-    public void DeletePost(int id)
+    public void DeletePost(string id)
     {
         Post post = _postRepository.GetById(id);
 

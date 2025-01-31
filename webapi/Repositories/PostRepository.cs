@@ -7,7 +7,7 @@ namespace webapi.Repositories;
 public interface IPostRepository
 {
     ICollection<Post> GetAll();
-    Post GetById(int id);
+    Post GetById(string id);
     void Add(Post post);
     void Update(Post post);
     void Delete(Post post);
@@ -22,7 +22,7 @@ public class PostRepository(NeighborhoodContext context) : IPostRepository
         return _context.Posts.ToList();
     }
 
-    public Post GetById(int id)
+    public Post GetById(string id)
     {
         return _context.Posts.Find(id);
     }
@@ -35,6 +35,12 @@ public class PostRepository(NeighborhoodContext context) : IPostRepository
 
     public void Update(Post post)
     {
+        var existingPost = _context.Posts.Find(post.Id);
+        if (existingPost != null)
+        {
+            _context.Entry(existingPost).State = EntityState.Detached;
+        }
+
         _context.Posts.Update(post);
         _context.SaveChanges();
     }

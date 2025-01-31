@@ -7,7 +7,7 @@ namespace webapi.Repositories;
 public interface INeighborhoodRepository
 {
     ICollection<Neighborhood> GetAll();
-    Neighborhood GetById(int id);
+    Neighborhood GetById(string id);
     void Add(Neighborhood neighborhood);
     void Update(Neighborhood neighborhood);
     void Delete(Neighborhood neighborhood);
@@ -22,7 +22,7 @@ public class NeighborhoodRepository(NeighborhoodContext context) : INeighborhood
         return _context.Neighborhoods.ToList();
     }
 
-    public Neighborhood GetById(int id)
+    public Neighborhood GetById(string id)
     {
         return _context.Neighborhoods.Find(id);
     }
@@ -35,6 +35,12 @@ public class NeighborhoodRepository(NeighborhoodContext context) : INeighborhood
 
     public void Update(Neighborhood neighborhood)
     {
+        var existingNeighborhood = _context.Neighborhoods.Find(neighborhood.Id);
+        if (existingNeighborhood != null)
+        {
+            _context.Entry(existingNeighborhood).State = EntityState.Detached;
+        }
+
         _context.Neighborhoods.Update(neighborhood);
         _context.SaveChanges();
     }

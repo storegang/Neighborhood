@@ -7,7 +7,7 @@ namespace webapi.Repositories;
 public interface ILikeRepository
 {
     ICollection<Like> GetAll();
-    Like GetById(int id);
+    Like GetById(string id);
     void Add(Like like);
     void Update(Like like);
     void Delete(Like like);
@@ -22,7 +22,7 @@ public class LikeRepository(NeighborhoodContext context) : ILikeRepository
         return _context.Likes.ToList();
     }
 
-    public Like GetById(int id)
+    public Like GetById(string id)
     {
         return _context.Likes.Find(id);
     }
@@ -35,6 +35,12 @@ public class LikeRepository(NeighborhoodContext context) : ILikeRepository
 
     public void Update(Like like)
     {
+        var existingLike = _context.Likes.Find(like.Id);
+        if (existingLike != null)
+        {
+            _context.Entry(existingLike).State = EntityState.Detached;
+        }
+
         _context.Likes.Update(like);
         _context.SaveChanges();
     }
