@@ -1,36 +1,39 @@
-import { Carousel } from "./Carousel"
+import { Carousel } from "./index"
+import { Post } from "@/Models/Post"
 
-type PostCardProps = {
-    id?: number
-    title: string
-    description: string
-    imageList?: string[]
-}
-
-export const PostCard: React.FC<PostCardProps> = ({
+export const PostCard: React.FC<Post> = ({
     id,
     title,
-    description,
+    author,
+    content,
     imageList,
+    likes,
+    comments,
+    dateTimePosted,
+    Neighborhood,
+    category,
 }) => {
     return (
         <div className="card shadow-sm">
             <figure>
                 {imageList && imageList.length > 0 ? (
                     <Carousel imageList={imageList} />
-                ) : (
-                    <img
-                        src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
-                        alt="Shoes"
-                    />
-                )}
+                ) : null}
             </figure>
             <div className="card-body">
-                <h2 className="card-title">{title}</h2>
-                <p>{description}</p>
-                <div className="card-actions justify-end">
-                    <button className="btn btn-primary">Buy Now</button>
+                <div className="flex h-8 w-full items-center justify-start gap-4">
+                    <div className="avatar w-8">
+                        <div className="mask mask-squircle">
+                            <img
+                                className="h-full w-full"
+                                src={author.avatar}
+                            />
+                        </div>
+                    </div>
+                    <p className="w-1/2 truncate text-sm">{author.name}</p>
                 </div>
+                <h2 className="card-title">{title}</h2>
+                <p>{content}</p>
             </div>
         </div>
     )
