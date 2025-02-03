@@ -24,7 +24,7 @@ public class LikeController(LikeService likeService, IMapper mapper) : Controlle
 
     // GET api/<LikeController>/5
     [HttpGet("{id}")]
-    public ActionResult<LikeViewModel> GetById(int id)
+    public ActionResult<LikeViewModel> GetById(string id)
     {
         var like = _likeService.GetLikeById(id);
         
@@ -41,29 +41,31 @@ public class LikeController(LikeService likeService, IMapper mapper) : Controlle
     [HttpPost]
     public ActionResult<LikeViewModel> Create(LikeViewModel likeViewModel)
     {
+        string newGuid;
+        do
+        {
+            newGuid = Guid.NewGuid().ToString();
+        }
+        while (_likeService.GetLikeById(newGuid) != null);
+
+        likeViewModel.Id = newGuid;
         var like = _mapper.Map<LikeViewModel, Like>(likeViewModel);
         _likeService.CreateLike(like);
-
-        likeViewModel.Id = like.Id;
 
         return CreatedAtAction(nameof(GetById), new { id = likeViewModel.Id }, likeViewModel);
     }
 
     // PUT api/<LikeController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(int id, LikeViewModel likeViewModel)
+    public IActionResult Update(string id, LikeViewModel likeViewModel)
     {
-        if (id != int.Parse(likeViewModel.Id))
-        {
-            return BadRequest();
-        }
-
         var existingLike = _likeService.GetLikeById(id);
         if (existingLike == null)
         {
             return NotFound();
         }
 
+        likeViewModel.Id = id;
         var like = _mapper.Map<LikeViewModel, Like>(likeViewModel);
         _likeService.UpdateLike(like);
 
@@ -72,7 +74,7 @@ public class LikeController(LikeService likeService, IMapper mapper) : Controlle
 
     // DELETE api/<LikeController>/5
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public IActionResult Delete(string id)
     {
         var existingLike = _likeService.GetLikeById(id);
         if (existingLike == null)

@@ -1,16 +1,14 @@
-import { Comment } from "./Comment"
-import { Likes } from "./Likes"
 import { User } from "./User"
+import { Neighborhood } from "./Neighborhood"
 
 export type Post = {
-    id?: number
+    id: string
     author: User
     title: string
-    description: string
+    content: string
     imageList?: string[]
-    likes: Likes
-    comments: {
-        count: number
-        comments: Comment[]
-    }
+    likes: string[]
+    comments: Comment[]
+    dateTimePosted: Date
+    Neighborhood: Neighborhood
 }

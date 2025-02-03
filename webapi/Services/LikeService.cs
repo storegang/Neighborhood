@@ -12,7 +12,7 @@ public class LikeService(ILikeRepository likeRepository)
         return _likeRepository.GetAll();
     }
 
-    public Like GetLikeById(int id)
+    public Like GetLikeById(string id)
     {
         return _likeRepository.GetById(id);
     }
@@ -27,7 +27,7 @@ public class LikeService(ILikeRepository likeRepository)
         _likeRepository.Update(like);
     }
 
-    public void DeleteLike(int id)
+    public void DeleteLike(string id)
     {
         Like like = _likeRepository.GetById(id);
 

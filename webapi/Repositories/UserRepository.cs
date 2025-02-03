@@ -7,7 +7,7 @@ namespace webapi.Repositories;
 public interface IUserRepository
 {
     ICollection<User> GetAll();
-    User GetById(int id);
+    User GetById(string id);
     void Add(User user);
     void Update(User user);
     void Delete(User user);
@@ -22,7 +22,7 @@ public class UserRepository(NeighborhoodContext context) : IUserRepository
         return _context.Users.ToList();
     }
 
-    public User GetById(int id)
+    public User GetById(string id)
     {
         return _context.Users.Find(id);
     }
@@ -35,6 +35,12 @@ public class UserRepository(NeighborhoodContext context) : IUserRepository
 
     public void Update(User user)
     {
+        var existingUser = _context.Users.Find(user.Id);
+        if (existingUser != null)
+        {
+            _context.Entry(existingUser).State = EntityState.Detached;
+        }
+
         _context.Users.Update(user);
         _context.SaveChanges();
     }

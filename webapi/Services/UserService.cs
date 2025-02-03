@@ -12,7 +12,7 @@ public class UserService(IUserRepository userRepository)
         return _userRepository.GetAll();
     }
 
-    public User GetUserById(int id)
+    public User GetUserById(string id)
     {
         return _userRepository.GetById(id);
     }
@@ -27,7 +27,7 @@ public class UserService(IUserRepository userRepository)
         _userRepository.Update(user);
     }
 
-    public void DeleteUser(int id)
+    public void DeleteUser(string id)
     {
         User user = _userRepository.GetById(id);
 
