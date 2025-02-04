@@ -1,7 +1,7 @@
 "use client"
 
 import { Geist, Geist_Mono } from "next/font/google"
-import "./globals.css"
+import "@/app/globals.css"
 import { ReactNode } from "react"
 import { Dock, Footer, HeaderNav } from "@/components"
 
@@ -23,7 +23,7 @@ export default function Layout({
     return (
         <html suppressHydrationWarning>
             <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
+                className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
             >
                 <header>
                     <HeaderNav />
