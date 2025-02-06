@@ -4,6 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "@/app/globals.css"
 import { ReactNode } from "react"
 import { Dock, Footer, HeaderNav } from "@/components"
+import { UserProvider } from "@auth0/nextjs-auth0"
+import React from "react"
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -22,18 +24,20 @@ export default function Layout({
 }>) {
     return (
         <html suppressHydrationWarning>
-            <body
-                className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
-            >
-                <header>
-                    <HeaderNav />
-                </header>
-                {children}
-                <footer className="mt-auto">
-                    <Dock />
-                    <Footer />
-                </footer>
-            </body>
+            <UserProvider>
+                <body
+                    className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
+                >
+                    <header>
+                        <HeaderNav />
+                    </header>
+                    {children}
+                    <footer>
+                        <Dock />
+                        <Footer />
+                    </footer>
+                </body>
+            </UserProvider>
         </html>
     )
 }

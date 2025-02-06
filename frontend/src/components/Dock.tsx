@@ -14,7 +14,7 @@ export const Dock: React.FC = () => {
     const currentPath = usePathname()
 
     return (
-        <div className="dock lg:hidden">
+        <div className="dock mt-8 lg:hidden">
             {links.map((link) => (
                 <button
                     className={`${currentPath === link.href ? "dock-active" : ""}`}
