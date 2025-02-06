@@ -1,10 +1,15 @@
 using Microsoft.EntityFrameworkCore;
+using dotenv.net;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using webapi.Controllers;
 using webapi.Repositories;
 using webapi.Services;
+using webapi.Middlewares;
 //using FluentValidation;
 //using FluentValidation.AspNetCore;
 using webapi.DataContexts;
+using Microsoft.Net.Http.Headers;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +25,19 @@ builder.Services.AddDbContext<NeighborhoodContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
-string localFrontendCorsPolicy = "AllowSpecificOrigin";
+builder.Host.ConfigureAppConfiguration((configBuilder) =>
+{
+    configBuilder.Sources.Clear();
+    DotEnv.Load();
+    configBuilder.AddEnvironmentVariables();
+});
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.AddServerHeader = false;
+});
+
+string localFrontendCorsPolicy = "AllowLocalhost";
 
 builder.Services.AddCors(options =>
 {
@@ -29,6 +46,18 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:3000")
             .AllowAnyMethod()
             .AllowAnyHeader());
+
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(
+            builder.Configuration.GetValue<string>("CLIENT_ORIGIN_URL"))
+            .WithHeaders(new string[] {
+                HeaderNames.ContentType,
+                HeaderNames.Authorization,
+            })
+            .WithMethods("GET")
+            .SetPreflightMaxAge(TimeSpan.FromSeconds(86400));
+    });
 });
 
 builder.Services.AddControllers();
@@ -55,8 +84,43 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 //builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
+builder.Host.ConfigureServices((services) =>
+    services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        .AddJwtBearer(options =>
+        {
+            var audience =
+                  builder.Configuration.GetValue<string>("AUTH0_AUDIENCE");
+
+            options.Authority =
+                  $"https://{builder.Configuration.GetValue<string>("AUTH0_DOMAIN")}/";
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true
+            };
+        })
+);
+
 var app = builder.Build();
 
+var requiredVars =
+    new string[] {
+          "PORT",
+          "CLIENT_ORIGIN_URL",
+          "AUTH0_DOMAIN",
+          "AUTH0_AUDIENCE",
+    };
+
+foreach (var key in requiredVars)
+{
+    var value = app.Configuration.GetValue<string>(key);
+
+    if (value == "" || value == null)
+    {
+        throw new Exception($"Config variable missing: {key}.");
+    }
+}
+
+app.Urls.Add($"http://+:{app.Configuration.GetValue<string>("PORT")}");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -66,9 +130,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(localFrontendCorsPolicy);
+app.UseCors();
 
+app.UseErrorHandler();
+app.UseSecureHeaders();
 app.UseHttpsRedirection();
-
 app.MapControllers();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.Run();

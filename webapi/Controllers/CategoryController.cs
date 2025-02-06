@@ -3,6 +3,7 @@ using webapi.Services;
 using webapi.Models;
 using webapi.ViewModels;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace webapi.Controllers;
 
@@ -24,6 +25,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
 
     // GET api/<CategoryController>/5
     [HttpGet("{id}")]
+    [Authorize]
     public ActionResult<CategoryViewModel> GetById(string id)
     {
         var category = _categoryService.GetCategoryById(id);
