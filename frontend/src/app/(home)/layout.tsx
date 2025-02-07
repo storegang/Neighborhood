@@ -1,9 +1,9 @@
-"use client"
-
 import { Geist, Geist_Mono } from "next/font/google"
 import "@/app/globals.css"
 import { ReactNode } from "react"
 import { Dock, Footer, HeaderNav } from "@/components"
+import { getAuthenticatedAppForUser } from "@/lib/firebase/serverApp"
+import AuthGuard from "@/components/AuthGuard"
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -15,20 +15,22 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 })
 
-export default function Layout({
+export default async function Layout({
     children,
 }: Readonly<{
     children: ReactNode
 }>) {
+    const { currentUser } = await getAuthenticatedAppForUser()
+
     return (
         <html suppressHydrationWarning>
             <body
                 className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
             >
                 <header>
-                    <HeaderNav />
+                    <HeaderNav initialUser={currentUser?.toJSON()} />
                 </header>
-                {children}
+                <AuthGuard>{children}</AuthGuard>
                 <footer className="mt-auto">
                     <Dock />
                     <Footer />
