@@ -23,8 +23,11 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
     }
 
     // GET api/<CategoryController>/5
+    // GET api/<CategoryController>/5?postCount=10
+    // GET api/<CategoryController>/5?postCount=10&commentCount=5
+    // GET api/<CategoryController>/{Id}?postCount={postCount}&commentCount={commentCount}
     [HttpGet("{id}")]
-    public ActionResult<CategoryViewModel> GetById(string id)
+    public ActionResult<CategoryViewModel> GetById(string id, [FromQuery] int postCount = 5, [FromQuery] int commentCount = 3)
     {
         var category = _categoryService.GetCategoryById(id);
         
@@ -33,7 +36,20 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
             return NotFound();
         }
 
-        var categoryViewModel = _mapper.Map<Category,  CategoryViewModel>(category);
+        var categoryViewModel = _mapper.Map<CategoryViewModel>(category);
+        var posts = category.Posts?.Take(postCount).ToList();
+
+        if (posts != null)
+        {
+            categoryViewModel.Posts = new List<PostViewModel>();
+            foreach (var post in posts)
+            {
+                var postViewModel = _mapper.Map<PostViewModel>(post);
+                postViewModel.Comments = _mapper.Map<ICollection<CommentViewModel>>(post.Comments?.Take(commentCount));
+                categoryViewModel.Posts.Add(postViewModel);
+            }
+        }
+
         return Ok(categoryViewModel);
     }
 

@@ -5,6 +5,7 @@ using webapi.Services;
 //using FluentValidation;
 //using FluentValidation.AspNetCore;
 using webapi.DataContexts;
+using AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -51,9 +52,14 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<NeighborhoodContext>();
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
-
 //builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+// Register AutoMapper with the required services
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile(new MappingProfile());
+}, AppDomain.CurrentDomain.GetAssemblies());
+
 
 var app = builder.Build();
 

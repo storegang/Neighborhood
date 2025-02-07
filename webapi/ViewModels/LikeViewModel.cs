@@ -5,6 +5,6 @@ namespace webapi.ViewModels;
 public class LikeViewModel
 {
     public string Id { get; set; }
-    public User User { get; set; }
-    public Post Post { get; set; }
+    public string UserId { get; set; }
+    public string PostId { get; set; }
 }

@@ -8,5 +8,6 @@ public class CategoryViewModel
     public string Name { get; set; }
     public string Color { get; set; }
 
-    public ICollection<Post> Posts { get; set; }
+    public string NeighborhoodId { get; set; }
+    public ICollection<PostViewModel>? Posts { get; set; }
 }

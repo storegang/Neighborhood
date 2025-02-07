@@ -9,13 +9,12 @@ public class PostViewModel
     public string? Description { get; set; }
     public DateTime DatePosted { get; set; }
 
-    public User User { get; set; }
+    public UserViewModel User { get; set; }
 
-    public Category Category { get; set; }
-    public Neighborhood Neighborhood { get; set; }
-    public ICollection<Comment>? Comments { get; set; }
+    public string CategoryId { get; set; }
+    public ICollection<CommentViewModel>? Comments { get; set; }
     public ICollection<string>? Images { get; set; }
-    public ICollection<string>? LikedByUserID { get; set; }
+    public ICollection<string>? LikedByUserId { get; set; }
 
     // TODO: Add image urls to POST
 

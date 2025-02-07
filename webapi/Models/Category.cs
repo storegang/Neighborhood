@@ -6,5 +6,6 @@ public class Category
     public string Name { get; set; }
     public string Color { get; set; }
 
-    public ICollection<Post> Posts { get; set; }
+    public Neighborhood Neighborhood { get; set; }
+    public ICollection<Post>? Posts { get; set; }
 }

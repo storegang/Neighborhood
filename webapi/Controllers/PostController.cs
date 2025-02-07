@@ -2,6 +2,7 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.ViewModels;
+using webapi.Services;
 using AutoMapper;
 
 namespace webapi.Controllers;
@@ -18,13 +19,13 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
     public ActionResult<IEnumerable<PostViewModel>> GetAll()
     {
         var posts = _postService.GetAllPosts();
-        var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(posts);
+        var postViewModels = _mapper.Map<IEnumerable<PostViewModel>>(posts);
         return Ok(postViewModels);
     }
 
-    // GET api/<PostController>/5
+    // GET /api/PostController/5?commentCount=10
     [HttpGet("{id}")]
-    public ActionResult<PostViewModel> GetById(string id)
+    public ActionResult<PostViewModel> GetById(string id, [FromQuery] int commentCount = 5)
     {
         var post = _postService.GetPostById(id);
 
@@ -33,13 +34,15 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        var postViewModel = _mapper.Map<Post, PostViewModel>(post);
+        var postViewModel = _mapper.Map<PostViewModel>(post);
+        postViewModel.Comments = _mapper.Map<ICollection<CommentViewModel>>(post.Comments?.Take(commentCount));
+
         return Ok(postViewModel);
     }
 
     // POST api/<PostController>
     [HttpPost]
-    public ActionResult<PostViewModel> Create(PostViewModel postViewModel)
+    public ActionResult<PostViewModel> Create(PostViewModel PostViewModel)
     {
         string newGuid;
         do
@@ -48,10 +51,12 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
         }
         while (_postService.GetPostById(newGuid) != null);
 
-        postViewModel.Id = newGuid;
-        var post = _mapper.Map<PostViewModel, Post>(postViewModel);
+        PostViewModel.Id = newGuid;
+
+        var post = _mapper.Map<Post>(PostViewModel);
         _postService.CreatePost(post);
 
+        var postViewModel = _mapper.Map<PostViewModel>(post);
         return CreatedAtAction(nameof(GetById), new { id = postViewModel.Id }, postViewModel);
     }
 
