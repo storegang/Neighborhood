@@ -1,17 +1,53 @@
 using Microsoft.EntityFrameworkCore;
-using webapi.Controllers;
+using dotenv.net;
 using webapi.Repositories;
 using webapi.Services;
 //using FluentValidation;
 //using FluentValidation.AspNetCore;
 using webapi.DataContexts;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.Sources.Clear();
+DotEnv.Load();
+builder.Configuration.AddEnvironmentVariables();
+
+string jwtIssuer = builder.Configuration.GetValue<string>("AUTH_DOMAIN") ?? throw new ArgumentNullException("AUTH_DOMAIN");
+string jwtAudience = builder.Configuration.GetValue<string>("AUTH_AUDIENCE") ?? throw new ArgumentNullException("AUTH_AUDIENCE");
+
+HttpClient client = new();
+string googleKeys = client.GetStringAsync("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com").Result;
+IEnumerable<SecurityKey> jwtKeyset = new JsonWebKeySet(googleKeys).GetSigningKeys();
+
 
 if (builder.Environment.IsDevelopment())
 {
     builder.Configuration.AddUserSecrets<Program>();
 }
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.IncludeErrorDetails = true;
+    options.Authority = jwtIssuer;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        ValidateLifetime = true,
+        ValidAlgorithms = [SecurityAlgorithms.RsaSha256],
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKeys = jwtKeyset,
+    };
+    
+});
 
 var connectionString = builder.Configuration.GetConnectionString("ConnectionString");
 
@@ -57,7 +93,6 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var app = builder.Build();
 
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -68,6 +103,9 @@ if (app.Environment.IsDevelopment())
 app.UseCors(localFrontendCorsPolicy);
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
