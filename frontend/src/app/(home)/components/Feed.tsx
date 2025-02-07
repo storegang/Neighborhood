@@ -2,7 +2,6 @@
 
 import { Post } from "@/Models/Post"
 import { PostCard } from "./index"
-import { useEffect, useState } from "react"
 import { useUser } from "@/lib/getUser"
 
 export const Feed: React.FC = () => {
