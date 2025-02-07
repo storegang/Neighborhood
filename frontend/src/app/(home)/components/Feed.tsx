@@ -78,32 +78,8 @@ export const Feed: React.FC = () => {
     }
 
     const user = useUser()
-    const [posts, setPosts] = useState([])
 
-    const baseUrl = "http://localhost:5233/api"
-    const fetchPosts = async () => {
-        try {
-            const response = await fetch(`${baseUrl}/post`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${user?.accessToken}`,
-                },
-            })
-            const data = await response.json()
-            setPosts(data)
-        } catch (error) {
-            console.error("Error fetching posts:", error)
-        }
-    }
-
-    useEffect(() => {
-        if (user?.accessToken) {
-            fetchPosts()
-        } else {
-            console.log("User access token not available")
-        }
-    }, [user?.accessToken])
+    console.log(user)
 
     return (
         <div className="mx-auto w-full lg:w-96">
