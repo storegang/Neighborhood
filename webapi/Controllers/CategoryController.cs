@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
+using webapi.DTOs;
 using AutoMapper;
 
 namespace webapi.Controllers;
@@ -15,16 +15,16 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
 
     // GET: api/<CategoryController>
     [HttpGet]
-    public ActionResult<IEnumerable<CategoryViewModel>> GetAll()
+    public ActionResult<IEnumerable<CategoryDTO>> GetAll()
     {
         var categories = _categoryService.GetAllCategories();
-        var categoryViewModels = _mapper.Map<IEnumerable<Category>, IEnumerable<CategoryViewModel>>(categories);
+        var categoryViewModels = _mapper.Map<IEnumerable<Category>, IEnumerable<CategoryDTO>>(categories);
         return Ok(categoryViewModels);
     }
 
     // GET api/<CategoryController>/5
     [HttpGet("{id}")]
-    public ActionResult<CategoryViewModel> GetById(string id)
+    public ActionResult<CategoryDTO> GetById(string id)
     {
         var category = _categoryService.GetCategoryById(id);
         
@@ -33,13 +33,13 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
             return NotFound();
         }
 
-        var categoryViewModel = _mapper.Map<Category,  CategoryViewModel>(category);
+        var categoryViewModel = _mapper.Map<Category,  CategoryDTO>(category);
         return Ok(categoryViewModel);
     }
 
     // POST api/<CategoryController>
     [HttpPost]
-    public ActionResult<CategoryViewModel> Create(CategoryViewModel categoryViewModel)
+    public ActionResult<CategoryDTO> Create(CategoryDTO categoryViewModel)
     {
         string newGuid;
         do
@@ -49,7 +49,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
         while (_categoryService.GetCategoryById(newGuid) != null);
 
         categoryViewModel.Id = newGuid;
-        var category = _mapper.Map<CategoryViewModel, Category>(categoryViewModel);
+        var category = _mapper.Map<CategoryDTO, Category>(categoryViewModel);
         _categoryService.CreateCategory(category);
 
         return CreatedAtAction(nameof(GetById), new { id = categoryViewModel.Id }, categoryViewModel);
@@ -57,7 +57,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
 
     // PUT api/<CategoryController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, CategoryViewModel categoryViewModel)
+    public IActionResult Update(string id, CategoryDTO categoryViewModel)
     {
         var existingCategory = _categoryService.GetCategoryById(id);
         if (existingCategory == null)
@@ -66,7 +66,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
         }
 
         categoryViewModel.Id = id;
-        var category = _mapper.Map<CategoryViewModel, Category>(categoryViewModel);
+        var category = _mapper.Map<CategoryDTO, Category>(categoryViewModel);
         _categoryService.UpdateCategory(category);
 
         return NoContent();

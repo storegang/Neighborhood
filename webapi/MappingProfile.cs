@@ -1,27 +1,27 @@
 using AutoMapper;
 using webapi.Models;
-using webapi.ViewModels;
+using webapi.DTOs;
 
 public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        CreateMap<CategoryViewModel, Category>();
-        CreateMap<Category, CategoryViewModel>();
+        CreateMap<CategoryDTO, Category>();
+        CreateMap<Category, CategoryDTO>();
 
-        CreateMap<CommentViewModel, Comment>();
-        CreateMap<Comment, CommentViewModel>();
+        CreateMap<CommentDTO, Comment>();
+        CreateMap<Comment, CommentDTO>();
 
-        CreateMap<LikeViewModel, Like>();
-        CreateMap<Like, LikeViewModel>();
+        CreateMap<LikeDTO, Like>();
+        CreateMap<Like, LikeDTO>();
 
-        CreateMap<NeighborhoodViewModel, Neighborhood>();
-        CreateMap<Neighborhood, NeighborhoodViewModel>();
+        CreateMap<NeighborhoodDTO, Neighborhood>();
+        CreateMap<Neighborhood, NeighborhoodDTO>();
 
-        CreateMap<PostViewModel, Post>();
-        CreateMap<Post, PostViewModel>();
+        CreateMap<PostDTO, Post>();
+        CreateMap<Post, PostDTO>();
 
-        CreateMap<UserViewModel, User>();
-        CreateMap<User, UserViewModel>();
+        CreateMap<UserDTO, User>();
+        CreateMap<User, UserDTO>();
     }
 }

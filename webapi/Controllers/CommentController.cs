@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
+using webapi.DTOs;
 using AutoMapper;
 
 namespace webapi.Controllers;
@@ -15,16 +15,16 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
 
     // GET: api/<CommentController>
     [HttpGet]
-    public ActionResult<IEnumerable<CommentViewModel>> GetAll()
+    public ActionResult<IEnumerable<CommentDTO>> GetAll()
     {
         var comments = _commentService.GetAllComments();
-        var commentViewModels = _mapper.Map<IEnumerable<Comment>, IEnumerable<CommentViewModel>>(comments);
+        var commentViewModels = _mapper.Map<IEnumerable<Comment>, IEnumerable<CommentDTO>>(comments);
         return Ok(commentViewModels);
     }
 
     // GET api/<CommentController>/5
     [HttpGet("{id}")]
-    public ActionResult<CommentViewModel> GetById(string id)
+    public ActionResult<CommentDTO> GetById(string id)
     {
         var comment = _commentService.GetCommentById(id);
         
@@ -33,13 +33,13 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
             return NotFound();
         }
 
-        var commentViewModel = _mapper.Map<Comment,  CommentViewModel>(comment);
+        var commentViewModel = _mapper.Map<Comment,  CommentDTO>(comment);
         return Ok(commentViewModel);
     }
 
     // POST api/<CommentController>
     [HttpPost]
-    public ActionResult<CommentViewModel> Create(CommentViewModel commentViewModel)
+    public ActionResult<CommentDTO> Create(CommentDTO commentViewModel)
     {
         string newGuid;
         do
@@ -49,7 +49,7 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
         while (_commentService.GetCommentById(newGuid) != null);
 
         commentViewModel.Id = newGuid;
-        var comment = _mapper.Map<CommentViewModel, Comment>(commentViewModel);
+        var comment = _mapper.Map<CommentDTO, Comment>(commentViewModel);
         _commentService.CreateComment(comment);
 
         return CreatedAtAction(nameof(GetById), new { id = commentViewModel.Id }, commentViewModel);
@@ -57,7 +57,7 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
 
     // PUT api/<CommentController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, CommentViewModel commentViewModel)
+    public IActionResult Update(string id, CommentDTO commentViewModel)
     {
         var existingComment = _commentService.GetCommentById(id);
         if (existingComment == null)
@@ -66,7 +66,7 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
         }
 
         commentViewModel.Id = id;
-        var comment = _mapper.Map<CommentViewModel, Comment>(commentViewModel);
+        var comment = _mapper.Map<CommentDTO, Comment>(commentViewModel);
         _commentService.UpdateComment(comment);
 
         return NoContent();

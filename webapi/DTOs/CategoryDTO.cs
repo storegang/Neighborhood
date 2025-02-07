@@ -1,12 +1,15 @@
 ﻿using webapi.Models;
 
-namespace webapi.ViewModels;
+namespace webapi.DTOs;
 
-public class CategoryViewModel
+public class CategoryDTO
 {
     public string Id { get; set; }
     public string Name { get; set; }
     public string Color { get; set; }
+}
 
-    public ICollection<Post> Posts { get; set; }
+public class CategoriesDTO
+{
+    public IEnumerable<CategoryDTO> Categories { get; set; }
 }

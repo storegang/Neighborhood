@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
+using webapi.DTOs;
 using AutoMapper;
 
 namespace webapi.Controllers;
@@ -15,16 +15,16 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
 
     // GET: api/<UserController>
     [HttpGet]
-    public ActionResult<IEnumerable<UserViewModel>> GetAll()
+    public ActionResult<IEnumerable<UserDTO>> GetAll()
     {
         var users = _userService.GetAllUsers();
-        var userViewModels = _mapper.Map<IEnumerable<User>, IEnumerable<UserViewModel>>(users);
+        var userViewModels = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(users);
         return Ok(userViewModels);
     }
 
     // GET api/<UserController>/5
     [HttpGet("{id}")]
-    public ActionResult<UserViewModel> GetById(string id)
+    public ActionResult<UserDTO> GetById(string id)
     {
         var user = _userService.GetUserById(id);
         
@@ -33,13 +33,13 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        var userViewModel = _mapper.Map<User,  UserViewModel>(user);
+        var userViewModel = _mapper.Map<User,  UserDTO>(user);
         return Ok(userViewModel);
     }
 
     // POST api/<UserController>
     [HttpPost]
-    public ActionResult<UserViewModel> Create(UserViewModel userViewModel)
+    public ActionResult<UserDTO> Create(UserDTO userViewModel)
     {
         string newGuid;
         do
@@ -49,7 +49,7 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
         while (_userService.GetUserById(newGuid) != null);
 
         userViewModel.Id = newGuid;
-        var user = _mapper.Map<UserViewModel, User>(userViewModel);
+        var user = _mapper.Map<UserDTO, User>(userViewModel);
         _userService.CreateUser(user);
 
         return CreatedAtAction(nameof(GetById), new { id = userViewModel.Id }, userViewModel);
@@ -57,7 +57,7 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
 
     // PUT api/<UserController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, UserViewModel userViewModel)
+    public IActionResult Update(string id, UserDTO userViewModel)
     {
         var existingUser = _userService.GetUserById(id);
         if (existingUser == null)
@@ -66,7 +66,7 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
         }
 
         userViewModel.Id = id;
-        var user = _mapper.Map<UserViewModel, User>(userViewModel);
+        var user = _mapper.Map<UserDTO, User>(userViewModel);
         _userService.UpdateUser(user);
 
         return NoContent();

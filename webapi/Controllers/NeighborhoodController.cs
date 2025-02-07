@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
+using webapi.DTOs;
 using AutoMapper;
 
 namespace webapi.Controllers;
@@ -15,16 +15,16 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
 
     // GET: api/<NeighborhoodController>
     [HttpGet]
-    public ActionResult<IEnumerable<NeighborhoodViewModel>> GetAll()
+    public ActionResult<IEnumerable<NeighborhoodDTO>> GetAll()
     {
         var neighborhoods = _neighborhoodService.GetAllNeighborhoods();
-        var neighborhoodViewModels = _mapper.Map<IEnumerable<Neighborhood>, IEnumerable<NeighborhoodViewModel>>(neighborhoods);
+        var neighborhoodViewModels = _mapper.Map<IEnumerable<Neighborhood>, IEnumerable<NeighborhoodDTO>>(neighborhoods);
         return Ok(neighborhoodViewModels);
     }
 
     // GET api/<NeighborhoodController>/5
     [HttpGet("{id}")]
-    public ActionResult<NeighborhoodViewModel> GetById(string id)
+    public ActionResult<NeighborhoodDTO> GetById(string id)
     {
         var neighborhood = _neighborhoodService.GetNeighborhoodById(id);
         
@@ -33,13 +33,13 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
             return NotFound();
         }
 
-        var neighborhoodViewModel = _mapper.Map<Neighborhood,  NeighborhoodViewModel>(neighborhood);
+        var neighborhoodViewModel = _mapper.Map<Neighborhood,  NeighborhoodDTO>(neighborhood);
         return Ok(neighborhoodViewModel);
     }
 
     // POST api/<NeighborhoodController>
     [HttpPost]
-    public ActionResult<NeighborhoodViewModel> Create(NeighborhoodViewModel neighborhoodViewModel)
+    public ActionResult<NeighborhoodDTO> Create(NeighborhoodDTO neighborhoodViewModel)
     {
         string newGuid;
         do
@@ -49,7 +49,7 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
         while (_neighborhoodService.GetNeighborhoodById(newGuid) != null);
 
         neighborhoodViewModel.Id = newGuid;
-        var neighborhood = _mapper.Map<NeighborhoodViewModel, Neighborhood>(neighborhoodViewModel);
+        var neighborhood = _mapper.Map<NeighborhoodDTO, Neighborhood>(neighborhoodViewModel);
         _neighborhoodService.CreateNeighborhood(neighborhood);
 
         return CreatedAtAction(nameof(GetById), new { id = neighborhoodViewModel.Id }, neighborhoodViewModel);
@@ -57,7 +57,7 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
 
     // PUT api/<NeighborhoodController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, NeighborhoodViewModel neighborhoodViewModel)
+    public IActionResult Update(string id, NeighborhoodDTO neighborhoodViewModel)
     {
         var existingNeighborhood = _neighborhoodService.GetNeighborhoodById(id);
         if (existingNeighborhood == null)
@@ -66,7 +66,7 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
         }
 
         neighborhoodViewModel.Id = id;
-        var neighborhood = _mapper.Map<NeighborhoodViewModel, Neighborhood>(neighborhoodViewModel);
+        var neighborhood = _mapper.Map<NeighborhoodDTO, Neighborhood>(neighborhoodViewModel);
         _neighborhoodService.UpdateNeighborhood(neighborhood);
 
         return NoContent();

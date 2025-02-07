@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
+using webapi.DTOs;
 using AutoMapper;
 
 namespace webapi.Controllers;
@@ -15,16 +15,16 @@ public class LikeController(LikeService likeService, IMapper mapper) : Controlle
 
     // GET: api/<LikeController>
     [HttpGet]
-    public ActionResult<IEnumerable<LikeViewModel>> GetAll()
+    public ActionResult<IEnumerable<LikeDTO>> GetAll()
     {
         var likes = _likeService.GetAllLikes();
-        var likeViewModels = _mapper.Map<IEnumerable<Like>, IEnumerable<LikeViewModel>>(likes);
+        var likeViewModels = _mapper.Map<IEnumerable<Like>, IEnumerable<LikeDTO>>(likes);
         return Ok(likeViewModels);
     }
 
     // GET api/<LikeController>/5
     [HttpGet("{id}")]
-    public ActionResult<LikeViewModel> GetById(string id)
+    public ActionResult<LikeDTO> GetById(string id)
     {
         var like = _likeService.GetLikeById(id);
         
@@ -33,13 +33,13 @@ public class LikeController(LikeService likeService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        var likeViewModel = _mapper.Map<Like,  LikeViewModel>(like);
+        var likeViewModel = _mapper.Map<Like,  LikeDTO>(like);
         return Ok(likeViewModel);
     }
 
     // POST api/<LikeController>
     [HttpPost]
-    public ActionResult<LikeViewModel> Create(LikeViewModel likeViewModel)
+    public ActionResult<LikeDTO> Create(LikeDTO likeViewModel)
     {
         string newGuid;
         do
@@ -49,7 +49,7 @@ public class LikeController(LikeService likeService, IMapper mapper) : Controlle
         while (_likeService.GetLikeById(newGuid) != null);
 
         likeViewModel.Id = newGuid;
-        var like = _mapper.Map<LikeViewModel, Like>(likeViewModel);
+        var like = _mapper.Map<LikeDTO, Like>(likeViewModel);
         _likeService.CreateLike(like);
 
         return CreatedAtAction(nameof(GetById), new { id = likeViewModel.Id }, likeViewModel);
@@ -57,7 +57,7 @@ public class LikeController(LikeService likeService, IMapper mapper) : Controlle
 
     // PUT api/<LikeController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, LikeViewModel likeViewModel)
+    public IActionResult Update(string id, LikeDTO likeViewModel)
     {
         var existingLike = _likeService.GetLikeById(id);
         if (existingLike == null)
@@ -66,7 +66,7 @@ public class LikeController(LikeService likeService, IMapper mapper) : Controlle
         }
 
         likeViewModel.Id = id;
-        var like = _mapper.Map<LikeViewModel, Like>(likeViewModel);
+        var like = _mapper.Map<LikeDTO, Like>(likeViewModel);
         _likeService.UpdateLike(like);
 
         return NoContent();

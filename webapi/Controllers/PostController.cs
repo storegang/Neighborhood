@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
+using webapi.DTOs;
 using AutoMapper;
 
 namespace webapi.Controllers;
@@ -15,16 +15,16 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
 
     // GET: api/<PostController>
     [HttpGet]
-    public ActionResult<IEnumerable<PostViewModel>> GetAll()
+    public ActionResult<IEnumerable<PostDTO>> GetAll()
     {
         var posts = _postService.GetAllPosts();
-        var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(posts);
+        var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostDTO>>(posts);
         return Ok(postViewModels);
     }
 
     // GET api/<PostController>/5
     [HttpGet("{id}")]
-    public ActionResult<PostViewModel> GetById(string id)
+    public ActionResult<PostDTO> GetById(string id)
     {
         var post = _postService.GetPostById(id);
 
@@ -33,13 +33,13 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        var postViewModel = _mapper.Map<Post, PostViewModel>(post);
+        var postViewModel = _mapper.Map<Post, PostDTO>(post);
         return Ok(postViewModel);
     }
 
     // POST api/<PostController>
     [HttpPost]
-    public ActionResult<PostViewModel> Create(PostViewModel postViewModel)
+    public ActionResult<PostDTO> Create(PostDTO postViewModel)
     {
         string newGuid;
         do
@@ -49,7 +49,7 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
         while (_postService.GetPostById(newGuid) != null);
 
         postViewModel.Id = newGuid;
-        var post = _mapper.Map<PostViewModel, Post>(postViewModel);
+        var post = _mapper.Map<PostDTO, Post>(postViewModel);
         _postService.CreatePost(post);
 
         return CreatedAtAction(nameof(GetById), new { id = postViewModel.Id }, postViewModel);
@@ -57,7 +57,7 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
 
     // PUT api/<PostController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, PostViewModel postViewModel)
+    public IActionResult Update(string id, PostDTO postViewModel)
     {
         var existingPost = _postService.GetPostById(id);
         if (existingPost == null)
@@ -66,7 +66,7 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
         }
 
         postViewModel.Id = id;
-        var post = _mapper.Map<PostViewModel, Post>(postViewModel);
+        var post = _mapper.Map<PostDTO, Post>(postViewModel);
         _postService.UpdatePost(post);
 
         return NoContent();
