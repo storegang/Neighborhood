@@ -56,18 +56,18 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Docker Login
-        if: ${{ contains(github.ref, 'deploy-action') }}
-        uses: azure/docker-login@v1
-        with:
-          login-server: ${{ secrets.LOGIN_SERVER }}
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+      # - name: Docker Login
+      #   if: ${{ contains(github.ref, 'deploy-action') }}
+      #   uses: azure/docker-login@v1
+      #   with:
+      #     login-server: ${{ secrets.LOGIN_SERVER }}
+      #     username: ${{ secrets.ACR_USERNAME }}
+      #     password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Build and Push to ACR
-        if: contains(github.ref, 'deploy-action')
-        uses: docker/build-push-action@v2
-        with:
-          context: frontend
-          push: true
-          tags: neighborhoodregistry.azurecr.io/frontend:latest
+      # - name: Build and Push to ACR
+      #   if: contains(github.ref, 'deploy-action')
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: frontend
+      #     push: true
+      #     tags: neighborhoodregistry.azurecr.io/frontend:latest
