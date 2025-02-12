@@ -10,13 +10,18 @@ public class LikeDTO
     {
         UserId = like.User.Id;
     }
+
+    public LikeDTO(string userId)
+    {
+        UserId = userId;
+    }
 }
 
-public class LikesCollectionDTO
+public class LikeCollectionDTO
 {
     public IEnumerable<LikeDTO> Likes { get; set; }
 
-    public LikesCollectionDTO(ICollection<Like> likes)
+    public LikeCollectionDTO(ICollection<Like> likes)
     {
         Likes = likes.Select(like => new LikeDTO(like));
     }

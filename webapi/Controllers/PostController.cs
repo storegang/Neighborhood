@@ -15,10 +15,10 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
 
     // GET: api/<PostController>
     [HttpGet]
-    public ActionResult<IEnumerable<PostDTO>> GetAll()
+    public ActionResult<PostCollectionDTO> GetAll()
     {
-        var posts = _postService.GetAllPosts();
-        var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostDTO>>(posts);
+        ICollection<Post> posts = _postService.GetAllPosts();
+        PostCollectionDTO postViewModels = new PostCollectionDTO(posts);
         return Ok(postViewModels);
     }
 
@@ -33,7 +33,7 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        var postViewModel = _mapper.Map<Post, PostDTO>(post);
+        PostDTO postViewModel = new PostDTO(post);
         return Ok(postViewModel);
     }
 

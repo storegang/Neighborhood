@@ -15,10 +15,10 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
 
     // GET: api/<CategoryController>
     [HttpGet]
-    public ActionResult<IEnumerable<CategoryDTO>> GetAll()
+    public ActionResult<CategoryCollectionDTO> GetAll()
     {
         var categories = _categoryService.GetAllCategories();
-        var categoryViewModels = _mapper.Map<IEnumerable<Category>, IEnumerable<CategoryDTO>>(categories);
+        var categoryViewModels = new CategoryCollectionDTO(categories);
         return Ok(categoryViewModels);
     }
 
@@ -33,7 +33,7 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
             return NotFound();
         }
 
-        var categoryViewModel = _mapper.Map<Category,  CategoryDTO>(category);
+        var categoryViewModel = new CategoryDTO(category);
         return Ok(categoryViewModel);
     }
 

@@ -14,6 +14,13 @@ public class CategoryDTO
         Name = category.Name;
         Color = category.Color;
     }
+
+    public CategoryDTO(string id, string name, string color)
+    {
+        Id = id;
+        Name = name;
+        Color = color;
+    }
 }
 
 public class CategoryCollectionDTO

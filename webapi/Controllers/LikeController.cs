@@ -15,10 +15,10 @@ public class LikeController(LikeService likeService, IMapper mapper) : Controlle
 
     // GET: api/<LikeController>
     [HttpGet]
-    public ActionResult<IEnumerable<LikeDTO>> GetAll()
+    public ActionResult<LikeCollectionDTO> GetAll()
     {
-        var likes = _likeService.GetAllLikes();
-        var likeViewModels = _mapper.Map<IEnumerable<Like>, IEnumerable<LikeDTO>>(likes);
+        ICollection<Like> likes = _likeService.GetAllLikes();
+        LikeCollectionDTO likeViewModels = new LikeCollectionDTO(likes);
         return Ok(likeViewModels);
     }
 
@@ -33,7 +33,7 @@ public class LikeController(LikeService likeService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        var likeViewModel = _mapper.Map<Like,  LikeDTO>(like);
+        LikeDTO likeViewModel = new LikeDTO(like);
         return Ok(likeViewModel);
     }
 

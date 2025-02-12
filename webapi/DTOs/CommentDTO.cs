@@ -16,6 +16,14 @@ public class CommentDTO
         DatePosted = comment.DatePosted;
         AuthorUserId = comment.User.Id;
     }
+
+    public CommentDTO(string id, string content, DateTime datePosted, string authorUserId)
+    {
+        Id = id;
+        Content = content;
+        DatePosted = datePosted;
+        AuthorUserId = authorUserId;
+    }
 }
 
 public class CommentCollectionDTO

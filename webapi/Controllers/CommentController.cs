@@ -15,10 +15,10 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
 
     // GET: api/<CommentController>
     [HttpGet]
-    public ActionResult<IEnumerable<CommentDTO>> GetAll()
+    public ActionResult<CommentCollectionDTO> GetAll()
     {
         var comments = _commentService.GetAllComments();
-        var commentViewModels = _mapper.Map<IEnumerable<Comment>, IEnumerable<CommentDTO>>(comments);
+        var commentViewModels = new CommentCollectionDTO(comments);
         return Ok(commentViewModels);
     }
 
@@ -33,7 +33,7 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
             return NotFound();
         }
 
-        var commentViewModel = _mapper.Map<Comment,  CommentDTO>(comment);
+        var commentViewModel = new CommentDTO(comment);
         return Ok(commentViewModel);
     }
 

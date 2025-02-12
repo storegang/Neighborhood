@@ -14,6 +14,13 @@ public class NeighborhoodDTO
         Name = neighborhood.Name;
         Description = neighborhood.Description;
     }
+
+    public NeighborhoodDTO(string id, string name, string? description)
+    {
+        Id = id;
+        Name = name;
+        Description = description;
+    }
 }
 
 // In what use case do you need this?

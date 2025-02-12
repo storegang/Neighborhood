@@ -15,10 +15,10 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
 
     // GET: api/<UserController>
     [HttpGet]
-    public ActionResult<IEnumerable<UserDTO>> GetAll()
+    public ActionResult<UserCollectionDTO> GetAll()
     {
-        var users = _userService.GetAllUsers();
-        var userViewModels = _mapper.Map<IEnumerable<User>, IEnumerable<UserDTO>>(users);
+        ICollection<User> users = _userService.GetAllUsers();
+        UserCollectionDTO userViewModels = new UserCollectionDTO(users);
         return Ok(userViewModels);
     }
 
@@ -33,7 +33,7 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        var userViewModel = _mapper.Map<User,  UserDTO>(user);
+        var userViewModel = new UserDTO(user);
         return Ok(userViewModel);
     }
 

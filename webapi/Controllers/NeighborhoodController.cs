@@ -15,10 +15,10 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
 
     // GET: api/<NeighborhoodController>
     [HttpGet]
-    public ActionResult<IEnumerable<NeighborhoodDTO>> GetAll()
+    public ActionResult<NeighborhoodCollectionDTO> GetAll()
     {
-        var neighborhoods = _neighborhoodService.GetAllNeighborhoods();
-        var neighborhoodViewModels = _mapper.Map<IEnumerable<Neighborhood>, IEnumerable<NeighborhoodDTO>>(neighborhoods);
+        ICollection<Neighborhood> neighborhoods = _neighborhoodService.GetAllNeighborhoods();
+        NeighborhoodCollectionDTO neighborhoodViewModels = new NeighborhoodCollectionDTO(neighborhoods);
         return Ok(neighborhoodViewModels);
     }
 
@@ -33,7 +33,7 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
             return NotFound();
         }
 
-        var neighborhoodViewModel = _mapper.Map<Neighborhood,  NeighborhoodDTO>(neighborhood);
+        NeighborhoodDTO neighborhoodViewModel = new NeighborhoodDTO(neighborhood);
         return Ok(neighborhoodViewModel);
     }
 

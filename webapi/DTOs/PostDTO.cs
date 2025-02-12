@@ -19,6 +19,15 @@ public class PostDTO
         DatePosted = post.DatePosted;
         AuthorUserId = post.User.Id;
     }
+
+    public PostDTO(string id, string title, string? description, DateTime datePosted, string authorUserId)
+    {
+        Id = id;
+        Title = title;
+        Description = description;
+        DatePosted = datePosted;
+        AuthorUserId = authorUserId;
+    }
 }
 
 public class PostCollectionDTO
