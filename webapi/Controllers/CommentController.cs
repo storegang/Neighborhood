@@ -8,9 +8,10 @@ namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(CommentService commentService, IMapper mapper) : ControllerBase
+public class CommentController(CommentService commentService, IMapper mapper, UserService userService) : ControllerBase
 {
     private readonly CommentService _commentService = commentService;
+    private readonly UserService _userService = userService;
     private readonly IMapper _mapper = mapper;
 
     // GET: api/<CommentController>
@@ -49,7 +50,14 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
         while (_commentService.GetCommentById(newGuid) != null);
 
         commentViewModel.Id = newGuid;
-        var comment = _mapper.Map<CommentDTO, Comment>(commentViewModel);
+        var comment = new Comment
+        {
+            Id = commentViewModel.Id,
+            Content = commentViewModel.Content,
+            DatePosted = commentViewModel.DatePosted,
+            User = _userService.GetUserById(commentViewModel.AuthorUserId),
+            ParentPostId = commentViewModel.ParentPostId
+        };
         _commentService.CreateComment(comment);
 
         return CreatedAtAction(nameof(GetById), new { id = commentViewModel.Id }, commentViewModel);
@@ -66,7 +74,14 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
         }
 
         commentViewModel.Id = id;
-        var comment = _mapper.Map<CommentDTO, Comment>(commentViewModel);
+        var comment = new Comment 
+        {
+            Id = commentViewModel.Id,
+            Content = commentViewModel.Content,
+            DatePosted = commentViewModel.DatePosted,
+            User = _userService.GetUserById(commentViewModel.AuthorUserId),
+            ParentPostId = commentViewModel.ParentPostId
+        };
         _commentService.UpdateComment(comment);
 
         return NoContent();

@@ -8,9 +8,10 @@ namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PostController(PostService postService, IMapper mapper) : ControllerBase
+public class PostController(PostService postService, IMapper mapper, UserService userService) : ControllerBase
 {
     private readonly PostService _postService = postService;
+    private readonly UserService _userService = userService;
     private readonly IMapper _mapper = mapper;
 
     // GET: api/<PostController>
@@ -49,7 +50,14 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
         while (_postService.GetPostById(newGuid) != null);
 
         postViewModel.Id = newGuid;
-        var post = _mapper.Map<PostDTO, Post>(postViewModel);
+        var post = new Post
+        {
+            Id = postViewModel.Id,
+            Title = postViewModel.Title,
+            Description = postViewModel.Description,
+            DatePosted = postViewModel.DatePosted,
+            User = _userService.GetUserById(postViewModel.AuthorUserId)
+        };
         _postService.CreatePost(post);
 
         return CreatedAtAction(nameof(GetById), new { id = postViewModel.Id }, postViewModel);
@@ -66,7 +74,15 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
         }
 
         postViewModel.Id = id;
-        var post = _mapper.Map<PostDTO, Post>(postViewModel);
+        var post = new Post
+        {
+            Id = postViewModel.Id,
+            Title = postViewModel.Title,
+            Description = postViewModel.Description,
+            DatePosted = postViewModel.DatePosted,
+            User = _userService.GetUserById(postViewModel.AuthorUserId),
+            LikedByUserID = existingPost.LikedByUserID
+        };
         _postService.UpdatePost(post);
 
         return NoContent();

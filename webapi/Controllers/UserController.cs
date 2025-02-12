@@ -49,7 +49,12 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
         while (_userService.GetUserById(newGuid) != null);
 
         userViewModel.Id = newGuid;
-        var user = _mapper.Map<UserDTO, User>(userViewModel);
+        var user = new User
+        {
+            Id = userViewModel.Id,
+            Name = userViewModel.Name,
+            Avatar = userViewModel.Avatar
+        };
         _userService.CreateUser(user);
 
         return CreatedAtAction(nameof(GetById), new { id = userViewModel.Id }, userViewModel);
@@ -66,7 +71,12 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
         }
 
         userViewModel.Id = id;
-        var user = _mapper.Map<UserDTO, User>(userViewModel);
+        var user = new User 
+        {
+            Id = userViewModel.Id,
+            Name = userViewModel.Name,
+            Avatar = userViewModel.Avatar
+        };
         _userService.UpdateUser(user);
 
         return NoContent();

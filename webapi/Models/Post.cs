@@ -8,7 +8,7 @@ public class Post
     public DateTime DatePosted { get; set; }
 
     public User User { get; set; }
-
+    public string CategoryId { get; set; }
     public Category Category { get; set; }
     public ICollection<Comment>? Comments { get; set; }
     public ICollection<string>? Images { get; set; }

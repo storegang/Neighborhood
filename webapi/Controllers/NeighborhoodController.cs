@@ -49,7 +49,12 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
         while (_neighborhoodService.GetNeighborhoodById(newGuid) != null);
 
         neighborhoodViewModel.Id = newGuid;
-        var neighborhood = _mapper.Map<NeighborhoodDTO, Neighborhood>(neighborhoodViewModel);
+        var neighborhood = new Neighborhood 
+        { 
+            Id = neighborhoodViewModel.Id,
+            Name = neighborhoodViewModel.Name,
+            Description = neighborhoodViewModel.Description
+        };
         _neighborhoodService.CreateNeighborhood(neighborhood);
 
         return CreatedAtAction(nameof(GetById), new { id = neighborhoodViewModel.Id }, neighborhoodViewModel);
@@ -66,7 +71,12 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
         }
 
         neighborhoodViewModel.Id = id;
-        var neighborhood = _mapper.Map<NeighborhoodDTO, Neighborhood>(neighborhoodViewModel);
+        var neighborhood = new Neighborhood
+        {
+            Id = neighborhoodViewModel.Id,
+            Name = neighborhoodViewModel.Name,
+            Description = neighborhoodViewModel.Description
+        };
         _neighborhoodService.UpdateNeighborhood(neighborhood);
 
         return NoContent();

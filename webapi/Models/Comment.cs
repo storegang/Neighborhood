@@ -8,6 +8,7 @@ public class Comment
     public DateTime DatePosted { get; set; }
 
     public User User { get; set; }
+    public string ParentPostId { get; set; }
     public Post ParentPost { get; set; }
 
     public ICollection<string>? LikedByUserID { get; set; }

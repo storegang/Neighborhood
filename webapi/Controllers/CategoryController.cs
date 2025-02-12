@@ -49,7 +49,13 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
         while (_categoryService.GetCategoryById(newGuid) != null);
 
         categoryViewModel.Id = newGuid;
-        var category = _mapper.Map<CategoryDTO, Category>(categoryViewModel);
+        var category = new Category 
+        {
+            Id = categoryViewModel.Id,
+            Name = categoryViewModel.Name,
+            Color = categoryViewModel.Color,
+            NeighborhoodId = categoryViewModel.NeighborhoodId
+        };
         _categoryService.CreateCategory(category);
 
         return CreatedAtAction(nameof(GetById), new { id = categoryViewModel.Id }, categoryViewModel);
@@ -66,7 +72,13 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
         }
 
         categoryViewModel.Id = id;
-        var category = _mapper.Map<CategoryDTO, Category>(categoryViewModel);
+        var category = new Category
+        {
+            Id = categoryViewModel.Id,
+            Name = categoryViewModel.Name,
+            Color = categoryViewModel.Color,
+            NeighborhoodId = categoryViewModel.NeighborhoodId
+        };
         _categoryService.UpdateCategory(category);
 
         return NoContent();
