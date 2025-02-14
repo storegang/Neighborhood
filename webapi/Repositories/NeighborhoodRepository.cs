@@ -8,6 +8,7 @@ public interface INeighborhoodRepository
 {
     ICollection<Neighborhood> GetAll();
     Neighborhood GetById(string id);
+    Neighborhood GetByIdExplicit(string id);
     void Add(Neighborhood neighborhood);
     void Update(Neighborhood neighborhood);
     void Delete(Neighborhood neighborhood);
@@ -25,6 +26,14 @@ public class NeighborhoodRepository(NeighborhoodContext context) : INeighborhood
     public Neighborhood GetById(string id)
     {
         return _context.Neighborhoods.Find(id);
+    }
+
+    public Neighborhood GetByIdExplicit(string id)
+    {
+        var neighborhood = _context.Neighborhoods
+            .Include(n => n.Categories)
+            .First(n => n.Id == id);
+        return neighborhood;
     }
 
     public void Add(Neighborhood neighborhood)

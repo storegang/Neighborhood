@@ -2,16 +2,15 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
-using AutoMapper;
 
 namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CategoryController(CategoryService categoryService, IMapper mapper) : ControllerBase
+public class CategoryController(CategoryService categoryService, NeighborhoodService neighborhoodService) : ControllerBase
 {
     private readonly CategoryService _categoryService = categoryService;
-    private readonly IMapper _mapper = mapper;
+    private readonly NeighborhoodService _neighborhoodService = neighborhoodService;
 
     // GET: api/<CategoryController>
     [HttpGet]
@@ -37,10 +36,33 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
         return Ok(categoryViewModel);
     }
 
+    // GET api/<CategoryController>/5
+    [HttpGet("FromNeighborhood={neighborhoodId}")]
+    public ActionResult<CategoryCollectionDTO> GetCategoryByNeighborhoodId(string neighborhoodId)
+    {
+        var neighborhood = _neighborhoodService.GetNeighborhoodByIdExplicit(neighborhoodId);
+        var categories = neighborhood.Categories;
+
+        if (neighborhood == null || neighborhood.Categories == null)
+        {
+            return NotFound();
+        }
+
+        var categoryViewModel = new CategoryCollectionDTO(categories);
+        return Ok(categoryViewModel);
+    }
+
     // POST api/<CategoryController>
     [HttpPost]
     public ActionResult<CategoryDTO> Create(CategoryDTO categoryViewModel)
     {
+        var neighborhood = _neighborhoodService.GetNeighborhoodById(categoryViewModel.NeighborhoodId);
+
+        if (neighborhood == null)
+        {
+            return NotFound();
+        }
+
         string newGuid;
         do
         {
@@ -57,6 +79,9 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
             NeighborhoodId = categoryViewModel.NeighborhoodId
         };
         _categoryService.CreateCategory(category);
+
+        neighborhood.Categories.Add(category);
+        _neighborhoodService.UpdateNeighborhood(neighborhood);
 
         return CreatedAtAction(nameof(GetById), new { id = categoryViewModel.Id }, categoryViewModel);
     }

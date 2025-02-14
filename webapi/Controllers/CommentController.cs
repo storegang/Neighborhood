@@ -2,17 +2,17 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
-using AutoMapper;
+using System.Drawing;
 
 namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(CommentService commentService, IMapper mapper, UserService userService) : ControllerBase
+public class CommentController(CommentService commentService, UserService userService, PostService postService) : ControllerBase
 {
     private readonly CommentService _commentService = commentService;
     private readonly UserService _userService = userService;
-    private readonly IMapper _mapper = mapper;
+    private readonly PostService _postService = postService;
 
     // GET: api/<CommentController>
     [HttpGet]
@@ -38,10 +38,63 @@ public class CommentController(CommentService commentService, IMapper mapper, Us
         return Ok(commentViewModel);
     }
 
+    // GET api/<CommentController>/FromPost=5
+    [HttpGet("AllFromPost={postId}")]
+    public ActionResult<CommentCollectionDTO> GetCommentsByPostId(string postId)
+    {
+        var post = _postService.GetPostByIdExplicit(postId);
+        var comments = post.Comments;
+
+        if (comments == null)
+        {
+            return NotFound();
+        }
+
+        var commentsViewModel = new CommentCollectionDTO(comments);
+        return Ok(commentsViewModel);
+    }
+
+    // GET api/<CommentController>/FromPost={postId}&Page={page}&Size={size}
+    // GET api/<CommentController>/FromPost=5
+    [HttpGet("FromPost={postId}&Page={page}")]
+    public ActionResult<CommentCollectionDTO> GetSomeCommentsByPostId(string postId, string page, string size = "5")
+    {
+        var post = _postService.GetPostByIdExplicit(postId);
+
+
+        if (post == null || post.Comments == null)
+        {
+            return NotFound();
+        }
+
+        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
+        {
+            return BadRequest();
+        }
+
+        var comments = post.Comments
+        .Skip((int.Parse(page) - 1) * int.Parse(size))
+        .Take(int.Parse(size))
+        .ToList();
+
+        var commentsViewModel = new CommentCollectionDTO(comments);
+        return Ok(commentsViewModel);
+    }
+
+    // TODO: Add OrderBy 
+
+
     // POST api/<CommentController>
     [HttpPost]
     public ActionResult<CommentDTO> Create(CommentDTO commentViewModel)
     {
+        var post = _postService.GetPostById(commentViewModel.ParentPostId);
+
+        if (post == null)
+        {
+            return NotFound();
+        }
+
         string newGuid;
         do
         {
@@ -59,6 +112,9 @@ public class CommentController(CommentService commentService, IMapper mapper, Us
             ParentPostId = commentViewModel.ParentPostId
         };
         _commentService.CreateComment(comment);
+
+        post.Comments.Add(comment);
+        _postService.UpdatePost(post);
 
         return CreatedAtAction(nameof(GetById), new { id = commentViewModel.Id }, commentViewModel);
     }

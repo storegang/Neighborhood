@@ -2,16 +2,14 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
-using AutoMapper;
 
 namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class NeighborhoodController(NeighborhoodService neighborhoodService, IMapper mapper) : ControllerBase
+public class NeighborhoodController(NeighborhoodService neighborhoodService) : ControllerBase
 {
     private readonly NeighborhoodService _neighborhoodService = neighborhoodService;
-    private readonly IMapper _mapper = mapper;
 
     // GET: api/<NeighborhoodController>
     [HttpGet]

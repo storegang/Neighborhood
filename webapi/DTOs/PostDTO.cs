@@ -14,6 +14,8 @@ public class PostDTO
     public string CategoryId { get; set; }
     public IEnumerable<string>? LikedByUserId { get; set; }
 
+    public PostDTO(){}
+
     public PostDTO(Post post)
     {
         Id = post.Id;

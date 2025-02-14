@@ -7,20 +7,25 @@ public class UserDTO
     public string Id { get; set; }
     public string Name { get; set; }
     public string? Avatar { get; set; }
+    public string NeighborhoodId { get; set; }
     // TODO: Connect with Auth0 and add other properties?
+
+    public UserDTO(){}
 
     public UserDTO(User user)
     {
         Id = user.Id;
         Name = user.Name;
         Avatar = user.Avatar;
+        NeighborhoodId = user.NeighborhoodId;
     }
 
-    public UserDTO(string id, string name, string? avatar)
+    public UserDTO(string id, string name, string? avatar, string neighborhoodId)
     {
         Id = id;
         Name = name;
         Avatar = avatar;
+        NeighborhoodId = neighborhoodId;
     }
 }
 

@@ -8,6 +8,7 @@ public interface IUserRepository
 {
     ICollection<User> GetAll();
     User GetById(string id);
+    User GetByIdExplicit(string id);
     void Add(User user);
     void Update(User user);
     void Delete(User user);

@@ -9,6 +9,8 @@ public class CategoryDTO
     public string Color { get; set; }
     public string NeighborhoodId { get; set; }
 
+    public CategoryDTO(){}
+
     public CategoryDTO(Category category)
     {
         Id = category.Id;

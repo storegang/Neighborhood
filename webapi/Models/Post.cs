@@ -10,9 +10,9 @@ public class Post
     public User User { get; set; }
     public string CategoryId { get; set; }
     public Category Category { get; set; }
-    public ICollection<Comment>? Comments { get; set; }
-    public ICollection<string>? Images { get; set; }
-    public ICollection<string>? LikedByUserID { get; set; }
+    public ICollection<Comment> Comments { get; set; } = new List<Comment>();
+    public ICollection<string> Images { get; set; } = new List<string>();
+    public ICollection<string> LikedByUserID { get; set; } = new List<string>();
 
     // TODO: Add image urls to POST
 

@@ -2,17 +2,16 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
-using AutoMapper;
 
 namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PostController(PostService postService, IMapper mapper, UserService userService) : ControllerBase
+public class PostController(PostService postService, UserService userService, CategoryService categoryService) : ControllerBase
 {
     private readonly PostService _postService = postService;
     private readonly UserService _userService = userService;
-    private readonly IMapper _mapper = mapper;
+    private readonly CategoryService _categoryService = categoryService;
 
     // GET: api/<PostController>
     [HttpGet]
@@ -38,10 +37,62 @@ public class PostController(PostService postService, IMapper mapper, UserService
         return Ok(postViewModel);
     }
 
+    // GET api/<PostController>/5
+    [HttpGet("FromCategory={id}")]
+    public ActionResult<PostCollectionDTO> GetPostByCategoryId(string categoryId)
+    {
+        var category = _categoryService.GetCategoryByIdExplicit(categoryId);
+        var posts = category.Posts;
+
+        if (category == null || category.Posts == null)
+        {
+            return NotFound();
+        }
+
+
+
+        PostCollectionDTO postViewModel = new PostCollectionDTO(posts);
+        return Ok(postViewModel);
+    }
+
+    // GET api/<PostController>/FromCategory={postId}&Page={page}&Size={size}
+    // GET api/<PostController>/FromCategory=5
+    [HttpGet("FromCategory={postId}&Page={page}")]
+    public ActionResult<PostCollectionDTO> GetSomeCommentsByPostId(string categoryId, string page, string size = "5")
+    {
+        var category = _categoryService.GetCategoryByIdExplicit(categoryId);
+
+
+        if (category == null || category.Posts == null)
+        {
+            return NotFound();
+        }
+
+        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
+        {
+            return BadRequest();
+        }
+
+        var posts = category.Posts
+        .Skip((int.Parse(page) - 1) * int.Parse(size))
+        .Take(int.Parse(size))
+        .ToList();
+
+        var postsViewModel = new PostCollectionDTO(posts);
+        return Ok(postsViewModel);
+    }
+
     // POST api/<PostController>
     [HttpPost]
     public ActionResult<PostDTO> Create(PostDTO postViewModel)
     {
+        var category = _categoryService.GetCategoryById(postViewModel.CategoryId);
+
+        if (category == null)
+        {
+            return NotFound();
+        }
+
         string newGuid;
         do
         {
@@ -59,6 +110,9 @@ public class PostController(PostService postService, IMapper mapper, UserService
             User = _userService.GetUserById(postViewModel.AuthorUserId)
         };
         _postService.CreatePost(post);
+
+        category.Posts.Add(post);
+        _categoryService.UpdateCategory(category);
 
         return CreatedAtAction(nameof(GetById), new { id = postViewModel.Id }, postViewModel);
     }

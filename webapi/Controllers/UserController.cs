@@ -2,16 +2,14 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
-using AutoMapper;
 
 namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(UserService userService, IMapper mapper) : ControllerBase
+public class UserController(UserService userService) : ControllerBase
 {
     private readonly UserService _userService = userService;
-    private readonly IMapper _mapper = mapper;
 
     // GET: api/<UserController>
     [HttpGet]

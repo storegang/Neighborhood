@@ -18,6 +18,11 @@ public class PostService(IPostRepository postRepository)
         return _postRepository.GetById(id);
     }
 
+    public Post GetPostByIdExplicit(string id)
+    {
+        return _postRepository.GetByIdExplicit(id);
+    }
+
     public void CreatePost(Post post)
     {
         _postRepository.Add(post);

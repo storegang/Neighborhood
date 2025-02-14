@@ -1,4 +1,5 @@
-﻿using webapi.Models;
+﻿using System.Text.Json.Serialization;
+using webapi.Models;
 
 namespace webapi.DTOs;
 
@@ -7,6 +8,8 @@ public class NeighborhoodDTO
     public string Id { get; set; }
     public string Name { get; set; }
     public string? Description { get; set; }
+
+    public NeighborhoodDTO() { }
 
     public NeighborhoodDTO(Neighborhood neighborhood)
     {

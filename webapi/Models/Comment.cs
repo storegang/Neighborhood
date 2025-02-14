@@ -11,5 +11,5 @@ public class Comment
     public string ParentPostId { get; set; }
     public Post ParentPost { get; set; }
 
-    public ICollection<string>? LikedByUserID { get; set; }
+    public ICollection<string> LikedByUserID { get; set; } = new List<string>();
 }

@@ -10,6 +10,8 @@ public class CommentDTO
     public string AuthorUserId { get; set; }
     public string ParentPostId { get; set; }
 
+    public CommentDTO(){}
+
     public CommentDTO(Comment comment)
     {
         Id = comment.Id;
