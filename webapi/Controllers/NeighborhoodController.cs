@@ -16,8 +16,8 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService) : C
     public ActionResult<NeighborhoodCollectionDTO> GetAll()
     {
         ICollection<Neighborhood> neighborhoods = _neighborhoodService.GetAllNeighborhoods();
-        NeighborhoodCollectionDTO neighborhoodViewModels = new NeighborhoodCollectionDTO(neighborhoods);
-        return Ok(neighborhoodViewModels);
+        NeighborhoodCollectionDTO neighborhoodDataCollection = new NeighborhoodCollectionDTO(neighborhoods);
+        return Ok(neighborhoodDataCollection);
     }
 
     // GET api/<NeighborhoodController>/5
@@ -31,13 +31,13 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService) : C
             return NotFound();
         }
 
-        NeighborhoodDTO neighborhoodViewModel = new NeighborhoodDTO(neighborhood);
-        return Ok(neighborhoodViewModel);
+        NeighborhoodDTO neighborhoodData = new NeighborhoodDTO(neighborhood);
+        return Ok(neighborhoodData);
     }
 
     // POST api/<NeighborhoodController>
     [HttpPost]
-    public ActionResult<NeighborhoodDTO> Create(NeighborhoodDTO neighborhoodViewModel)
+    public ActionResult<NeighborhoodDTO> Create(NeighborhoodDTO neighborhoodData)
     {
         string newGuid;
         do
@@ -46,21 +46,21 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService) : C
         }
         while (_neighborhoodService.GetNeighborhoodById(newGuid) != null);
 
-        neighborhoodViewModel.Id = newGuid;
+        neighborhoodData.Id = newGuid;
         var neighborhood = new Neighborhood 
         { 
-            Id = neighborhoodViewModel.Id,
-            Name = neighborhoodViewModel.Name,
-            Description = neighborhoodViewModel.Description
+            Id = neighborhoodData.Id,
+            Name = neighborhoodData.Name,
+            Description = neighborhoodData.Description
         };
         _neighborhoodService.CreateNeighborhood(neighborhood);
 
-        return CreatedAtAction(nameof(GetById), new { id = neighborhoodViewModel.Id }, neighborhoodViewModel);
+        return CreatedAtAction(nameof(GetById), new { id = neighborhoodData.Id }, neighborhoodData);
     }
 
     // PUT api/<NeighborhoodController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, NeighborhoodDTO neighborhoodViewModel)
+    public IActionResult Update(string id, NeighborhoodDTO neighborhoodData)
     {
         var existingNeighborhood = _neighborhoodService.GetNeighborhoodById(id);
         if (existingNeighborhood == null)
@@ -68,12 +68,12 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService) : C
             return NotFound();
         }
 
-        neighborhoodViewModel.Id = id;
+        neighborhoodData.Id = id;
         var neighborhood = new Neighborhood
         {
-            Id = neighborhoodViewModel.Id,
-            Name = neighborhoodViewModel.Name,
-            Description = neighborhoodViewModel.Description
+            Id = neighborhoodData.Id,
+            Name = neighborhoodData.Name,
+            Description = neighborhoodData.Description
         };
         _neighborhoodService.UpdateNeighborhood(neighborhood);
 

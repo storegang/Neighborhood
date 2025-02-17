@@ -18,8 +18,8 @@ public class PostController(PostService postService, UserService userService, Ca
     public ActionResult<PostCollectionDTO> GetAll()
     {
         ICollection<Post> posts = _postService.GetAllPosts();
-        PostCollectionDTO postViewModels = new PostCollectionDTO(posts);
-        return Ok(postViewModels);
+        PostCollectionDTO postDataCollection = new PostCollectionDTO(posts);
+        return Ok(postDataCollection);
     }
 
     // GET api/<PostController>/5
@@ -33,8 +33,8 @@ public class PostController(PostService postService, UserService userService, Ca
             return NotFound();
         }
 
-        PostDTO postViewModel = new PostDTO(post);
-        return Ok(postViewModel);
+        PostDTO postData = new PostDTO(post);
+        return Ok(postData);
     }
 
     // GET api/<PostController>/5
@@ -51,8 +51,8 @@ public class PostController(PostService postService, UserService userService, Ca
 
 
 
-        PostCollectionDTO postViewModel = new PostCollectionDTO(posts);
-        return Ok(postViewModel);
+        PostCollectionDTO postData = new PostCollectionDTO(posts);
+        return Ok(postData);
     }
 
     // GET api/<PostController>/FromCategory={postId}&Page={page}&Size={size}
@@ -78,15 +78,15 @@ public class PostController(PostService postService, UserService userService, Ca
         .Take(int.Parse(size))
         .ToList();
 
-        var postsViewModel = new PostCollectionDTO(posts);
-        return Ok(postsViewModel);
+        var postsData = new PostCollectionDTO(posts);
+        return Ok(postsData);
     }
 
     // POST api/<PostController>
     [HttpPost]
-    public ActionResult<PostDTO> Create(PostDTO postViewModel)
+    public ActionResult<PostDTO> Create(PostDTO postData)
     {
-        var category = _categoryService.GetCategoryById(postViewModel.CategoryId);
+        var category = _categoryService.GetCategoryById(postData.CategoryId);
 
         if (category == null)
         {
@@ -100,27 +100,27 @@ public class PostController(PostService postService, UserService userService, Ca
         }
         while (_postService.GetPostById(newGuid) != null);
 
-        postViewModel.Id = newGuid;
+        postData.Id = newGuid;
         var post = new Post
         {
-            Id = postViewModel.Id,
-            Title = postViewModel.Title,
-            Description = postViewModel.Description,
+            Id = postData.Id,
+            Title = postData.Title,
+            Description = postData.Description,
             DatePosted = DateTime.Now,
-            User = _userService.GetUserById(postViewModel.AuthorUserId),
-            CategoryId = postViewModel.CategoryId
+            User = _userService.GetUserById(postData.AuthorUserId),
+            CategoryId = postData.CategoryId
         };
         _postService.CreatePost(post);
 
         category.Posts.Add(post);
         _categoryService.UpdateCategory(category);
 
-        return CreatedAtAction(nameof(GetById), new { id = postViewModel.Id }, postViewModel);
+        return CreatedAtAction(nameof(GetById), new { id = postData.Id }, postData);
     }
 
     // PUT api/<PostController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, PostDTO postViewModel)
+    public IActionResult Update(string id, PostDTO postData)
     {
         var existingPost = _postService.GetPostById(id);
         if (existingPost == null)
@@ -128,14 +128,14 @@ public class PostController(PostService postService, UserService userService, Ca
             return NotFound();
         }
 
-        postViewModel.Id = id;
+        postData.Id = id;
         var post = new Post
         {
-            Id = postViewModel.Id,
-            Title = postViewModel.Title,
-            Description = postViewModel.Description,
+            Id = postData.Id,
+            Title = postData.Title,
+            Description = postData.Description,
             DateLastEdited = DateTime.Now,
-            User = _userService.GetUserById(postViewModel.AuthorUserId),
+            User = _userService.GetUserById(postData.AuthorUserId),
             LikedByUserID = existingPost.LikedByUserID
         };
         _postService.UpdatePost(post);

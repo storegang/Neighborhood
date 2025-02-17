@@ -16,8 +16,8 @@ public class UserController(UserService userService) : ControllerBase
     public ActionResult<UserCollectionDTO> GetAll()
     {
         ICollection<User> users = _userService.GetAllUsers();
-        UserCollectionDTO userViewModels = new UserCollectionDTO(users);
-        return Ok(userViewModels);
+        UserCollectionDTO userDataCollection = new UserCollectionDTO(users);
+        return Ok(userDataCollection);
     }
 
     // GET api/<UserController>/5
@@ -31,13 +31,13 @@ public class UserController(UserService userService) : ControllerBase
             return NotFound();
         }
 
-        var userViewModel = new UserDTO(user);
-        return Ok(userViewModel);
+        var userData = new UserDTO(user);
+        return Ok(userData);
     }
 
     // POST api/<UserController>
     [HttpPost]
-    public ActionResult<UserDTO> Create(UserDTO userViewModel)
+    public ActionResult<UserDTO> Create(UserDTO userData)
     {
         string newGuid;
         do
@@ -46,21 +46,21 @@ public class UserController(UserService userService) : ControllerBase
         }
         while (_userService.GetUserById(newGuid) != null);
 
-        userViewModel.Id = newGuid;
+        userData.Id = newGuid;
         var user = new User
         {
-            Id = userViewModel.Id,
-            Name = userViewModel.Name,
-            Avatar = userViewModel.Avatar
+            Id = userData.Id,
+            Name = userData.Name,
+            Avatar = userData.Avatar
         };
         _userService.CreateUser(user);
 
-        return CreatedAtAction(nameof(GetById), new { id = userViewModel.Id }, userViewModel);
+        return CreatedAtAction(nameof(GetById), new { id = userData.Id }, userData);
     }
 
     // PUT api/<UserController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, UserDTO userViewModel)
+    public IActionResult Update(string id, UserDTO userData)
     {
         var existingUser = _userService.GetUserById(id);
         if (existingUser == null)
@@ -68,12 +68,12 @@ public class UserController(UserService userService) : ControllerBase
             return NotFound();
         }
 
-        userViewModel.Id = id;
+        userData.Id = id;
         var user = new User 
         {
-            Id = userViewModel.Id,
-            Name = userViewModel.Name,
-            Avatar = userViewModel.Avatar
+            Id = userData.Id,
+            Name = userData.Name,
+            Avatar = userData.Avatar
         };
         _userService.UpdateUser(user);
 

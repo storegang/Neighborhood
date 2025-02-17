@@ -18,8 +18,8 @@ public class CommentController(CommentService commentService, UserService userSe
     public ActionResult<CommentCollectionDTO> GetAll()
     {
         var comments = _commentService.GetAllComments();
-        var commentViewModels = new CommentCollectionDTO(comments);
-        return Ok(commentViewModels);
+        var commentDataCollection = new CommentCollectionDTO(comments);
+        return Ok(commentDataCollection);
     }
 
     // GET api/<CommentController>/5
@@ -33,8 +33,8 @@ public class CommentController(CommentService commentService, UserService userSe
             return NotFound();
         }
 
-        var commentViewModel = new CommentDTO(comment);
-        return Ok(commentViewModel);
+        var commentData = new CommentDTO(comment);
+        return Ok(commentData);
     }
 
     // GET api/<CommentController>/FromPost=5
@@ -49,8 +49,8 @@ public class CommentController(CommentService commentService, UserService userSe
             return NotFound();
         }
 
-        var commentsViewModel = new CommentCollectionDTO(comments);
-        return Ok(commentsViewModel);
+        var commentsData = new CommentCollectionDTO(comments);
+        return Ok(commentsData);
     }
 
     // GET api/<CommentController>/FromPost={postId}&Page={page}&Size={size}
@@ -76,8 +76,8 @@ public class CommentController(CommentService commentService, UserService userSe
         .Take(int.Parse(size))
         .ToList();
 
-        var commentsViewModel = new CommentCollectionDTO(comments);
-        return Ok(commentsViewModel);
+        var commentsData = new CommentCollectionDTO(comments);
+        return Ok(commentsData);
     }
 
     // TODO: Add OrderBy 
@@ -85,9 +85,9 @@ public class CommentController(CommentService commentService, UserService userSe
 
     // POST api/<CommentController>
     [HttpPost]
-    public ActionResult<CommentDTO> Create(CommentDTO commentViewModel)
+    public ActionResult<CommentDTO> Create(CommentDTO commentData)
     {
-        var post = _postService.GetPostById(commentViewModel.ParentPostId);
+        var post = _postService.GetPostById(commentData.ParentPostId);
 
         if (post == null)
         {
@@ -101,26 +101,26 @@ public class CommentController(CommentService commentService, UserService userSe
         }
         while (_commentService.GetCommentById(newGuid) != null);
 
-        commentViewModel.Id = newGuid;
+        commentData.Id = newGuid;
         var comment = new Comment
         {
-            Id = commentViewModel.Id,
-            Content = commentViewModel.Content,
+            Id = commentData.Id,
+            Content = commentData.Content,
             DatePosted = DateTime.Now,
-            User = _userService.GetUserById(commentViewModel.AuthorUserId),
-            ParentPostId = commentViewModel.ParentPostId
+            User = _userService.GetUserById(commentData.AuthorUserId),
+            ParentPostId = commentData.ParentPostId
         };
         _commentService.CreateComment(comment);
 
         post.Comments.Add(comment);
         _postService.UpdatePost(post);
 
-        return CreatedAtAction(nameof(GetById), new { id = commentViewModel.Id }, commentViewModel);
+        return CreatedAtAction(nameof(GetById), new { id = commentData.Id }, commentData);
     }
 
     // PUT api/<CommentController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, CommentDTO commentViewModel)
+    public IActionResult Update(string id, CommentDTO commentData)
     {
         var existingComment = _commentService.GetCommentById(id);
         if (existingComment == null)
@@ -128,14 +128,14 @@ public class CommentController(CommentService commentService, UserService userSe
             return NotFound();
         }
 
-        commentViewModel.Id = id;
+        commentData.Id = id;
         var comment = new Comment 
         {
-            Id = commentViewModel.Id,
-            Content = commentViewModel.Content,
+            Id = commentData.Id,
+            Content = commentData.Content,
             DateLastEdited = DateTime.Now,
-            User = _userService.GetUserById(commentViewModel.AuthorUserId),
-            ParentPostId = commentViewModel.ParentPostId
+            User = _userService.GetUserById(commentData.AuthorUserId),
+            ParentPostId = commentData.ParentPostId
         };
         _commentService.UpdateComment(comment);
 

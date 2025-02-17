@@ -17,8 +17,8 @@ public class CategoryController(CategoryService categoryService, NeighborhoodSer
     public ActionResult<CategoryCollectionDTO> GetAll()
     {
         var categories = _categoryService.GetAllCategories();
-        var categoryViewModels = new CategoryCollectionDTO(categories);
-        return Ok(categoryViewModels);
+        var categoryDataCollection = new CategoryCollectionDTO(categories);
+        return Ok(categoryDataCollection);
     }
 
     // GET api/<CategoryController>/5
@@ -32,8 +32,8 @@ public class CategoryController(CategoryService categoryService, NeighborhoodSer
             return NotFound();
         }
 
-        var categoryViewModel = new CategoryDTO(category);
-        return Ok(categoryViewModel);
+        var categoryData = new CategoryDTO(category);
+        return Ok(categoryData);
     }
 
     // GET api/<CategoryController>/5
@@ -48,15 +48,15 @@ public class CategoryController(CategoryService categoryService, NeighborhoodSer
             return NotFound();
         }
 
-        var categoryViewModel = new CategoryCollectionDTO(categories);
-        return Ok(categoryViewModel);
+        var categoryData = new CategoryCollectionDTO(categories);
+        return Ok(categoryData);
     }
 
     // POST api/<CategoryController>
     [HttpPost]
-    public ActionResult<CategoryDTO> Create(CategoryDTO categoryViewModel)
+    public ActionResult<CategoryDTO> Create(CategoryDTO categoryData)
     {
-        var neighborhood = _neighborhoodService.GetNeighborhoodById(categoryViewModel.NeighborhoodId);
+        var neighborhood = _neighborhoodService.GetNeighborhoodById(categoryData.NeighborhoodId);
 
         if (neighborhood == null)
         {
@@ -70,25 +70,25 @@ public class CategoryController(CategoryService categoryService, NeighborhoodSer
         }
         while (_categoryService.GetCategoryById(newGuid) != null);
 
-        categoryViewModel.Id = newGuid;
+        categoryData.Id = newGuid;
         var category = new Category 
         {
-            Id = categoryViewModel.Id,
-            Name = categoryViewModel.Name,
-            Color = categoryViewModel.Color,
-            NeighborhoodId = categoryViewModel.NeighborhoodId
+            Id = categoryData.Id,
+            Name = categoryData.Name,
+            Color = categoryData.Color,
+            NeighborhoodId = categoryData.NeighborhoodId
         };
         _categoryService.CreateCategory(category);
 
         neighborhood.Categories.Add(category);
         _neighborhoodService.UpdateNeighborhood(neighborhood);
 
-        return CreatedAtAction(nameof(GetById), new { id = categoryViewModel.Id }, categoryViewModel);
+        return CreatedAtAction(nameof(GetById), new { id = categoryData.Id }, categoryData);
     }
 
     // PUT api/<CategoryController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, CategoryDTO categoryViewModel)
+    public IActionResult Update(string id, CategoryDTO categoryData)
     {
         var existingCategory = _categoryService.GetCategoryById(id);
         if (existingCategory == null)
@@ -96,13 +96,13 @@ public class CategoryController(CategoryService categoryService, NeighborhoodSer
             return NotFound();
         }
 
-        categoryViewModel.Id = id;
+        categoryData.Id = id;
         var category = new Category
         {
-            Id = categoryViewModel.Id,
-            Name = categoryViewModel.Name,
-            Color = categoryViewModel.Color,
-            NeighborhoodId = categoryViewModel.NeighborhoodId
+            Id = categoryData.Id,
+            Name = categoryData.Name,
+            Color = categoryData.Color,
+            NeighborhoodId = categoryData.NeighborhoodId
         };
         _categoryService.UpdateCategory(category);
 
