@@ -2,7 +2,6 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
-using System.Drawing;
 
 namespace webapi.Controllers;
 
@@ -42,7 +41,7 @@ public class CommentController(CommentService commentService, UserService userSe
     [HttpGet("AllFromPost={postId}")]
     public ActionResult<CommentCollectionDTO> GetCommentsByPostId(string postId)
     {
-        var post = _postService.GetPostByIdExplicit(postId);
+        var post = _postService.GetPostByIdWithChildren(postId);
         var comments = post.Comments;
 
         if (comments == null)
@@ -59,7 +58,7 @@ public class CommentController(CommentService commentService, UserService userSe
     [HttpGet("FromPost={postId}&Page={page}")]
     public ActionResult<CommentCollectionDTO> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
-        var post = _postService.GetPostByIdExplicit(postId);
+        var post = _postService.GetPostByIdWithChildren(postId);
 
 
         if (post == null || post.Comments == null)
@@ -107,7 +106,7 @@ public class CommentController(CommentService commentService, UserService userSe
         {
             Id = commentViewModel.Id,
             Content = commentViewModel.Content,
-            DatePosted = commentViewModel.DatePosted,
+            DatePosted = DateTime.Now,
             User = _userService.GetUserById(commentViewModel.AuthorUserId),
             ParentPostId = commentViewModel.ParentPostId
         };
@@ -134,7 +133,7 @@ public class CommentController(CommentService commentService, UserService userSe
         {
             Id = commentViewModel.Id,
             Content = commentViewModel.Content,
-            DatePosted = commentViewModel.DatePosted,
+            DateLastEdited = DateTime.Now,
             User = _userService.GetUserById(commentViewModel.AuthorUserId),
             ParentPostId = commentViewModel.ParentPostId
         };

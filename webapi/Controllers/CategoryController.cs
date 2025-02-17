@@ -40,7 +40,7 @@ public class CategoryController(CategoryService categoryService, NeighborhoodSer
     [HttpGet("FromNeighborhood={neighborhoodId}")]
     public ActionResult<CategoryCollectionDTO> GetCategoryByNeighborhoodId(string neighborhoodId)
     {
-        var neighborhood = _neighborhoodService.GetNeighborhoodByIdExplicit(neighborhoodId);
+        var neighborhood = _neighborhoodService.GetNeighborhoodByIdWithChildren(neighborhoodId);
         var categories = neighborhood.Categories;
 
         if (neighborhood == null || neighborhood.Categories == null)

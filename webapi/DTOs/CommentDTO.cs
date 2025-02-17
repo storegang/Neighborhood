@@ -6,7 +6,8 @@ public class CommentDTO
 {
     public string Id { get; set; }
     public string Content { get; set; }
-    public DateTime DatePosted { get; set; }
+    public DateTime? DatePosted { get; set; }
+    public DateTime? DateLastEdited { get; set; }
     public string AuthorUserId { get; set; }
     public string ParentPostId { get; set; }
 
@@ -17,15 +18,17 @@ public class CommentDTO
         Id = comment.Id;
         Content = comment.Content;
         DatePosted = comment.DatePosted;
+        DateLastEdited = comment.DateLastEdited;
         AuthorUserId = comment.User.Id;
         ParentPostId = comment.ParentPostId;
     }
 
-    public CommentDTO(string id, string content, DateTime datePosted, string authorUserId, string parentPostId)
+    public CommentDTO(string id, string content, DateTime? datePosted, DateTime? dateLastEdited, string authorUserId, string parentPostId)
     {
         Id = id;
         Content = content;
         DatePosted = datePosted;
+        DateLastEdited = dateLastEdited;
         AuthorUserId = authorUserId;
         ParentPostId = parentPostId;
     }

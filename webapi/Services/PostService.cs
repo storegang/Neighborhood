@@ -18,9 +18,9 @@ public class PostService(IPostRepository postRepository)
         return _postRepository.GetById(id);
     }
 
-    public Post GetPostByIdExplicit(string id)
+    public Post GetPostByIdWithChildren(string id)
     {
-        return _postRepository.GetByIdExplicit(id);
+        return _postRepository.GetByIdWithChildren(id);
     }
 
     public void CreatePost(Post post)

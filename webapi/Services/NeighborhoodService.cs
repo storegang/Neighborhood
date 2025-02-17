@@ -17,9 +17,9 @@ public class NeighborhoodService(INeighborhoodRepository neighborhoodRepository)
         return _neighborhoodRepository.GetById(id);
     }
 
-    public Neighborhood GetNeighborhoodByIdExplicit(string id)
+    public Neighborhood GetNeighborhoodByIdWithChildren(string id)
     {
-        return _neighborhoodRepository.GetByIdExplicit(id);
+        return _neighborhoodRepository.GetByIdWithChildren(id);
     }
 
     public void CreateNeighborhood(Neighborhood neighborhood)

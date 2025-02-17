@@ -41,7 +41,7 @@ public class PostController(PostService postService, UserService userService, Ca
     [HttpGet("FromCategory={id}")]
     public ActionResult<PostCollectionDTO> GetPostByCategoryId(string categoryId)
     {
-        var category = _categoryService.GetCategoryByIdExplicit(categoryId);
+        var category = _categoryService.GetCategoryByIdWithChildren(categoryId);
         var posts = category.Posts;
 
         if (category == null || category.Posts == null)
@@ -60,7 +60,7 @@ public class PostController(PostService postService, UserService userService, Ca
     [HttpGet("FromCategory={postId}&Page={page}")]
     public ActionResult<PostCollectionDTO> GetSomeCommentsByPostId(string categoryId, string page, string size = "5")
     {
-        var category = _categoryService.GetCategoryByIdExplicit(categoryId);
+        var category = _categoryService.GetCategoryByIdWithChildren(categoryId);
 
 
         if (category == null || category.Posts == null)
@@ -106,8 +106,9 @@ public class PostController(PostService postService, UserService userService, Ca
             Id = postViewModel.Id,
             Title = postViewModel.Title,
             Description = postViewModel.Description,
-            DatePosted = postViewModel.DatePosted,
-            User = _userService.GetUserById(postViewModel.AuthorUserId)
+            DatePosted = DateTime.Now,
+            User = _userService.GetUserById(postViewModel.AuthorUserId),
+            CategoryId = postViewModel.CategoryId
         };
         _postService.CreatePost(post);
 
@@ -133,7 +134,7 @@ public class PostController(PostService postService, UserService userService, Ca
             Id = postViewModel.Id,
             Title = postViewModel.Title,
             Description = postViewModel.Description,
-            DatePosted = postViewModel.DatePosted,
+            DateLastEdited = DateTime.Now,
             User = _userService.GetUserById(postViewModel.AuthorUserId),
             LikedByUserID = existingPost.LikedByUserID
         };

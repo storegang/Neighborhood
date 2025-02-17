@@ -8,7 +8,7 @@ public interface ICommentRepository
 {
     ICollection<Comment> GetAll();
     Comment GetById(string id);
-    Comment GetByIdExplicit(string id);
+    Comment GetByIdWithChildren(string id);
     void Add(Comment comment);
     void Update(Comment comment);
     void Delete(Comment comment);
@@ -20,18 +20,23 @@ public class CommentRepository(NeighborhoodContext context) : ICommentRepository
 
     public ICollection<Comment> GetAll()
     {
-        return _context.Comments.ToList();
+        return _context.Comments
+            .Include(c => c.User)
+            .ToList();
     }
 
     public Comment GetById(string id)
     {
-        return _context.Comments.Find(id);
+        return _context.Comments
+            .Include(c => c.User)
+            .First(c => c.Id == id);
     }
 
-    public Comment GetByIdExplicit(string id)
+    public Comment GetByIdWithChildren(string id)
     {
         var comment = _context.Comments
             //.Include(c => c.Post)
+            .Include(c => c.User)
             .First(c => c.Id == id);
         return comment;
 

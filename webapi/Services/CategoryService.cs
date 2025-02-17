@@ -17,9 +17,9 @@ public class CategoryService(ICategoryRepository categoryRepository)
         return _categoryRepository.GetById(id);
     }
 
-    public Category GetCategoryByIdExplicit(string id)
+    public Category GetCategoryByIdWithChildren(string id)
     {
-        return _categoryRepository.GetByIdExplicit(id);
+        return _categoryRepository.GetByIdWithChildren(id);
     }
 
     public void CreateCategory(Category category)

@@ -8,7 +8,7 @@ public interface INeighborhoodRepository
 {
     ICollection<Neighborhood> GetAll();
     Neighborhood GetById(string id);
-    Neighborhood GetByIdExplicit(string id);
+    Neighborhood GetByIdWithChildren(string id);
     void Add(Neighborhood neighborhood);
     void Update(Neighborhood neighborhood);
     void Delete(Neighborhood neighborhood);
@@ -28,7 +28,7 @@ public class NeighborhoodRepository(NeighborhoodContext context) : INeighborhood
         return _context.Neighborhoods.Find(id);
     }
 
-    public Neighborhood GetByIdExplicit(string id)
+    public Neighborhood GetByIdWithChildren(string id)
     {
         var neighborhood = _context.Neighborhoods
             .Include(n => n.Categories)

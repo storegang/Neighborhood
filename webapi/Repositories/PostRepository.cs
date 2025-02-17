@@ -8,7 +8,7 @@ public interface IPostRepository
 {
     ICollection<Post> GetAll();
     Post GetById(string id);
-    Post GetByIdExplicit(string id);
+    Post GetByIdWithChildren(string id);
     void Add(Post post);
     void Update(Post post);
     void Delete(Post post);
@@ -20,18 +20,23 @@ public class PostRepository(NeighborhoodContext context) : IPostRepository
 
     public ICollection<Post> GetAll()
     {
-        return _context.Posts.ToList();
+        return _context.Posts
+            .Include(p => p.User)
+            .ToList();
     }
 
     public Post GetById(string id)
     {
-        return _context.Posts.Find(id);
+        return _context.Posts
+            .Include(p => p.User)
+            .First(p => p.Id == id);
     }
 
-    public Post GetByIdExplicit(string id)
+    public Post GetByIdWithChildren(string id)
     {
         var post = _context.Posts
             .Include(p => p.Comments)
+            .Include(p => p.User)
             .First(p => p.Id == id);
         return post;
     }
