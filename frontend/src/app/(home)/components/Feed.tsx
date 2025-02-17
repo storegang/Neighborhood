@@ -1,5 +1,8 @@
+"use client"
+
 import { Post } from "@/Models/Post"
 import { PostCard } from "./index"
+import { useUser } from "@/lib/getUser"
 
 export const Feed: React.FC = () => {
     const fakePost: Post = {
@@ -72,6 +75,10 @@ export const Feed: React.FC = () => {
             posts: [],
         },
     }
+
+    const user = useUser()
+
+    console.log(user)
 
     return (
         <div className="mx-auto w-full lg:w-96">

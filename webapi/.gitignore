@@ -12,6 +12,10 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# Env files (can opt-in for committing if needed)
+.env
+.env.*
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
