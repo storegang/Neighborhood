@@ -40,7 +40,7 @@ public class CommentRepository(NeighborhoodContext context) : ICommentRepository
             .First(c => c.Id == id);
         return comment;
 
-        // TODO: Include whatever could be needed
+        // TODO: Include whatever could be needed.
     }
 
     public void Add(Comment comment)
