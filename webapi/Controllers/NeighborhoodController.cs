@@ -1,30 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
-using AutoMapper;
+using webapi.DTOs;
 
 namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class NeighborhoodController(NeighborhoodService neighborhoodService, IMapper mapper) : ControllerBase
+public class NeighborhoodController(NeighborhoodService neighborhoodService) : ControllerBase
 {
     private readonly NeighborhoodService _neighborhoodService = neighborhoodService;
-    private readonly IMapper _mapper = mapper;
 
     // GET: api/<NeighborhoodController>
     [HttpGet]
-    public ActionResult<IEnumerable<NeighborhoodViewModel>> GetAll()
+    public ActionResult<NeighborhoodCollectionDTO> GetAll()
     {
-        var neighborhoods = _neighborhoodService.GetAllNeighborhoods();
-        var neighborhoodViewModels = _mapper.Map<IEnumerable<Neighborhood>, IEnumerable<NeighborhoodViewModel>>(neighborhoods);
-        return Ok(neighborhoodViewModels);
+        ICollection<Neighborhood> neighborhoods = _neighborhoodService.GetAllNeighborhoods();
+        NeighborhoodCollectionDTO neighborhoodDataCollection = new NeighborhoodCollectionDTO(neighborhoods);
+        return Ok(neighborhoodDataCollection);
     }
 
     // GET api/<NeighborhoodController>/5
     [HttpGet("{id}")]
-    public ActionResult<NeighborhoodViewModel> GetById(string id)
+    public ActionResult<NeighborhoodDTO> GetById(string id)
     {
         var neighborhood = _neighborhoodService.GetNeighborhoodById(id);
         
@@ -33,13 +31,13 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
             return NotFound();
         }
 
-        var neighborhoodViewModel = _mapper.Map<Neighborhood,  NeighborhoodViewModel>(neighborhood);
-        return Ok(neighborhoodViewModel);
+        NeighborhoodDTO neighborhoodData = new NeighborhoodDTO(neighborhood);
+        return Ok(neighborhoodData);
     }
 
     // POST api/<NeighborhoodController>
     [HttpPost]
-    public ActionResult<NeighborhoodViewModel> Create(NeighborhoodViewModel neighborhoodViewModel)
+    public ActionResult<NeighborhoodDTO> Create(NeighborhoodDTO neighborhoodData)
     {
         string newGuid;
         do
@@ -48,16 +46,21 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
         }
         while (_neighborhoodService.GetNeighborhoodById(newGuid) != null);
 
-        neighborhoodViewModel.Id = newGuid;
-        var neighborhood = _mapper.Map<NeighborhoodViewModel, Neighborhood>(neighborhoodViewModel);
+        neighborhoodData.Id = newGuid;
+        var neighborhood = new Neighborhood 
+        { 
+            Id = neighborhoodData.Id,
+            Name = neighborhoodData.Name,
+            Description = neighborhoodData.Description
+        };
         _neighborhoodService.CreateNeighborhood(neighborhood);
 
-        return CreatedAtAction(nameof(GetById), new { id = neighborhoodViewModel.Id }, neighborhoodViewModel);
+        return CreatedAtAction(nameof(GetById), new { id = neighborhoodData.Id }, neighborhoodData);
     }
 
     // PUT api/<NeighborhoodController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, NeighborhoodViewModel neighborhoodViewModel)
+    public IActionResult Update(string id, NeighborhoodDTO neighborhoodData)
     {
         var existingNeighborhood = _neighborhoodService.GetNeighborhoodById(id);
         if (existingNeighborhood == null)
@@ -65,8 +68,13 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService, IMa
             return NotFound();
         }
 
-        neighborhoodViewModel.Id = id;
-        var neighborhood = _mapper.Map<NeighborhoodViewModel, Neighborhood>(neighborhoodViewModel);
+        neighborhoodData.Id = id;
+        var neighborhood = new Neighborhood
+        {
+            Id = neighborhoodData.Id,
+            Name = neighborhoodData.Name,
+            Description = neighborhoodData.Description
+        };
         _neighborhoodService.UpdateNeighborhood(neighborhood);
 
         return NoContent();

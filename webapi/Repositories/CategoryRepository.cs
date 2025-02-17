@@ -8,6 +8,7 @@ public interface ICategoryRepository
 {
     ICollection<Category> GetAll();
     Category GetById(string id);
+    Category GetByIdWithChildren(string id);
     void Add(Category category);
     void Update(Category category);
     void Delete(Category category);
@@ -25,6 +26,14 @@ public class CategoryRepository(NeighborhoodContext context) : ICategoryReposito
     public Category GetById(string id)
     {
         return _context.Categories.Find(id);
+    }
+
+    public Category GetByIdWithChildren(string id)
+    {
+        var category = _context.Categories
+            .Include(c => c.Posts)
+            .First(c => c.Id == id);
+        return category;
     }
 
     public void Add(Category category)

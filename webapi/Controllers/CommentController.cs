@@ -1,30 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
-using AutoMapper;
+using webapi.DTOs;
 
 namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(CommentService commentService, IMapper mapper) : ControllerBase
+public class CommentController(CommentService commentService, UserService userService, PostService postService) : ControllerBase
 {
     private readonly CommentService _commentService = commentService;
-    private readonly IMapper _mapper = mapper;
+    private readonly UserService _userService = userService;
+    private readonly PostService _postService = postService;
 
     // GET: api/<CommentController>
     [HttpGet]
-    public ActionResult<IEnumerable<CommentViewModel>> GetAll()
+    public ActionResult<CommentCollectionDTO> GetAll()
     {
         var comments = _commentService.GetAllComments();
-        var commentViewModels = _mapper.Map<IEnumerable<Comment>, IEnumerable<CommentViewModel>>(comments);
-        return Ok(commentViewModels);
+        var commentDataCollection = new CommentCollectionDTO(comments);
+        return Ok(commentDataCollection);
     }
 
     // GET api/<CommentController>/5
     [HttpGet("{id}")]
-    public ActionResult<CommentViewModel> GetById(string id)
+    public ActionResult<CommentDTO> GetById(string id)
     {
         var comment = _commentService.GetCommentById(id);
         
@@ -33,14 +33,67 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
             return NotFound();
         }
 
-        var commentViewModel = _mapper.Map<Comment,  CommentViewModel>(comment);
-        return Ok(commentViewModel);
+        var commentData = new CommentDTO(comment);
+        return Ok(commentData);
     }
+
+    // GET api/<CommentController>/FromPost=5
+    [HttpGet("AllFromPost={postId}")]
+    public ActionResult<CommentCollectionDTO> GetCommentsByPostId(string postId)
+    {
+        var post = _postService.GetPostByIdWithChildren(postId);
+        var comments = post.Comments;
+
+        if (comments == null)
+        {
+            return NotFound();
+        }
+
+        var commentsData = new CommentCollectionDTO(comments);
+        return Ok(commentsData);
+    }
+
+    // GET api/<CommentController>/FromPost={postId}&Page={page}&Size={size}
+    // GET api/<CommentController>/FromPost=5
+    [HttpGet("FromPost={postId}&Page={page}")]
+    public ActionResult<CommentCollectionDTO> GetSomeCommentsByPostId(string postId, string page, string size = "5")
+    {
+        var post = _postService.GetPostByIdWithChildren(postId);
+
+
+        if (post == null || post.Comments == null)
+        {
+            return NotFound();
+        }
+
+        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
+        {
+            return BadRequest();
+        }
+
+        var comments = post.Comments
+        .Skip((int.Parse(page) - 1) * int.Parse(size))
+        .Take(int.Parse(size))
+        .ToList();
+
+        var commentsData = new CommentCollectionDTO(comments);
+        return Ok(commentsData);
+    }
+
+    // TODO: Add OrderBy 
+
 
     // POST api/<CommentController>
     [HttpPost]
-    public ActionResult<CommentViewModel> Create(CommentViewModel commentViewModel)
+    public ActionResult<CommentDTO> Create(CommentDTO commentData)
     {
+        var post = _postService.GetPostById(commentData.ParentPostId);
+
+        if (post == null)
+        {
+            return NotFound();
+        }
+
         string newGuid;
         do
         {
@@ -48,16 +101,26 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
         }
         while (_commentService.GetCommentById(newGuid) != null);
 
-        commentViewModel.Id = newGuid;
-        var comment = _mapper.Map<CommentViewModel, Comment>(commentViewModel);
+        commentData.Id = newGuid;
+        var comment = new Comment
+        {
+            Id = commentData.Id,
+            Content = commentData.Content,
+            DatePosted = DateTime.Now,
+            User = _userService.GetUserById(commentData.AuthorUserId),
+            ParentPostId = commentData.ParentPostId
+        };
         _commentService.CreateComment(comment);
 
-        return CreatedAtAction(nameof(GetById), new { id = commentViewModel.Id }, commentViewModel);
+        post.Comments.Add(comment);
+        _postService.UpdatePost(post);
+
+        return CreatedAtAction(nameof(GetById), new { id = commentData.Id }, commentData);
     }
 
     // PUT api/<CommentController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, CommentViewModel commentViewModel)
+    public IActionResult Update(string id, CommentDTO commentData)
     {
         var existingComment = _commentService.GetCommentById(id);
         if (existingComment == null)
@@ -65,8 +128,15 @@ public class CommentController(CommentService commentService, IMapper mapper) : 
             return NotFound();
         }
 
-        commentViewModel.Id = id;
-        var comment = _mapper.Map<CommentViewModel, Comment>(commentViewModel);
+        commentData.Id = id;
+        var comment = new Comment 
+        {
+            Id = commentData.Id,
+            Content = commentData.Content,
+            DateLastEdited = DateTime.Now,
+            User = _userService.GetUserById(commentData.AuthorUserId),
+            ParentPostId = commentData.ParentPostId
+        };
         _commentService.UpdateComment(comment);
 
         return NoContent();

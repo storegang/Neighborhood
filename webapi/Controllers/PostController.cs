@@ -1,30 +1,30 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
-using AutoMapper;
+using webapi.DTOs;
 
 namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PostController(PostService postService, IMapper mapper) : ControllerBase
+public class PostController(PostService postService, UserService userService, CategoryService categoryService) : ControllerBase
 {
     private readonly PostService _postService = postService;
-    private readonly IMapper _mapper = mapper;
+    private readonly UserService _userService = userService;
+    private readonly CategoryService _categoryService = categoryService;
 
     // GET: api/<PostController>
     [HttpGet]
-    public ActionResult<IEnumerable<PostViewModel>> GetAll()
+    public ActionResult<PostCollectionDTO> GetAll()
     {
-        var posts = _postService.GetAllPosts();
-        var postViewModels = _mapper.Map<IEnumerable<Post>, IEnumerable<PostViewModel>>(posts);
-        return Ok(postViewModels);
+        ICollection<Post> posts = _postService.GetAllPosts();
+        PostCollectionDTO postDataCollection = new PostCollectionDTO(posts);
+        return Ok(postDataCollection);
     }
 
     // GET api/<PostController>/5
     [HttpGet("{id}")]
-    public ActionResult<PostViewModel> GetById(string id)
+    public ActionResult<PostDTO> GetById(string id)
     {
         var post = _postService.GetPostById(id);
 
@@ -33,14 +33,66 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        var postViewModel = _mapper.Map<Post, PostViewModel>(post);
-        return Ok(postViewModel);
+        PostDTO postData = new PostDTO(post);
+        return Ok(postData);
+    }
+
+    // GET api/<PostController>/5
+    [HttpGet("FromCategory={id}")]
+    public ActionResult<PostCollectionDTO> GetPostByCategoryId(string categoryId)
+    {
+        var category = _categoryService.GetCategoryByIdWithChildren(categoryId);
+        var posts = category.Posts;
+
+        if (category == null || category.Posts == null)
+        {
+            return NotFound();
+        }
+
+
+
+        PostCollectionDTO postData = new PostCollectionDTO(posts);
+        return Ok(postData);
+    }
+
+    // GET api/<PostController>/FromCategory={postId}&Page={page}&Size={size}
+    // GET api/<PostController>/FromCategory=5
+    [HttpGet("FromCategory={postId}&Page={page}")]
+    public ActionResult<PostCollectionDTO> GetSomeCommentsByPostId(string categoryId, string page, string size = "5")
+    {
+        var category = _categoryService.GetCategoryByIdWithChildren(categoryId);
+
+
+        if (category == null || category.Posts == null)
+        {
+            return NotFound();
+        }
+
+        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
+        {
+            return BadRequest();
+        }
+
+        var posts = category.Posts
+        .Skip((int.Parse(page) - 1) * int.Parse(size))
+        .Take(int.Parse(size))
+        .ToList();
+
+        var postsData = new PostCollectionDTO(posts);
+        return Ok(postsData);
     }
 
     // POST api/<PostController>
     [HttpPost]
-    public ActionResult<PostViewModel> Create(PostViewModel postViewModel)
+    public ActionResult<PostDTO> Create(PostDTO postData)
     {
+        var category = _categoryService.GetCategoryById(postData.CategoryId);
+
+        if (category == null)
+        {
+            return NotFound();
+        }
+
         string newGuid;
         do
         {
@@ -48,16 +100,27 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
         }
         while (_postService.GetPostById(newGuid) != null);
 
-        postViewModel.Id = newGuid;
-        var post = _mapper.Map<PostViewModel, Post>(postViewModel);
+        postData.Id = newGuid;
+        var post = new Post
+        {
+            Id = postData.Id,
+            Title = postData.Title,
+            Description = postData.Description,
+            DatePosted = DateTime.Now,
+            User = _userService.GetUserById(postData.AuthorUserId),
+            CategoryId = postData.CategoryId
+        };
         _postService.CreatePost(post);
 
-        return CreatedAtAction(nameof(GetById), new { id = postViewModel.Id }, postViewModel);
+        category.Posts.Add(post);
+        _categoryService.UpdateCategory(category);
+
+        return CreatedAtAction(nameof(GetById), new { id = postData.Id }, postData);
     }
 
     // PUT api/<PostController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, PostViewModel postViewModel)
+    public IActionResult Update(string id, PostDTO postData)
     {
         var existingPost = _postService.GetPostById(id);
         if (existingPost == null)
@@ -65,8 +128,16 @@ public class PostController(PostService postService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        postViewModel.Id = id;
-        var post = _mapper.Map<PostViewModel, Post>(postViewModel);
+        postData.Id = id;
+        var post = new Post
+        {
+            Id = postData.Id,
+            Title = postData.Title,
+            Description = postData.Description,
+            DateLastEdited = DateTime.Now,
+            User = _userService.GetUserById(postData.AuthorUserId),
+            LikedByUserID = existingPost.LikedByUserID
+        };
         _postService.UpdatePost(post);
 
         return NoContent();
