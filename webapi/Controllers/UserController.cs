@@ -1,30 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
-using AutoMapper;
+using webapi.DTOs;
 
 namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(UserService userService, IMapper mapper) : ControllerBase
+public class UserController(UserService userService) : ControllerBase
 {
     private readonly UserService _userService = userService;
-    private readonly IMapper _mapper = mapper;
 
     // GET: api/<UserController>
     [HttpGet]
-    public ActionResult<IEnumerable<UserViewModel>> GetAll()
+    public ActionResult<UserCollectionDTO> GetAll()
     {
-        var users = _userService.GetAllUsers();
-        var userViewModels = _mapper.Map<IEnumerable<User>, IEnumerable<UserViewModel>>(users);
-        return Ok(userViewModels);
+        ICollection<User> users = _userService.GetAllUsers();
+        UserCollectionDTO userDataCollection = new UserCollectionDTO(users);
+        return Ok(userDataCollection);
     }
 
     // GET api/<UserController>/5
     [HttpGet("{id}")]
-    public ActionResult<UserViewModel> GetById(string id)
+    public ActionResult<UserDTO> GetById(string id)
     {
         var user = _userService.GetUserById(id);
         
@@ -33,13 +31,13 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        var userViewModel = _mapper.Map<User,  UserViewModel>(user);
-        return Ok(userViewModel);
+        var userData = new UserDTO(user);
+        return Ok(userData);
     }
 
     // POST api/<UserController>
     [HttpPost]
-    public ActionResult<UserViewModel> Create(UserViewModel userViewModel)
+    public ActionResult<UserDTO> Create(UserDTO userData)
     {
         string newGuid;
         do
@@ -48,16 +46,21 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
         }
         while (_userService.GetUserById(newGuid) != null);
 
-        userViewModel.Id = newGuid;
-        var user = _mapper.Map<UserViewModel, User>(userViewModel);
+        userData.Id = newGuid;
+        var user = new User
+        {
+            Id = userData.Id,
+            Name = userData.Name,
+            Avatar = userData.Avatar
+        };
         _userService.CreateUser(user);
 
-        return CreatedAtAction(nameof(GetById), new { id = userViewModel.Id }, userViewModel);
+        return CreatedAtAction(nameof(GetById), new { id = userData.Id }, userData);
     }
 
     // PUT api/<UserController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, UserViewModel userViewModel)
+    public IActionResult Update(string id, UserDTO userData)
     {
         var existingUser = _userService.GetUserById(id);
         if (existingUser == null)
@@ -65,8 +68,13 @@ public class UserController(UserService userService, IMapper mapper) : Controlle
             return NotFound();
         }
 
-        userViewModel.Id = id;
-        var user = _mapper.Map<UserViewModel, User>(userViewModel);
+        userData.Id = id;
+        var user = new User 
+        {
+            Id = userData.Id,
+            Name = userData.Name,
+            Avatar = userData.Avatar
+        };
         _userService.UpdateUser(user);
 
         return NoContent();

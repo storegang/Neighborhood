@@ -1,4 +1,5 @@
-﻿using webapi.Models;
+﻿using webapi.DTOs;
+using webapi.Models;
 using webapi.Repositories;
 
 namespace webapi.Services;
@@ -15,6 +16,11 @@ public class PostService(IPostRepository postRepository)
     public Post GetPostById(string id)
     {
         return _postRepository.GetById(id);
+    }
+
+    public Post GetPostByIdWithChildren(string id)
+    {
+        return _postRepository.GetByIdWithChildren(id);
     }
 
     public void CreatePost(Post post)

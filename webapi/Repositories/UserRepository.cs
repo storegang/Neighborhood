@@ -8,6 +8,7 @@ public interface IUserRepository
 {
     ICollection<User> GetAll();
     User GetById(string id);
+    User GetByIdWithChildren(string id);
     void Add(User user);
     void Update(User user);
     void Delete(User user);
@@ -25,6 +26,16 @@ public class UserRepository(NeighborhoodContext context) : IUserRepository
     public User GetById(string id)
     {
         return _context.Users.Find(id);
+    }
+
+    public User GetByIdWithChildren(string id)
+    {
+        var user = _context.Users
+            //.Include(u => u.Posts)
+            .First(u => u.Id == id);
+        return user;
+
+        // TODO: Do something with this.
     }
 
     public void Add(User user)

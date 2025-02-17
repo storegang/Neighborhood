@@ -1,30 +1,29 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
-using webapi.ViewModels;
-using AutoMapper;
+using webapi.DTOs;
 
 namespace webapi.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CategoryController(CategoryService categoryService, IMapper mapper) : ControllerBase
+public class CategoryController(CategoryService categoryService, NeighborhoodService neighborhoodService) : ControllerBase
 {
     private readonly CategoryService _categoryService = categoryService;
-    private readonly IMapper _mapper = mapper;
+    private readonly NeighborhoodService _neighborhoodService = neighborhoodService;
 
     // GET: api/<CategoryController>
     [HttpGet]
-    public ActionResult<IEnumerable<CategoryViewModel>> GetAll()
+    public ActionResult<CategoryCollectionDTO> GetAll()
     {
         var categories = _categoryService.GetAllCategories();
-        var categoryViewModels = _mapper.Map<IEnumerable<Category>, IEnumerable<CategoryViewModel>>(categories);
-        return Ok(categoryViewModels);
+        var categoryDataCollection = new CategoryCollectionDTO(categories);
+        return Ok(categoryDataCollection);
     }
 
     // GET api/<CategoryController>/5
     [HttpGet("{id}")]
-    public ActionResult<CategoryViewModel> GetById(string id)
+    public ActionResult<CategoryDTO> GetById(string id)
     {
         var category = _categoryService.GetCategoryById(id);
         
@@ -33,14 +32,37 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
             return NotFound();
         }
 
-        var categoryViewModel = _mapper.Map<Category,  CategoryViewModel>(category);
-        return Ok(categoryViewModel);
+        var categoryData = new CategoryDTO(category);
+        return Ok(categoryData);
+    }
+
+    // GET api/<CategoryController>/5
+    [HttpGet("FromNeighborhood={neighborhoodId}")]
+    public ActionResult<CategoryCollectionDTO> GetCategoryByNeighborhoodId(string neighborhoodId)
+    {
+        var neighborhood = _neighborhoodService.GetNeighborhoodByIdWithChildren(neighborhoodId);
+        var categories = neighborhood.Categories;
+
+        if (neighborhood == null || neighborhood.Categories == null)
+        {
+            return NotFound();
+        }
+
+        var categoryData = new CategoryCollectionDTO(categories);
+        return Ok(categoryData);
     }
 
     // POST api/<CategoryController>
     [HttpPost]
-    public ActionResult<CategoryViewModel> Create(CategoryViewModel categoryViewModel)
+    public ActionResult<CategoryDTO> Create(CategoryDTO categoryData)
     {
+        var neighborhood = _neighborhoodService.GetNeighborhoodById(categoryData.NeighborhoodId);
+
+        if (neighborhood == null)
+        {
+            return NotFound();
+        }
+
         string newGuid;
         do
         {
@@ -48,16 +70,25 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
         }
         while (_categoryService.GetCategoryById(newGuid) != null);
 
-        categoryViewModel.Id = newGuid;
-        var category = _mapper.Map<CategoryViewModel, Category>(categoryViewModel);
+        categoryData.Id = newGuid;
+        var category = new Category 
+        {
+            Id = categoryData.Id,
+            Name = categoryData.Name,
+            Color = categoryData.Color,
+            NeighborhoodId = categoryData.NeighborhoodId
+        };
         _categoryService.CreateCategory(category);
 
-        return CreatedAtAction(nameof(GetById), new { id = categoryViewModel.Id }, categoryViewModel);
+        neighborhood.Categories.Add(category);
+        _neighborhoodService.UpdateNeighborhood(neighborhood);
+
+        return CreatedAtAction(nameof(GetById), new { id = categoryData.Id }, categoryData);
     }
 
     // PUT api/<CategoryController>/5
     [HttpPut("{id}")]
-    public IActionResult Update(string id, CategoryViewModel categoryViewModel)
+    public IActionResult Update(string id, CategoryDTO categoryData)
     {
         var existingCategory = _categoryService.GetCategoryById(id);
         if (existingCategory == null)
@@ -65,8 +96,14 @@ public class CategoryController(CategoryService categoryService, IMapper mapper)
             return NotFound();
         }
 
-        categoryViewModel.Id = id;
-        var category = _mapper.Map<CategoryViewModel, Category>(categoryViewModel);
+        categoryData.Id = id;
+        var category = new Category
+        {
+            Id = categoryData.Id,
+            Name = categoryData.Name,
+            Color = categoryData.Color,
+            NeighborhoodId = categoryData.NeighborhoodId
+        };
         _categoryService.UpdateCategory(category);
 
         return NoContent();
