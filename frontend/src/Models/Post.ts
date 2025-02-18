@@ -8,10 +8,9 @@ export type Post = {
     author: User
     title: string
     content: string
+    datePosted?: Date
+    dateLastEdited?: Date
+    categoryId: string
     imageList?: string[]
-    likes: string[]
-    comments: Comment[]
-    dateTimePosted: Date
-    Neighborhood: Neighborhood
-    category: Category
+    likes?: string[]
 }

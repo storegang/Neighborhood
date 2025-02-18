@@ -110,7 +110,8 @@ public class CommentController(CommentService commentService, UserService userSe
             Content = commentData.Content,
             DatePosted = DateTime.Now,
             User = _userService.GetUserById(commentData.AuthorUserId),
-            ParentPostId = commentData.ParentPostId
+            ParentPostId = commentData.ParentPostId,
+            ImageUrl = commentData.ImageUrl
         };
         _commentService.CreateComment(comment);
 
@@ -137,7 +138,8 @@ public class CommentController(CommentService commentService, UserService userSe
             Content = commentData.Content,
             DateLastEdited = DateTime.Now,
             User = _userService.GetUserById(commentData.AuthorUserId),
-            ParentPostId = commentData.ParentPostId
+            ParentPostId = commentData.ParentPostId,
+            ImageUrl = commentData.ImageUrl
         };
         _commentService.UpdateComment(comment);
 
