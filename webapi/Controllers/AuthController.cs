@@ -13,7 +13,7 @@ public class AuthController(IConfiguration config) : ControllerBase
     [HttpPost]
     public async Task<ActionResult> GetToken([FromForm] LoginInfo loginInfo)
     {
-        string authUri = "https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=" + _config["AUTH_API_KEY"];
+        string authUri = $"https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key={_config["AUTH_API_KEY"]}";
 
         using HttpClient httpClient = new();
 
