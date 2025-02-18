@@ -31,11 +31,8 @@ public class UserRepository(NeighborhoodContext context) : IUserRepository
     public User GetByIdWithChildren(string id)
     {
         var user = _context.Users
-            //.Include(u => u.Posts)
             .First(u => u.Id == id);
         return user;
-
-        // TODO: Do something with this.
     }
 
     public void Add(User user)

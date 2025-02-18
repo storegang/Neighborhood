@@ -5,8 +5,5 @@ import { User } from "./User"
 export type Neighborhood = {
     id: string
     name: string
-    description: string
-    members: User[]
-    posts: Post[]
-    categories: Category[]
+    description?: string
 }
