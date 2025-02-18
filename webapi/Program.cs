@@ -7,6 +7,9 @@ using webapi.Services;
 using webapi.DataContexts;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi.Interfaces;
+using Microsoft.OpenApi.Any;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,7 +49,6 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKeys = jwtKeyset,
     };
-    
 });
 
 var connectionString = builder.Configuration.GetConnectionString("ConnectionString");
@@ -69,7 +71,43 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.OAuth2,
+        Flows = new OpenApiOAuthFlows
+        {
+            Password = new OpenApiOAuthFlow
+            {
+                TokenUrl = new Uri("/api/auth", UriKind.Relative),
+                Extensions = new Dictionary<string, IOpenApiExtension>
+                {
+                    { "returnSecureToken", new OpenApiBoolean(true) }
+                },
+            }
+        }
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            { 
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = JwtBearerDefaults.AuthenticationScheme,
+                },
+                Scheme = "oauth2",
+                Name = JwtBearerDefaults.AuthenticationScheme,
+                In = ParameterLocation.Header,
+            },
+            new List<string> { "openid", "email", "profile" }
+        }
+    });
+});
 
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<CommentService>();
