@@ -2,9 +2,11 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace webapi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class UserController(UserService userService) : ControllerBase
@@ -20,7 +22,7 @@ public class UserController(UserService userService) : ControllerBase
         return Ok(userDataCollection);
     }
 
-    // GET api/<UserController>/5
+    // GET api/<UserController>/{id}
     [HttpGet("{id}")]
     public ActionResult<UserDTO> GetById(string id)
     {
@@ -58,7 +60,7 @@ public class UserController(UserService userService) : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = userData.Id }, userData);
     }
 
-    // PUT api/<UserController>/5
+    // PUT api/<UserController>/{id}
     [HttpPut("{id}")]
     public IActionResult Update(string id, UserDTO userData)
     {
@@ -80,7 +82,7 @@ public class UserController(UserService userService) : ControllerBase
         return NoContent();
     }
 
-    // DELETE api/<UserController>/5
+    // DELETE api/<UserController>/{id}
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)
     {

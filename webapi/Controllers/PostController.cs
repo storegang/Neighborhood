@@ -2,9 +2,11 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace webapi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class PostController(PostService postService, UserService userService, CategoryService categoryService) : ControllerBase
@@ -22,7 +24,7 @@ public class PostController(PostService postService, UserService userService, Ca
         return Ok(postDataCollection);
     }
 
-    // GET api/<PostController>/5
+    // GET api/<PostController>/{id}
     [HttpGet("{id}")]
     public ActionResult<PostDTO> GetById(string id)
     {
@@ -37,7 +39,7 @@ public class PostController(PostService postService, UserService userService, Ca
         return Ok(postData);
     }
 
-    // GET api/<PostController>/5
+    // GET api/<PostController>/{id}
     [HttpGet("FromCategory={id}")]
     public ActionResult<PostCollectionDTO> GetPostByCategoryId(string categoryId)
     {
@@ -56,7 +58,7 @@ public class PostController(PostService postService, UserService userService, Ca
     }
 
     // GET api/<PostController>/FromCategory={postId}&Page={page}&Size={size}
-    // GET api/<PostController>/FromCategory=5
+    // GET api/<PostController>/FromCategory={postId}&Page={page}
     [HttpGet("FromCategory={postId}&Page={page}")]
     public ActionResult<PostCollectionDTO> GetSomeCommentsByPostId(string categoryId, string page, string size = "5")
     {
@@ -118,7 +120,7 @@ public class PostController(PostService postService, UserService userService, Ca
         return CreatedAtAction(nameof(GetById), new { id = postData.Id }, postData);
     }
 
-    // PUT api/<PostController>/5
+    // PUT api/<PostController>/{id}
     [HttpPut("{id}")]
     public IActionResult Update(string id, PostDTO postData)
     {
@@ -143,7 +145,7 @@ public class PostController(PostService postService, UserService userService, Ca
         return NoContent();
     }
 
-    // DELETE api/<PostController>/5
+    // DELETE api/<PostController>/{id}
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)
     {
