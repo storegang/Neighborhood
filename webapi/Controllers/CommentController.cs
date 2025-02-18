@@ -2,9 +2,11 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace webapi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class CommentController(CommentService commentService, UserService userService, PostService postService) : ControllerBase
@@ -22,7 +24,7 @@ public class CommentController(CommentService commentService, UserService userSe
         return Ok(commentDataCollection);
     }
 
-    // GET api/<CommentController>/5
+    // GET api/<CommentController>/{id}
     [HttpGet("{id}")]
     public ActionResult<CommentDTO> GetById(string id)
     {
@@ -37,7 +39,7 @@ public class CommentController(CommentService commentService, UserService userSe
         return Ok(commentData);
     }
 
-    // GET api/<CommentController>/FromPost=5
+    // GET api/<CommentController>/AllFromPost={postId}
     [HttpGet("AllFromPost={postId}")]
     public ActionResult<CommentCollectionDTO> GetCommentsByPostId(string postId)
     {
@@ -54,7 +56,7 @@ public class CommentController(CommentService commentService, UserService userSe
     }
 
     // GET api/<CommentController>/FromPost={postId}&Page={page}&Size={size}
-    // GET api/<CommentController>/FromPost=5
+    // GET api/<CommentController>/FromPost={postId}&Page={page}
     [HttpGet("FromPost={postId}&Page={page}")]
     public ActionResult<CommentCollectionDTO> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
@@ -119,7 +121,7 @@ public class CommentController(CommentService commentService, UserService userSe
         return CreatedAtAction(nameof(GetById), new { id = commentData.Id }, commentData);
     }
 
-    // PUT api/<CommentController>/5
+    // PUT api/<CommentController>/{id}
     [HttpPut("{id}")]
     public IActionResult Update(string id, CommentDTO commentData)
     {
@@ -144,7 +146,7 @@ public class CommentController(CommentService commentService, UserService userSe
         return NoContent();
     }
 
-    // DELETE api/<CommentController>/5
+    // DELETE api/<CommentController>/{id}
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)
     {

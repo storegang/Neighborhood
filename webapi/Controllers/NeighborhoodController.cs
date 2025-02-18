@@ -2,9 +2,11 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace webapi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class NeighborhoodController(NeighborhoodService neighborhoodService) : ControllerBase
@@ -20,7 +22,7 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService) : C
         return Ok(neighborhoodDataCollection);
     }
 
-    // GET api/<NeighborhoodController>/5
+    // GET api/<NeighborhoodController>/{id}
     [HttpGet("{id}")]
     public ActionResult<NeighborhoodDTO> GetById(string id)
     {
@@ -58,7 +60,7 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService) : C
         return CreatedAtAction(nameof(GetById), new { id = neighborhoodData.Id }, neighborhoodData);
     }
 
-    // PUT api/<NeighborhoodController>/5
+    // PUT api/<NeighborhoodController>/{id}
     [HttpPut("{id}")]
     public IActionResult Update(string id, NeighborhoodDTO neighborhoodData)
     {
@@ -80,7 +82,7 @@ public class NeighborhoodController(NeighborhoodService neighborhoodService) : C
         return NoContent();
     }
 
-    // DELETE api/<NeighborhoodController>/5
+    // DELETE api/<NeighborhoodController>/{id}
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)
     {

@@ -2,9 +2,11 @@
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace webapi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class CategoryController(CategoryService categoryService, NeighborhoodService neighborhoodService) : ControllerBase
@@ -21,7 +23,7 @@ public class CategoryController(CategoryService categoryService, NeighborhoodSer
         return Ok(categoryDataCollection);
     }
 
-    // GET api/<CategoryController>/5
+    // GET api/<CategoryController>/{id}
     [HttpGet("{id}")]
     public ActionResult<CategoryDTO> GetById(string id)
     {
@@ -36,7 +38,7 @@ public class CategoryController(CategoryService categoryService, NeighborhoodSer
         return Ok(categoryData);
     }
 
-    // GET api/<CategoryController>/5
+    // GET api/<CategoryController>/FromNeighborhood={neighborhoodId}
     [HttpGet("FromNeighborhood={neighborhoodId}")]
     public ActionResult<CategoryCollectionDTO> GetCategoryByNeighborhoodId(string neighborhoodId)
     {
@@ -86,7 +88,7 @@ public class CategoryController(CategoryService categoryService, NeighborhoodSer
         return CreatedAtAction(nameof(GetById), new { id = categoryData.Id }, categoryData);
     }
 
-    // PUT api/<CategoryController>/5
+    // PUT api/<CategoryController>/{id}
     [HttpPut("{id}")]
     public IActionResult Update(string id, CategoryDTO categoryData)
     {
@@ -109,7 +111,7 @@ public class CategoryController(CategoryService categoryService, NeighborhoodSer
         return NoContent();
     }
 
-    // DELETE api/<CategoryController>/5
+    // DELETE api/<CategoryController>/{id}
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)
     {
