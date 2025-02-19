@@ -8,10 +8,8 @@ export const PostCard: React.FC<Post> = ({
     content,
     imageList,
     likes,
-    comments,
-    dateTimePosted,
-    Neighborhood,
-    category,
+    datePosted,
+    categoryId,
 }) => {
     return (
         <div className="card shadow-sm">

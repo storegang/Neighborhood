@@ -2,8 +2,11 @@ import { User } from "./User"
 
 export type Comment = {
     id: string
-    author: User
+    authorId: string
     content: string
-    likes: string[]
-    postedDate: Date
+    datePosted?: Date
+    dateLastEdited?: Date
+    parentPostId: string
+    likes?: string[]
+    image?: string
 }
