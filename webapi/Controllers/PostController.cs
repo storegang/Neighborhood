@@ -152,6 +152,33 @@ public class PostController(PostService postService, UserService userService, Ca
         return NoContent();
     }
 
+    [HttpPut("Like/{postId}")]
+    public IActionResult Like(string postId)
+    {
+        var post = _postService.GetPostById(postId);
+        if (post == null)
+        {
+            return NotFound();
+        }
+        var userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
+
+        if (post.LikedByUserID == null)
+        {
+            post.LikedByUserID = new List<string>();
+        }
+        if (post.LikedByUserID.Contains(userId))
+        {
+            post.LikedByUserID.Remove(userId);
+        }
+        else
+        {
+            post.LikedByUserID.Add(userId);
+        }
+        _postService.UpdatePost(post);
+        return NoContent();
+    }
+
+
     // DELETE api/<PostController>/{id}
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)

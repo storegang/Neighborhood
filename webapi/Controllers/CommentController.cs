@@ -149,6 +149,32 @@ public class CommentController(CommentService commentService, UserService userSe
         return NoContent();
     }
 
+    [HttpPut("Likes/{commentId}")]
+    public IActionResult Like(string commentId)
+    {
+        var comment = _postService.GetPostById(commentId);
+        if (comment == null)
+        {
+            return NotFound();
+        }
+        var userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
+
+        if (comment.LikedByUserID == null)
+        {
+            comment.LikedByUserID = new List<string>();
+        }
+        if (comment.LikedByUserID.Contains(userId))
+        {
+            comment.LikedByUserID.Remove(userId);
+        }
+        else
+        {
+            comment.LikedByUserID.Add(userId);
+        }
+        _postService.UpdatePost(comment);
+        return NoContent();
+    }
+
     // DELETE api/<CommentController>/{id}
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)
