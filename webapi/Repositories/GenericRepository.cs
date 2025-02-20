@@ -1,40 +1,69 @@
-﻿using webapi.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using webapi.DataContexts;
+using webapi.Models;
 
 namespace webapi.Repositories;
 
-public interface IGenericRepository
+public interface IChildrenRepository<T1, T2> where T1 : class where T2 : class
 {
-    ICollection<Comment> GetAll();
-    Comment GetById(string id);
-    void Add(Comment comment);
-    void Update(Comment comment);
-    void Delete(Comment comment);
+    T1 GetByIdWithChildren(string id);
 }
 
-public class GenericRepository : IGenericRepository
+public interface IGetUserRepository<T1> where T1 : class
 {
-    public void Add(Comment comment)
+    T1 GetByIdWithUser(string id);
+}
+
+public interface IGenericRepository<T1> where T1 : class
+{
+    ICollection<T1> GetAll();
+    T1 GetById(string id);
+    void Add(T1 entity);
+    void Update(T1 entity);
+    void Delete(T1 entity);
+}
+
+public class GenericRepository<T1> : IGenericRepository<T1> where T1 : class
+{
+    private readonly NeighborhoodContext _context;
+    private readonly DbSet<T1> _dbSet;
+
+    public GenericRepository(NeighborhoodContext context)
     {
-        throw new NotImplementedException();
+        _context = context;
+        _dbSet = _context.Set<T1>();
     }
 
-    public void Delete(Comment comment)
+    public ICollection<T1> GetAll()
     {
-        throw new NotImplementedException();
+        return _dbSet.ToList();
     }
 
-    public ICollection<Comment> GetAll()
+    public T1 GetById(string id)
     {
-        throw new NotImplementedException();
+        return _dbSet.Find(id);
     }
 
-    public Comment GetById(string id)
+    public void Add(T1 entity)
     {
-        throw new NotImplementedException();
+        _dbSet.Add(entity);
+        _context.SaveChanges();
     }
 
-    public void Update(Comment comment)
+    public void Update(T1 entity)
     {
-        throw new NotImplementedException();
+        _dbSet.Attach(entity);
+        _context.Entry(entity).State = EntityState.Modified;
+        _context.SaveChanges();
+    }
+
+    public void Delete(T1 entity)
+    {
+        if (_context.Entry(entity).State == EntityState.Detached)
+        {
+            _dbSet.Attach(entity);
+        }
+        _dbSet.Remove(entity);
+        _context.SaveChanges();
     }
 }
