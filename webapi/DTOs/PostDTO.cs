@@ -15,8 +15,9 @@ public class PostDTO
     public User? AuthorUser { get; set; }
     public string CategoryId { get; set; }
     public IEnumerable<string>? ImageUrls { get; set; }
+    public int? CommentCount { get; set; }
     public int? LikedByUserCount { get; set; }
-    public bool LikedByCurrentUser { get; set; }
+    public bool? LikedByCurrentUser { get; set; }
 
     public PostDTO(){}
 
@@ -31,11 +32,12 @@ public class PostDTO
         AuthorUser = post.User;
         CategoryId = post.CategoryId;
         ImageUrls = post.Images;
+        CommentCount = post.Comments.Count();
         LikedByUserCount = post.LikedByUserID?.Count();
     }
 
     public PostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, 
-        User? authorUser, string categoryId, IEnumerable<string>? imageUrls, int? likedByUserCount, bool likedByCurrentUser)
+        User? authorUser, string categoryId, IEnumerable<string>? imageUrls, int? commentCount, int? likedByUserCount, bool likedByCurrentUser)
     {
         Id = id;
         Title = title;
@@ -46,12 +48,13 @@ public class PostDTO
         AuthorUser = authorUser;
         CategoryId = categoryId;
         ImageUrls = imageUrls;
+        CommentCount = commentCount;
         LikedByUserCount = likedByUserCount;
         LikedByCurrentUser = likedByCurrentUser;
     }
 
     public PostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, string authorUserId,
-        User? authorUser, string categoryId, IEnumerable<string>? imageUrls, int? likedByUserCount, bool likedByCurrentUser)
+        User? authorUser, string categoryId, IEnumerable<string>? imageUrls, int? commentCount, int? likedByUserCount, bool likedByCurrentUser)
     {
         Id = id;
         Title = title;
@@ -62,6 +65,7 @@ public class PostDTO
         AuthorUser = authorUser;
         CategoryId = categoryId;
         ImageUrls = imageUrls;
+        CommentCount = commentCount;
         LikedByUserCount = likedByUserCount;
         LikedByCurrentUser = likedByCurrentUser;
     }
