@@ -109,8 +109,10 @@ public class PostController(PostService postService, UserService userService, Ca
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = DateTime.Now,
-            User = _userService.GetUserById(postData.AuthorUserId),
-            CategoryId = postData.CategoryId
+            User = postData.AuthorUser,
+            CategoryId = postData.CategoryId,
+            Category = category,
+            Images = (ICollection<string>)postData.ImageUrls
         };
         _postService.CreatePost(post);
 
@@ -136,8 +138,13 @@ public class PostController(PostService postService, UserService userService, Ca
             Id = postData.Id,
             Title = postData.Title,
             Description = postData.Description,
+            DatePosted = existingPost.DatePosted,
             DateLastEdited = DateTime.Now,
-            User = _userService.GetUserById(postData.AuthorUserId),
+            User = existingPost.User,
+            CategoryId = existingPost.CategoryId,
+            Category = existingPost.Category,
+            Comments = existingPost.Comments,
+            Images = (ICollection<string>)postData.ImageUrls,
             LikedByUserID = existingPost.LikedByUserID
         };
         _postService.UpdatePost(post);

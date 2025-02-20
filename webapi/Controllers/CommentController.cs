@@ -109,7 +109,7 @@ public class CommentController(CommentService commentService, UserService userSe
             Id = commentData.Id,
             Content = commentData.Content,
             DatePosted = DateTime.Now,
-            User = _userService.GetUserById(commentData.AuthorUserId),
+            User = commentData.AuthorUser,
             ParentPostId = commentData.ParentPostId,
             ImageUrl = commentData.ImageUrl
         };
@@ -134,12 +134,15 @@ public class CommentController(CommentService commentService, UserService userSe
         commentData.Id = id;
         var comment = new Comment 
         {
-            Id = commentData.Id,
+            Id = existingComment.Id,
             Content = commentData.Content,
+            DatePosted = existingComment.DatePosted,
             DateLastEdited = DateTime.Now,
-            User = _userService.GetUserById(commentData.AuthorUserId),
-            ParentPostId = commentData.ParentPostId,
-            ImageUrl = commentData.ImageUrl
+            User = existingComment.User,
+            ParentPostId = existingComment.ParentPostId,
+            ParentPost = existingComment.ParentPost,
+            ImageUrl = commentData.ImageUrl,
+            LikedByUserID = existingComment.LikedByUserID
         };
         _commentService.UpdateComment(comment);
 
