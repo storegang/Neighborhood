@@ -9,10 +9,6 @@ export const Feed: React.FC = () => {
 
     const { data: posts, isLoading, isError } = useGetPosts(user?.accessToken)
 
-    console.log(posts)
-
-    console.log({ posts, isLoading, isError })
-
     if (isLoading) {
         return <p>Loading...</p>
     }
