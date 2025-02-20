@@ -109,7 +109,7 @@ public class CommentController(CommentService commentService, UserService userSe
             Id = commentData.Id,
             Content = commentData.Content,
             DatePosted = DateTime.Now,
-            User = commentData.AuthorUser,
+            User = _userService.GetUserById(commentData.AuthorUserId),
             ParentPostId = commentData.ParentPostId,
             ImageUrl = commentData.ImageUrl
         };

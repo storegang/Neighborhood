@@ -109,7 +109,7 @@ public class PostController(PostService postService, UserService userService, Ca
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = DateTime.Now,
-            User = postData.AuthorUser,
+            User = _userService.GetUserById(postData.AuthorUserId),
             CategoryId = postData.CategoryId,
             Category = category,
             Images = (ICollection<string>)postData.ImageUrls
