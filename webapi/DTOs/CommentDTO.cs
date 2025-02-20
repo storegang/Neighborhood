@@ -9,10 +9,12 @@ public class CommentDTO
     public DateTime? DatePosted { get; set; }
     public DateTime? DateLastEdited { get; set; }
     public string AuthorUserId { get; set; }
+    public User? AuthorUser { get; set; }
     public string ParentPostId { get; set; }
 
     public string? ImageUrl { get; set; }
-    public IEnumerable<string>? LikedByUserId { get; set; }
+    public int? LikedByUserCount { get; set; }
+    public bool? LikedByCurrentUser { get; set; }
 
     public CommentDTO(){}
 
@@ -23,22 +25,24 @@ public class CommentDTO
         DatePosted = comment.DatePosted;
         DateLastEdited = comment.DateLastEdited;
         AuthorUserId = comment.User.Id;
+        AuthorUser = comment.User;
         ParentPostId = comment.ParentPostId;
         ImageUrl = comment.ImageUrl;
-        LikedByUserId = comment.LikedByUserID;
+        LikedByUserCount = comment.LikedByUserID?.Count();
     }
 
     public CommentDTO(string id, string content, DateTime? datePosted, DateTime? dateLastEdited, 
-        string authorUserId, string parentPostId, string imageUrl, IEnumerable<string> likedByUserIds)
+        string authorUserId, User? authorUser, string parentPostId, string? imageUrl, ICollection<string>? likedByUserIds)
     {
         Id = id;
         Content = content;
         DatePosted = datePosted;
         DateLastEdited = dateLastEdited;
         AuthorUserId = authorUserId;
+        AuthorUser = authorUser;
         ParentPostId = parentPostId;
         ImageUrl = imageUrl;
-        LikedByUserId = likedByUserIds;
+        LikedByUserCount = likedByUserIds?.Count();
     }
 }
 
