@@ -12,9 +12,12 @@ public class PostDTO
     public DateTime? DateLastEdited { get; set; }
 
     public string AuthorUserId { get; set; }
+    public User? AuthorUser { get; set; }
     public string CategoryId { get; set; }
     public IEnumerable<string>? ImageUrls { get; set; }
-    public IEnumerable<string>? LikedByUserId { get; set; }
+    public int? CommentCount { get; set; }
+    public int? LikedByUserCount { get; set; }
+    public bool? LikedByCurrentUser { get; set; }
 
     public PostDTO(){}
 
@@ -26,12 +29,32 @@ public class PostDTO
         DatePosted = post.DatePosted;
         DateLastEdited = post.DateLastEdited;
         AuthorUserId = post.User.Id;
+        AuthorUser = post.User;
         CategoryId = post.CategoryId;
         ImageUrls = post.Images;
-        LikedByUserId = post.LikedByUserID;
+        CommentCount = post.Comments.Count();
+        LikedByUserCount = post.LikedByUserID?.Count();
     }
 
-    public PostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, string authorUserId, string categoryId, IEnumerable<string> imageUrls, IEnumerable<string> likedByUserId)
+    public PostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, 
+        User? authorUser, string categoryId, IEnumerable<string>? imageUrls, int? commentCount, int? likedByUserCount, bool likedByCurrentUser)
+    {
+        Id = id;
+        Title = title;
+        Description = description;
+        DatePosted = datePosted;
+        DateLastEdited = dateLastEdited;
+        AuthorUserId = authorUser.Id;
+        AuthorUser = authorUser;
+        CategoryId = categoryId;
+        ImageUrls = imageUrls;
+        CommentCount = commentCount;
+        LikedByUserCount = likedByUserCount;
+        LikedByCurrentUser = likedByCurrentUser;
+    }
+
+    public PostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, string authorUserId,
+        User? authorUser, string categoryId, IEnumerable<string>? imageUrls, int? commentCount, int? likedByUserCount, bool likedByCurrentUser)
     {
         Id = id;
         Title = title;
@@ -39,9 +62,12 @@ public class PostDTO
         DatePosted = datePosted;
         DateLastEdited = dateLastEdited;
         AuthorUserId = authorUserId;
+        AuthorUser = authorUser;
         CategoryId = categoryId;
         ImageUrls = imageUrls;
-        LikedByUserId = likedByUserId;
+        CommentCount = commentCount;
+        LikedByUserCount = likedByUserCount;
+        LikedByCurrentUser = likedByCurrentUser;
     }
 }
 
