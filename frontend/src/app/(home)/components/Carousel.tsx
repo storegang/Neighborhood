@@ -46,7 +46,7 @@ export const Carousel: React.FC<CarouselProps> = ({ imageList }) => {
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
         >
-            <div className="relative h-[400px] w-full">
+            <div className="relative h-124 w-full">
                 {imageList.map((image, index) => (
                     <div
                         key={`slide${index}`}
