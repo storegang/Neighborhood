@@ -1,4 +1,7 @@
-﻿using webapi.DTOs;
+﻿
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Hosting;
+using webapi.DTOs;
 using webapi.Models;
 using webapi.Repositories;
 
@@ -36,5 +39,15 @@ public class CommentService(ICommentRepository commentRepository)
         {
             _commentRepository.Delete(comment);
         }
+    }
+
+
+    public bool CheckIfCurrentUserLiked(Comment comment, ControllerBase user)
+    {
+        if (comment.LikedByUserID.Contains(user.User.Claims.First(c => c.Type.Equals("user_id"))?.Value))
+        {
+            return true;
+        }
+        return false;
     }
 }

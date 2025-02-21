@@ -36,6 +36,9 @@ public class PostController(PostService postService, UserService userService, Ca
         }
 
         PostDTO postData = new PostDTO(post);
+
+        postData.LikedByCurrentUser = _postService.CheckIfCurrentUserLiked(post, this);
+
         return Ok(postData);
     }
 
@@ -103,6 +106,7 @@ public class PostController(PostService postService, UserService userService, Ca
         while (_postService.GetPostById(newGuid) != null);
 
         postData.Id = newGuid;
+        /*
         var post = new Post
         {
             Id = postData.Id,
@@ -114,6 +118,19 @@ public class PostController(PostService postService, UserService userService, Ca
             Category = category,
             Images = (ICollection<string>)postData.ImageUrls
         };
+        */
+        var post = new Post
+        {
+            Id = postData.Id,
+            Title = postData.Title,
+            Description = postData.Description,
+            DatePosted = DateTime.Now,
+            User = _userService.GetUserById(postData.AuthorUserId),
+            CategoryId = postData.CategoryId,
+            Category = category,
+            Images = (ICollection<string>)postData.ImageUrls
+        };
+
         _postService.CreatePost(post);
 
         category.Posts.Add(post);
@@ -152,6 +169,7 @@ public class PostController(PostService postService, UserService userService, Ca
         return NoContent();
     }
 
+    // PUT api/<PostController>/Like/{postId}
     [HttpPut("Like/{postId}")]
     public IActionResult Like(string postId)
     {

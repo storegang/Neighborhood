@@ -3,6 +3,7 @@ using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Hosting;
 
 namespace webapi.Controllers;
 
@@ -36,6 +37,9 @@ public class CommentController(CommentService commentService, UserService userSe
         }
 
         var commentData = new CommentDTO(comment);
+
+        commentData.LikedByCurrentUser = _commentService.CheckIfCurrentUserLiked(comment, this);
+
         return Ok(commentData);
     }
 
@@ -149,6 +153,7 @@ public class CommentController(CommentService commentService, UserService userSe
         return NoContent();
     }
 
+    // PUT api/<CommentController>/Likes/{commentId}
     [HttpPut("Likes/{commentId}")]
     public IActionResult Like(string commentId)
     {
