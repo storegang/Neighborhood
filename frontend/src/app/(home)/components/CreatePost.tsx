@@ -1,4 +1,19 @@
-export const CreatePost: React.FC = () => {
+"use client"
+
+import { Category } from "@/Models/Category"
+import { useState } from "react"
+
+type CreatePostProps = {
+    categories?: Category[]
+}
+
+export const CreatePost: React.FC<CreatePostProps> = ({ categories }) => {
+    const [selectedCategory, setSelectedCategory] = useState<Category>()
+
+    const handleCategorySelect = (category: Category) => {
+        setSelectedCategory(category)
+    }
+
     return (
         <div className="card card-border border-base-300 card-sm overflow-hidden">
             <div className="border-base-300 border-b border-dashed">
@@ -32,23 +47,23 @@ export const CreatePost: React.FC = () => {
                         className="input input-md"
                     />
                     <button className="btn btn-xs">Add files</button>
-                </div>{" "}
+                </div>
                 <textarea
                     className="textarea textarea-border w-full resize-none"
                     placeholder="What's happening?"
                 ></textarea>
                 <div className="flex gap-4">
-                    <div className="badge badge-soft badge-primary">
-                        Primary
-                    </div>
-                    <div className="badge badge-soft badge-secondary">
-                        Secondary
-                    </div>
-                    <div className="badge badge-soft badge-accent">Accent</div>
-                    <div className="badge badge-soft badge-neutral">
-                        Neutral
-                    </div>
-                    <div className="badge badge-soft badge-info">Info</div>
+                    {categories?.map((category) => {
+                        return (
+                            <button
+                                className={`btn btn-xs btn-${category.color} ${selectedCategory === category ? "btn-active" : "btn-soft"}`}
+                                onClick={() => handleCategorySelect(category)}
+                                key={category.id}
+                            >
+                                {category.name}
+                            </button>
+                        )
+                    })}
                 </div>
                 <div className="card-actions justify-end">
                     <button className="btn btn-primary">Publish</button>

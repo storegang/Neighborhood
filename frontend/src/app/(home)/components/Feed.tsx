@@ -1,14 +1,15 @@
 "use client"
 
-import { Post } from "@/Models/Post"
 import { PostCard, CreatePost } from "./index"
 import { useUser } from "@/lib/getUser"
-import { useGetPosts } from "../queries"
+import { useGetCategories, useGetPosts } from "../queries"
 
 export const Feed: React.FC = () => {
     const user = useUser()
 
     const { data: posts, isLoading, isError } = useGetPosts(user?.accessToken)
+
+    const { data: categories } = useGetCategories(user?.accessToken)
 
     if (isLoading) {
         return <p>Loading...</p>
@@ -24,7 +25,7 @@ export const Feed: React.FC = () => {
 
     return (
         <div className="mx-auto mt-6 flex w-full flex-col gap-6 lg:w-96 xl:w-1/2">
-            <CreatePost />
+            <CreatePost categories={categories} />
             {posts.map((post) => (
                 <PostCard
                     key={post.id}
