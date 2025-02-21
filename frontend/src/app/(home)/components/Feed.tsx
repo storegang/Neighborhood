@@ -1,6 +1,7 @@
 "use client"
 
-import { PostCard } from "./index"
+import { Post } from "@/Models/Post"
+import { PostCard, CreatePost } from "./index"
 import { useUser } from "@/lib/getUser"
 import { useGetPosts } from "../queries"
 
@@ -22,7 +23,8 @@ export const Feed: React.FC = () => {
     }
 
     return (
-        <div className="mx-auto w-full lg:w-96 xl:w-1/2">
+        <div className="mx-auto mt-6 flex w-full flex-col gap-6 lg:w-96 xl:w-1/2">
+            <CreatePost />
             {posts.map((post) => (
                 <PostCard
                     key={post.id}
