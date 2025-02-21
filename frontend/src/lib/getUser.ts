@@ -5,30 +5,26 @@ import { useEffect, useState } from "react"
 
 import { auth } from "@/lib/firebase/clientApp.js"
 import { useRouter } from "next/navigation"
-import { User as FirebaseUser } from "firebase/auth"
-
-type NeighborhoodUser = FirebaseUser & {
-    accessToken: string
-}
+import { User } from "@/Models/User"
 
 export const useUser = () => {
-    const [user, setUser] = useState<NeighborhoodUser | null>(null)
+    const [user, setUser] = useState<User | null>(null)
 
     const router = useRouter()
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-            setUser(authUser as NeighborhoodUser)
+            setUser(authUser as User)
         })
 
         return () => unsubscribe()
     }, [])
 
-    /* useEffect(() => {
+    useEffect(() => {
         if (!user?.accessToken) {
             router.push("/")
         }
-    }, [user]) */
+    }, [user])
 
     return user
 }
