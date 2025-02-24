@@ -128,12 +128,15 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                     </div>
                     <div className="card-actions justify-end">
                         <button
-                            className="btn btn-primary"
+                            className="btn btn-sm btn-primary"
                             type="submit"
                             disabled={isPending}
                         >
                             {isPending ? (
-                                <span className="loading loading-spinner"></span>
+                                <>
+                                    <span className="loading loading-circular"></span>
+                                    <span>loading...</span>
+                                </>
                             ) : (
                                 "Publish"
                             )}

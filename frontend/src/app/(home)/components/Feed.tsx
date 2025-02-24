@@ -3,6 +3,7 @@
 import { PostCard, CreatePost } from "./index"
 import { useUser } from "@/lib/getUser"
 import { useGetCategories, useGetPosts } from "../queries"
+import { CardSkeletonLoader } from "@/components"
 
 export const Feed: React.FC = () => {
     const user = useUser()
@@ -16,7 +17,12 @@ export const Feed: React.FC = () => {
         useGetCategories(user)
 
     if (!user || postsLoading || categoriesLoading) {
-        return <p>Loading...</p>
+        return (
+            <div className="mx-auto mt-6 flex w-full flex-col gap-6 lg:w-96 xl:w-1/2">
+                <CardSkeletonLoader />
+                <CardSkeletonLoader />
+            </div>
+        )
     }
 
     if (postsError) {
