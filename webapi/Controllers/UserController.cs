@@ -41,14 +41,13 @@ public class UserController(UserService userService) : ControllerBase
     [HttpPost]
     public ActionResult<UserDTO> Create(UserDTO userData)
     {
-        string newGuid;
-        do
+        // DEBUG: In this statement we make it so we can make fake users with custom Ids. Remove this in production.
+        if (string.IsNullOrEmpty(userData.Id))
         {
-            newGuid = Guid.NewGuid().ToString();
+            // Get the user_id from the token
+            userData.Id = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
         }
-        while (_userService.GetUserById(newGuid) != null);
 
-        userData.Id = newGuid;
         var user = new User
         {
             Id = userData.Id,
@@ -75,7 +74,8 @@ public class UserController(UserService userService) : ControllerBase
         {
             Id = userData.Id,
             Name = userData.Name,
-            Avatar = userData.Avatar
+            Avatar = userData.Avatar,
+            NeighborhoodId = userData.NeighborhoodId
         };
         _userService.UpdateUser(user);
 

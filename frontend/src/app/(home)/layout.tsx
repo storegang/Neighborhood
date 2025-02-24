@@ -4,6 +4,7 @@ import { ReactNode } from "react"
 import { Dock, Footer, HeaderNav } from "@/components"
 import { getAuthenticatedAppForUser } from "@/lib/firebase/serverApp"
 import AuthGuard from "@/components/AuthGuard"
+import { QueryProvider } from "@/providers/QueryProvider"
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -27,14 +28,16 @@ export default async function Layout({
             <body
                 className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
             >
-                <header>
-                    <HeaderNav initialUser={currentUser?.toJSON()} />
-                </header>
-                <AuthGuard>{children}</AuthGuard>
-                <footer className="mt-auto">
-                    <Dock />
-                    <Footer />
-                </footer>
+                <QueryProvider>
+                    <header>
+                        <HeaderNav initialUser={currentUser?.toJSON()} />
+                    </header>
+                    <AuthGuard>{children}</AuthGuard>
+                    <footer className="mt-auto">
+                        <Dock />
+                        <Footer />
+                    </footer>
+                </QueryProvider>
             </body>
         </html>
     )
