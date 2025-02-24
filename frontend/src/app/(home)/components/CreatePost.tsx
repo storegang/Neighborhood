@@ -4,14 +4,15 @@ import { Category } from "@/Models/Category"
 import { User } from "@/Models/User"
 import { useState } from "react"
 import { Post } from "@/Models/Post"
+import { useCreatePost, useGetCategories } from "../queries"
+import { useQueryClient } from "@tanstack/react-query"
 
 type CreatePostProps = {
-    categories?: Category[]
     user: User
     onPostCreated?: (newPost: Post) => void
 }
 
-export const CreatePost: React.FC<CreatePostProps> = ({ categories, user }) => {
+export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(
         null
     )
@@ -24,8 +25,50 @@ export const CreatePost: React.FC<CreatePostProps> = ({ categories, user }) => {
         )
     }
 
+    const { data: categories } = useGetCategories(user)
+
+    const {
+        isPending,
+        isError,
+        isSuccess,
+        mutate: createPost,
+    } = useCreatePost()
+
+    const queryClient = useQueryClient()
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        if (!selectedCategory) {
+            // TODO: Legg på en feilmelding til brukeren
+            return
+        }
+
+        createPost(
+            {
+                title,
+                content,
+                categoryId: selectedCategory.id,
+                userUID: user.uid,
+                accessToken: user.accessToken,
+            },
+            {
+                onSuccess: () => {
+                    setTitle("")
+                    setContent("")
+                    setSelectedCategory(null)
+                    queryClient.invalidateQueries({
+                        queryKey: ["posts", user.accessToken],
+                    })
+                },
+                onError: (error) => {
+                    console.error("Error creating post:", error)
+                },
+            }
+        )
+    }
+
     return (
-        <div className="card card-border border-base-300 card-sm overflow-hidden">
+        <section className="card card-border border-base-300 card-sm overflow-hidden">
             <div className="border-base-300 border-b border-dashed">
                 <div className="flex items-center gap-2 p-4">
                     <div className="grow">
@@ -49,7 +92,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({ categories, user }) => {
                     </div>
                 </div>
             </div>
-            <form>
+            <form onSubmit={handleSubmit}>
                 <div className="card-body gap-4">
                     <div className="flex items-center justify-between">
                         <input
@@ -84,12 +127,20 @@ export const CreatePost: React.FC<CreatePostProps> = ({ categories, user }) => {
                         ))}
                     </div>
                     <div className="card-actions justify-end">
-                        <button className="btn btn-primary" type="submit">
-                            Publish
+                        <button
+                            className="btn btn-primary"
+                            type="submit"
+                            disabled={isPending}
+                        >
+                            {isPending ? (
+                                <span className="loading loading-spinner"></span>
+                            ) : (
+                                "Publiser"
+                            )}
                         </button>
                     </div>
                 </div>
             </form>
-        </div>
+        </section>
     )
 }

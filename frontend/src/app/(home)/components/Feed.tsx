@@ -25,7 +25,7 @@ export const Feed: React.FC = () => {
 
     return (
         <div className="mx-auto mt-6 flex w-full flex-col gap-6 lg:w-96 xl:w-1/2">
-            <CreatePost categories={categories} user={user} />
+            <CreatePost user={user} />
             {posts.length > 0 ? (
                 posts.map((post) => <PostCard key={post.id} {...post} />)
             ) : (
