@@ -21,17 +21,19 @@ export const PostCard: React.FC<Post> = ({
     likedByCurrentUser = true
 
     return (
-        <div className="card lg:card-side shadow-sm">
+        <div className="card shadow-sm">
             {imageUrls && imageUrls.length ? (
-                <figure className="lg:hidden lg:h-32 lg:w-32 lg:self-center">
-                    <Image
-                        className="h-full w-full object-cover"
-                        src={imageUrls[0]}
-                        alt={title}
-                        width={400}
-                        height={300}
-                    />
-                </figure>
+                <div className="lg:hidden">
+                    <figure className="lg:h-32 lg:w-32 lg:self-center">
+                        <Image
+                            className="h-full w-full object-cover"
+                            src={imageUrls[0]}
+                            alt={title}
+                            width={400}
+                            height={300}
+                        />
+                    </figure>
+                </div>
             ) : null}
             <div className="card-body">
                 <div className="flex h-8 w-full items-center justify-start gap-4">
