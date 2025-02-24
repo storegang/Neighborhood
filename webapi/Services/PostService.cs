@@ -1,4 +1,5 @@
-﻿using webapi.DTOs;
+﻿using Microsoft.AspNetCore.Mvc;
+using webapi.DTOs;
 using webapi.Models;
 using webapi.Repositories;
 
@@ -41,5 +42,15 @@ public class PostService(IPostRepository postRepository)
         {
             _postRepository.Delete(post);
         }
+    }
+
+
+    public bool CheckIfCurrentUserLiked(Post post, ControllerBase user)
+    {
+        if (post.LikedByUserID.Contains(user.User.Claims.First(c => c.Type.Equals("user_id"))?.Value))
+        {
+            return true;
+        }
+        return false;
     }
 }

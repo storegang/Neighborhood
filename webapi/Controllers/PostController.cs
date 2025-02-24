@@ -36,6 +36,9 @@ public class PostController(PostService postService, UserService userService, Ca
         }
 
         PostDTO postData = new PostDTO(post);
+
+        postData.LikedByCurrentUser = _postService.CheckIfCurrentUserLiked(post, this);
+
         return Ok(postData);
     }
 
@@ -103,6 +106,7 @@ public class PostController(PostService postService, UserService userService, Ca
         while (_postService.GetPostById(newGuid) != null);
 
         postData.Id = newGuid;
+        
         var post = new Post
         {
             Id = postData.Id,
@@ -114,6 +118,7 @@ public class PostController(PostService postService, UserService userService, Ca
             Category = category,
             Images = (ICollection<string>)postData.ImageUrls
         };
+
         _postService.CreatePost(post);
 
         category.Posts.Add(post);
@@ -151,6 +156,34 @@ public class PostController(PostService postService, UserService userService, Ca
 
         return NoContent();
     }
+
+    // PUT api/<PostController>/Like/{postId}
+    [HttpPut("Like/{postId}")]
+    public IActionResult Like(string postId)
+    {
+        var post = _postService.GetPostById(postId);
+        if (post == null)
+        {
+            return NotFound();
+        }
+        var userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
+
+        if (post.LikedByUserID == null)
+        {
+            post.LikedByUserID = new List<string>();
+        }
+        if (post.LikedByUserID.Contains(userId))
+        {
+            post.LikedByUserID.Remove(userId);
+        }
+        else
+        {
+            post.LikedByUserID.Add(userId);
+        }
+        _postService.UpdatePost(post);
+        return NoContent();
+    }
+
 
     // DELETE api/<PostController>/{id}
     [HttpDelete("{id}")]
