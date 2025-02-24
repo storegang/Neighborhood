@@ -56,7 +56,7 @@ export const PostCard: React.FC<Post> = ({
                         <p>{description}</p>
                     </div>
                     {imageUrls && imageUrls.length ? (
-                        <div className="ml-4 hidden gap-2 lg:visible lg:flex lg:h-28 lg:w-28">
+                        <div className="ml-4 hidden gap-2 lg:flex lg:h-28 lg:w-28">
                             <Image
                                 key={imageUrls[0]}
                                 className="h-full w-full rounded-sm object-cover"
