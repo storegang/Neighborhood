@@ -135,7 +135,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                             {isPending ? (
                                 <span className="loading loading-spinner"></span>
                             ) : (
-                                "Publiser"
+                                "Publish"
                             )}
                         </button>
                     </div>
