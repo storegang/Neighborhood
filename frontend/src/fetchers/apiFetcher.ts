@@ -8,14 +8,14 @@ if (!url) {
 
 export const apiFetcher = async <T>({
     path,
-    params,
-    method = "GET",
+    method,
     accessToken,
+    body,
 }: {
     path: string
     method?: string
-    params?: Record<string, unknown>
     accessToken?: string
+    body?: Record<string, unknown>
 }): Promise<T> => {
     try {
         const response = await fetch(`${url}${path}`, {
@@ -24,10 +24,10 @@ export const apiFetcher = async <T>({
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${accessToken}`,
             },
-            body: JSON.stringify(params),
+            body: JSON.stringify(body),
         })
         if (!response.ok) {
-            throw new Error(`Error: ${response.statusText}`)
+            throw new Error(`Error fetching data: ${response.statusText}`)
         }
         return await response.json()
     } catch (error) {

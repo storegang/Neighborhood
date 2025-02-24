@@ -1,11 +1,29 @@
-import { useQuery } from "@tanstack/react-query"
-import { getPosts } from "./actions"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { createPost, CreatePostInput, getCategories, getPosts } from "./actions"
+import { User } from "@/Models/User"
 
-export const useGetPosts = (accessToken: string | undefined) => {
-    const query = useQuery({
+export const useGetPosts = (user: User | null) => {
+    const accessToken = user?.accessToken
+    return useQuery({
         queryKey: ["posts", accessToken],
         enabled: !!accessToken,
         queryFn: () => getPosts(accessToken!),
     })
-    return query
+}
+
+export const useGetCategories = (user: User | null) => {
+    const accessToken = user?.accessToken
+    return useQuery({
+        queryKey: ["categories", accessToken],
+        queryFn: () => getCategories(accessToken!),
+        enabled: !!accessToken,
+    })
+}
+
+export const useCreatePost = () => {
+    return useMutation({
+        mutationFn: (input: CreatePostInput) => {
+            return createPost(input)
+        },
+    })
 }
