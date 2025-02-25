@@ -3,7 +3,17 @@ using webapi.Repositories;
 
 namespace webapi.Services;
 
-public class CategoryService(ICategoryRepository categoryRepository)
+public interface ICategoryService
+{
+    ICollection<Category> GetAllCategories();
+    Category GetCategoryById(string id);
+    Category GetCategoryByIdWithChildren(string id);
+    void CreateCategory(Category category);
+    void UpdateCategory(Category category);
+    void DeleteCategory(string id);
+}
+
+public class CategoryService(ICategoryRepository categoryRepository) : ICategoryService
 {
     private readonly ICategoryRepository _categoryRepository = categoryRepository;
 

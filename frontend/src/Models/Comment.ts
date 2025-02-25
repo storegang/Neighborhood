@@ -1,5 +1,3 @@
-import { User } from "./User"
-
 export type Comment = {
     id: string
     authorId: string

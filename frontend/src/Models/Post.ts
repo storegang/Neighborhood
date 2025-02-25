@@ -5,10 +5,10 @@ export type Post = {
     title: string
     description: string
     datePosted: string
-    dateLastEdited: string
+    dateLastEdited: string | null
     authorUserId: string
     authorUser: User
-    categoryId: string
+    categoryId: string | null
     imageUrls: string[]
     commentCount: number
     likedByUserCount: number

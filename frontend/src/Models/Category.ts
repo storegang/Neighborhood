@@ -1,5 +1,3 @@
-import { Post } from "./Post"
-
 export type Category = {
     id: string
     name: string

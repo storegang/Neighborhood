@@ -1,0 +1,6 @@
+export type { Category } from "./Category"
+export type { Likes } from "./Likes"
+export type { Comment } from "./Comment"
+export type { Neighborhood } from "./Neighborhood"
+export type { Post } from "./Post"
+export type { User } from "./User"

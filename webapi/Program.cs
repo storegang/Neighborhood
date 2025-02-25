@@ -110,11 +110,11 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddScoped<CategoryService>();
-builder.Services.AddScoped<CommentService>();
-builder.Services.AddScoped<NeighborhoodService>();
-builder.Services.AddScoped<PostService>();
-builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
+builder.Services.AddScoped<INeighborhoodService, NeighborhoodService>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<LikeService>();
 
