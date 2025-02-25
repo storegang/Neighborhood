@@ -1,11 +1,10 @@
 "use client"
 
-import { Category } from "@/Models/Category"
-import { User } from "@/Models/User"
+import { User, Post, Category } from "@/Models"
 import { useState } from "react"
-import { Post } from "@/Models/Post"
 import { useCreatePost, useGetCategories } from "../queries"
 import { useQueryClient } from "@tanstack/react-query"
+import { Alert } from "@/components"
 
 type CreatePostProps = {
     user: User
@@ -13,17 +12,10 @@ type CreatePostProps = {
 }
 
 export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
-    const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-        null
-    )
+    const [selectedCategory, setSelectedCategory] = useState<Category["id"]>("")
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
-
-    const handleCategorySelect = (category: Category) => {
-        setSelectedCategory((prev) =>
-            prev?.id === category.id ? null : category
-        )
-    }
+    const [categoryError, setCategoryError] = useState(false)
 
     const { data: categories } = useGetCategories(user)
 
@@ -38,16 +30,20 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        if (!selectedCategory) {
-            // TODO: Legg på en feilmelding til brukeren
+        if (!title || !selectedCategory) {
+            setCategoryError(true)
             return
         }
+
+        const selectedCategoryObj = categories?.find(
+            (category) => category.id === selectedCategory
+        )
 
         createPost(
             {
                 title,
                 content,
-                categoryId: selectedCategory.id,
+                categoryId: selectedCategoryObj?.id || "",
                 userUID: user.uid,
                 accessToken: user.accessToken,
             },
@@ -55,10 +51,11 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                 onSuccess: () => {
                     setTitle("")
                     setContent("")
-                    setSelectedCategory(null)
+                    setSelectedCategory("")
                     queryClient.invalidateQueries({
                         queryKey: ["posts", user.accessToken],
                     })
+                    setCategoryError(false)
                 },
                 onError: (error) => {
                     console.error("Error creating post:", error)
@@ -67,6 +64,16 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
         )
     }
 
+    const colorClasses: Record<string, string> = {
+        neutral: "btn-neutral",
+        primary: "btn-primary",
+        secondary: "btn-secondary",
+        accent: "btn-accent",
+        info: "btn-info",
+        success: "btn-success",
+        warning: "btn-warning",
+        error: "btn-error",
+    }
     return (
         <section className="card card-border border-base-300 card-sm overflow-hidden">
             <div className="border-base-300 border-b border-dashed">
@@ -101,6 +108,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                             className="input input-md"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
+                            required
                         />
                         <button className="btn btn-xs">Add files</button>
                     </div>
@@ -114,12 +122,12 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                         {categories?.map((category) => (
                             <button
                                 type="button"
-                                className={`btn btn-xs btn-${category.color} ${
-                                    selectedCategory?.id === category.id
+                                className={`btn btn-xs ${
+                                    selectedCategory === category.id
                                         ? "btn-active"
                                         : "btn-soft"
-                                }`}
-                                onClick={() => handleCategorySelect(category)}
+                                } ${colorClasses[category.color.toLowerCase()] || "btn-neutral"}`}
+                                onClick={() => setSelectedCategory(category.id)}
                                 key={category.id}
                             >
                                 {category.name}
@@ -135,12 +143,18 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                             {isPending ? (
                                 <>
                                     <span className="loading loading-circular"></span>
-                                    <span>loading...</span>
+                                    <span>loading</span>
                                 </>
                             ) : (
                                 "Publish"
                             )}
                         </button>
+                        {categoryError && (
+                            <Alert
+                                type="warning"
+                                message="You need to set a category"
+                            />
+                        )}
                     </div>
                 </div>
             </form>
