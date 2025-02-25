@@ -39,7 +39,7 @@ export const Feed: React.FC = () => {
             {posts.length > 0 ? (
                 posts.map((post) => <PostCard key={post.id} {...post} />)
             ) : (
-                <p>No posts found</p>
+                <Alert type="info" message="No posts to show" />
             )}
         </div>
     )
