@@ -3,7 +3,17 @@ using webapi.Repositories;
 
 namespace webapi.Services;
 
-public class NeighborhoodService(INeighborhoodRepository neighborhoodRepository)
+public interface INeighborhoodService
+{
+    ICollection<Neighborhood> GetAllNeighborhoods();
+    Neighborhood GetNeighborhoodById(string id);
+    Neighborhood GetNeighborhoodByIdWithChildren(string id);
+    void CreateNeighborhood(Neighborhood neighborhood);
+    void UpdateNeighborhood(Neighborhood neighborhood);
+    void DeleteNeighborhood(string id);
+}
+
+public class NeighborhoodService(INeighborhoodRepository neighborhoodRepository) : INeighborhoodService
 {
     private readonly INeighborhoodRepository _neighborhoodRepository = neighborhoodRepository;
 

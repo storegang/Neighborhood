@@ -10,11 +10,11 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(CommentService commentService, UserService userService, PostService postService) : ControllerBase
+public class CommentController(ICommentService commentService, IUserService userService, IPostService postService) : ControllerBase
 {
-    private readonly CommentService _commentService = commentService;
-    private readonly UserService _userService = userService;
-    private readonly PostService _postService = postService;
+    private readonly ICommentService _commentService = commentService;
+    private readonly IUserService _userService = userService;
+    private readonly IPostService _postService = postService;
 
     // GET: api/<CommentController>
     [HttpGet]
