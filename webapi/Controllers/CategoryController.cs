@@ -9,10 +9,10 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class CategoryController(CategoryService categoryService, NeighborhoodService neighborhoodService) : ControllerBase
+public class CategoryController(ICategoryService categoryService, INeighborhoodService neighborhoodService) : ControllerBase
 {
-    private readonly CategoryService _categoryService = categoryService;
-    private readonly NeighborhoodService _neighborhoodService = neighborhoodService;
+    private readonly ICategoryService _categoryService = categoryService;
+    private readonly INeighborhoodService _neighborhoodService = neighborhoodService;
 
     // GET: api/<CategoryController>
     [HttpGet]

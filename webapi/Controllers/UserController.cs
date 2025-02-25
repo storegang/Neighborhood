@@ -9,9 +9,9 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(UserService userService) : ControllerBase
+public class UserController(IUserService userService) : ControllerBase
 {
-    private readonly UserService _userService = userService;
+    private readonly IUserService _userService = userService;
 
     // GET: api/<UserController>
     [HttpGet]

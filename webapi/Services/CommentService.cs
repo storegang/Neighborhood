@@ -7,7 +7,18 @@ using webapi.Repositories;
 
 namespace webapi.Services;
 
-public class CommentService(ICommentRepository commentRepository)
+public interface ICommentService
+{
+    ICollection<Comment> GetAllComments();
+    Comment GetCommentById(string id);
+    void CreateComment(Comment comment);
+    void UpdateComment(Comment comment);
+    void DeleteComment(string id);
+    bool CheckIfCurrentUserLiked(Comment comment, ControllerBase user);
+
+}
+
+public class CommentService(ICommentRepository commentRepository) : ICommentService
 {
     private readonly ICommentRepository _commentRepository = commentRepository;
 

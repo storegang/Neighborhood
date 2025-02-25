@@ -3,7 +3,16 @@ using webapi.Repositories;
 
 namespace webapi.Services;
 
-public class UserService(IUserRepository userRepository)
+public interface IUserService
+{
+    ICollection<User> GetAllUsers();
+    User GetUserById(string id);
+    void CreateUser(User user);
+    void UpdateUser(User user);
+    void DeleteUser(string id);
+}
+
+public class UserService(IUserRepository userRepository) : IUserService
 {
     private readonly IUserRepository _userRepository = userRepository;
 
