@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-    themes: autumn --default;
-
+    themes:
+        nord --default,
+        night --prefersdark;
 }
 
 @utility container {
