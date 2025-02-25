@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createPost, CreatePostInput, getCategories, getPosts } from "./actions"
-import { User } from "@/Models/User"
+import { User } from "@/Models"
 
 export const useGetPosts = (user: User | null) => {
     const accessToken = user?.accessToken

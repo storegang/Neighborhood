@@ -1,8 +1,7 @@
 "use server"
 
 import { apiFetcher } from "@/fetchers/apiFetcher"
-import { Post } from "@/Models/Post"
-import { Category } from "../../Models/Category"
+import { Post, Category } from "@/Models"
 
 export const getPosts = async (accessToken: string): Promise<Post[]> => {
     const response = await apiFetcher<{ posts: Post[] }>({
