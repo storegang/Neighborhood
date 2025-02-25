@@ -15,25 +15,23 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
     const [selectedCategory, setSelectedCategory] = useState<Category["id"]>("")
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
-    const [categoryError, setCategoryError] = useState(false)
+    const [categoryWarning, setCategoryWarning] = useState(false)
+    const [displayError, setDisplayError] = useState(false)
 
     const { data: categories } = useGetCategories(user)
 
-    const {
-        isPending,
-        isError,
-        isSuccess,
-        mutate: createPost,
-    } = useCreatePost()
+    const { isPending, isError, mutate: createPost } = useCreatePost()
 
     const queryClient = useQueryClient()
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        if (!title || !selectedCategory) {
-            setCategoryError(true)
+        if (!selectedCategory) {
+            setCategoryWarning(true)
             return
         }
+
+        isError && setDisplayError(true)
 
         const selectedCategoryObj = categories?.find(
             (category) => category.id === selectedCategory
@@ -55,7 +53,8 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                     queryClient.invalidateQueries({
                         queryKey: ["posts", user.accessToken],
                     })
-                    setCategoryError(false)
+                    setCategoryWarning(false)
+                    setDisplayError(false)
                 },
                 onError: (error) => {
                     console.error("Error creating post:", error)
@@ -149,12 +148,14 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                                 "Publish"
                             )}
                         </button>
-                        {categoryError && (
+                        {categoryWarning ? (
                             <Alert
                                 type="warning"
                                 message="You need to set a category"
                             />
-                        )}
+                        ) : displayError ? (
+                            <Alert type="error" message="Error creating post" />
+                        ) : null}
                     </div>
                 </div>
             </form>

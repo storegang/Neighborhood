@@ -3,7 +3,7 @@
 import { PostCard, CreatePost } from "./index"
 import { useUser } from "@/lib/getUser"
 import { useGetCategories, useGetPosts } from "../queries"
-import { CardSkeletonLoader } from "@/components"
+import { Alert, CardSkeletonLoader } from "@/components"
 
 export const Feed: React.FC = () => {
     const user = useUser()
@@ -26,7 +26,11 @@ export const Feed: React.FC = () => {
     }
 
     if (postsError) {
-        return <p>Error loading posts</p>
+        return (
+            <div className="mx-auto mt-6 flex w-full flex-col gap-6 lg:w-96 xl:w-1/2">
+                <Alert type="error" message="Error loading posts" />
+            </div>
+        )
     }
 
     return (
