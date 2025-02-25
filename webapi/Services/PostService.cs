@@ -5,7 +5,18 @@ using webapi.Repositories;
 
 namespace webapi.Services;
 
-public class PostService(IPostRepository postRepository)
+public interface IPostService
+{
+    ICollection<Post> GetAllPosts();
+    Post GetPostById(string id);
+    Post GetPostByIdWithChildren(string id);
+    void CreatePost(Post post);
+    void UpdatePost(Post post);
+    void DeletePost(string id);
+    bool CheckIfCurrentUserLiked(Post post, ControllerBase user);
+}
+
+public class PostService(IPostRepository postRepository) : IPostService
 {
     private readonly IPostRepository _postRepository = postRepository;
 
