@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using webapi.DataContexts;
@@ -6,34 +7,39 @@ using webapi.Models;
 
 namespace webapi.Repositories;
 
-public interface IGenericChildRepository<T1> where T1 : class
+public interface IGenericChildRepository<T> where T : class
 {
-    ICollection<T1> GetByIdWithChildren(string id);
+    public ICollection<T> GetByIdWithChildren(string id, Expression<Func<T, object>> include);
+    public T GetByIdWithMultipleIncludes(string id, Expression<Func<T, object>>[] includes);
 }
 
-public class GenericChildRepository<T1> : IGenericChildRepository<T1> where T1 : class
+public class GenericChildRepository<T> : IGenericChildRepository<T> where T : class
 {
     private readonly NeighborhoodContext _context;
-    private readonly DbSet<T1> _dbSet;
-    private readonly Dictionary<Type, Func<string, IQueryable<T1>>> _includeExpressions;
+    private readonly DbSet<T> _dbSet;
     public GenericChildRepository(NeighborhoodContext context)
     {
         _context = context;
-        _dbSet = _context.Set<T1>();
-        _includeExpressions = new Dictionary<Type, Func<string, IQueryable<T1>>>
-        {
-            { typeof(Neighborhood), id => _dbSet.Include(n => ((Neighborhood)(object)n).Categories).Where(n => ((Neighborhood)(object)n).Id == id).Cast<T1>() },
-            { typeof(Category), id => _dbSet.Include(c => ((Category)(object)c).Posts).Where(c => ((Category)(object)c).Id == id).Cast<T1>() },
-            { typeof(Post), id => _dbSet.Include(p => ((Post)(object)p).Comments).Where(p => ((Post)(object)p).Id == id).Cast<T1>() },
-        };
+        _dbSet = _context.Set<T>();
     }
-    public ICollection<T1> GetByIdWithChildren(string id)
+    public ICollection<T> GetByIdWithChildren(string id, Expression<Func<T, object>> include)
     {
-        if (_includeExpressions.TryGetValue(typeof(T1), out var includeExpression))
+        IQueryable<T> query = _dbSet;
+
+        query = query.Include(include);
+
+        return (ICollection<T>)query.FirstOrDefault(e => EF.Property<string>(e, "Id") == id);
+    }
+
+    public T GetByIdWithMultipleIncludes(string id, Expression<Func<T, object>>[] includes)
+    {
+        IQueryable<T> query = _dbSet;
+
+        foreach (var include in includes)
         {
-            return includeExpression(id).ToList();
+            query = query.Include(include);
         }
 
-        return new List<T1>();
+        return query.FirstOrDefault(e => EF.Property<string>(e, "Id") == id);
     }
 }

@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Any;
+using webapi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -115,11 +116,19 @@ builder.Services.AddScoped<NeighborhoodService>();
 builder.Services.AddScoped<PostService>();
 builder.Services.AddScoped<UserService>();
 
+builder.Services.AddScoped<LikeService>();
+
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<INeighborhoodRepository, NeighborhoodRepository>();
 builder.Services.AddScoped<IPostRepository, PostRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+// builder.Services.AddScoped<IGenericChildRepository<GenericChildRepository>>;
+
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
+
 
 builder.Services.AddScoped<NeighborhoodContext>();
 
@@ -136,7 +145,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseCors(localFrontendCorsPolicy);
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
