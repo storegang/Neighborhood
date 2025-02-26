@@ -5,7 +5,13 @@ using webapi.Repositories;
 
 namespace webapi.Services;
 
-public class LikeService
+public interface ILikeService
+{
+    bool LikePost(Post post, ControllerBase _controllerBase);
+    bool LikeComment(Comment comment, ControllerBase _controllerBase);
+}
+
+public class LikeService : ILikeService
 {
 
     public bool LikePost(Post post, ControllerBase _controllerBase)
