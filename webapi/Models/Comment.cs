@@ -1,8 +1,8 @@
 ﻿namespace webapi.Models;
 
-public class Comment
+public class Comment : BaseEntity
 {
-    public string Id { get; set; }
+    // INHERITS: public string Id { get; set; }
     public string Content { get; set; }
 
     public DateTime DatePosted { get; set; }

@@ -1,8 +1,8 @@
 ﻿namespace webapi.Models;
 
-public class Neighborhood
+public class Neighborhood : BaseEntity
 {
-    public string Id { get; set; }
+    // INHERITS: public string Id { get; set; }
     public string Name { get; set; }
     public string? Description { get; set; }
 
