@@ -1,4 +1,4 @@
-import { formatDate } from "@/lib/formatDate"
+import { formatRelativeDate } from "@/lib/formatters/formatDate"
 import { Post } from "@/Models/Post"
 import Image from "next/image"
 import { useGetCategories } from "../queries"
@@ -51,7 +51,9 @@ export const PostCard: React.FC<Post> = ({
                         Category
                     </div>
                 </div>
-                <p className="text-neutral-500">{formatDate(datePosted)}</p>
+                <p className="text-neutral-500">
+                    {formatRelativeDate(new Date(datePosted))}
+                </p>
                 <div className="justify-between lg:flex">
                     <div className="lg:w-3/4">
                         <h2 className="card-title">{title}</h2>
