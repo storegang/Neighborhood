@@ -11,12 +11,12 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class PostController(IGenericService<Post> postService, IGenericService<Category> categoryService, IGenericService<User> userService, LikeService likeService) : ControllerBase
+public class PostController(IGenericService<Post> postService, IGenericService<Category> categoryService, IGenericService<User> userService, ILikeService likeService) : ControllerBase
 {
     private readonly IGenericService<Post> _postService = postService;
     private readonly IGenericService<Category> _categoryService = categoryService;
     private readonly IGenericService<User> _userService = userService;
-    private readonly LikeService _likeService = likeService;
+    private readonly ILikeService _likeService = likeService;
 
     // GET: api/<PostController>
     [HttpGet]
@@ -72,12 +72,12 @@ public class PostController(IGenericService<Post> postService, IGenericService<C
     public ActionResult<PostCollectionDTO> GetPostByCategoryId(string categoryId)
     {
         var category = _categoryService.GetById(categoryId, [c => c.Posts]);
-        var postCollection = category.Posts;
 
         if (category == null || category.Posts == null)
         {
             return NotFound();
         }
+        var postCollection = category.Posts;
 
         PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
 
@@ -106,7 +106,6 @@ public class PostController(IGenericService<Post> postService, IGenericService<C
     public ActionResult<PostCollectionDTO> GetSomeCommentsByPostId(string categoryId, string page, string size = "5")
     {
         var category = _categoryService.GetById(categoryId, [c => c.Posts]);
-
 
         if (category == null || category.Posts == null)
         {

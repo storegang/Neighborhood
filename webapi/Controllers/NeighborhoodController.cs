@@ -9,15 +9,20 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class NeighborhoodController(INeighborhoodService neighborhoodService) : ControllerBase
+public class NeighborhoodController(IGenericService<Neighborhood> neighborhoodService, IGenericService<User> userService) : ControllerBase
 {
-    private readonly INeighborhoodService _neighborhoodService = neighborhoodService;
+    private readonly IGenericService<Neighborhood> _neighborhoodService = neighborhoodService;
+    private readonly IGenericService<User> _userService = userService;
 
     // GET: api/<NeighborhoodController>
     [HttpGet]
     public ActionResult<NeighborhoodCollectionDTO> GetAll()
     {
-        ICollection<Neighborhood> neighborhoods = _neighborhoodService.GetAllNeighborhoods();
+        ICollection<Neighborhood> neighborhoods = _neighborhoodService.GetAll();
+        if (neighborhoods == null)
+        {
+            return NotFound();
+        }
         NeighborhoodCollectionDTO neighborhoodDataCollection = new NeighborhoodCollectionDTO(neighborhoods);
         return Ok(neighborhoodDataCollection);
     }
@@ -26,7 +31,7 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService) : 
     [HttpGet("{id}")]
     public ActionResult<NeighborhoodDTO> GetById(string id)
     {
-        var neighborhood = _neighborhoodService.GetNeighborhoodById(id);
+        var neighborhood = _neighborhoodService.GetById(id);
         
         if (neighborhood == null)
         {
@@ -46,7 +51,7 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService) : 
         {
             newGuid = Guid.NewGuid().ToString();
         }
-        while (_neighborhoodService.GetNeighborhoodById(newGuid) != null);
+        while (_neighborhoodService.GetById(newGuid) != null);
 
         neighborhoodData.Id = newGuid;
         var neighborhood = new Neighborhood 
@@ -55,7 +60,7 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService) : 
             Name = neighborhoodData.Name,
             Description = neighborhoodData.Description
         };
-        _neighborhoodService.CreateNeighborhood(neighborhood);
+        _neighborhoodService.Create(neighborhood);
 
         return CreatedAtAction(nameof(GetById), new { id = neighborhoodData.Id }, neighborhoodData);
     }
@@ -64,7 +69,7 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService) : 
     [HttpPut("{id}")]
     public IActionResult Update(string id, NeighborhoodDTO neighborhoodData)
     {
-        var existingNeighborhood = _neighborhoodService.GetNeighborhoodById(id);
+        var existingNeighborhood = _neighborhoodService.GetById(id);
         if (existingNeighborhood == null)
         {
             return NotFound();
@@ -77,7 +82,7 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService) : 
             Name = neighborhoodData.Name,
             Description = neighborhoodData.Description
         };
-        _neighborhoodService.UpdateNeighborhood(neighborhood);
+        _neighborhoodService.Update(neighborhood);
 
         return NoContent();
     }
@@ -86,13 +91,13 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService) : 
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)
     {
-        var existingNeighborhood = _neighborhoodService.GetNeighborhoodById(id);
+        var existingNeighborhood = _neighborhoodService.GetById(id);
         if (existingNeighborhood == null)
         {
             return NotFound();
         }
 
-        _neighborhoodService.DeleteNeighborhood(id);
+        _neighborhoodService.Delete(id);
 
         return NoContent();
     }

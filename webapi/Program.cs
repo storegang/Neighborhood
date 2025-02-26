@@ -116,7 +116,8 @@ builder.Services.AddScoped<INeighborhoodService, NeighborhoodService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-builder.Services.AddScoped<LikeService>();
+builder.Services.AddScoped<ILikeService, LikeService>();
+builder.Services.AddScoped<IUserSortService, UserSortService>();
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();

@@ -10,24 +10,24 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(IGenericService<Comment> commentService, IGenericService<User> userService, IGenericService<Post> postService, LikeService likeService) : ControllerBase
+public class CommentController(IGenericService<Comment> commentService, IGenericService<User> userService, IGenericService<Post> postService, ILikeService likeService) : ControllerBase
 {
     private readonly IGenericService<Comment> _commentService = commentService;
     private readonly IGenericService<User> _userService = userService;
     private readonly IGenericService<Post> _postService = postService;
-    private readonly LikeService _likeService = likeService;
+    private readonly ILikeService _likeService = likeService;
 
     // GET: api/<CommentController>
     [HttpGet]
     public ActionResult<CommentCollectionDTO> GetAll()
     {
         ICollection<Comment> commentCollection = _commentService.GetAll([c => c.User]);
-        CommentCollectionDTO commentDataCollection = new CommentCollectionDTO(commentCollection);
-
+        
         if (commentCollection == null)
         {
             return NotFound();
         }
+        CommentCollectionDTO commentDataCollection = new CommentCollectionDTO(commentCollection);
 
         Comment[] comments = new Comment[commentCollection.Count()];
         comments = commentCollection.ToArray();
@@ -72,12 +72,12 @@ public class CommentController(IGenericService<Comment> commentService, IGeneric
     public ActionResult<CommentCollectionDTO> GetCommentsByPostId(string postId)
     {
         var post = _postService.GetById(postId, [c => c.User, c => c.Comments]);
-        var commentCollection = post.Comments;
 
-        if (commentCollection == null)
+        if (post == null || post.Comments == null)
         {
             return NotFound();
         }
+        var commentCollection = post.Comments;
 
         var commentDataCollection = new CommentCollectionDTO(commentCollection);
 
@@ -106,7 +106,6 @@ public class CommentController(IGenericService<Comment> commentService, IGeneric
     public ActionResult<CommentCollectionDTO> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
         var post = _postService.GetById(postId, [c => c.User, c => c.Comments]);
-
 
         if (post == null || post.Comments == null)
         {

@@ -4,25 +4,25 @@ using webapi.Repositories;
 
 namespace webapi.Services;
 
-public interface IGenericService<T> where T : class
+public interface IGenericService<T> where T : BaseEntity
 {
-    ICollection<T> GetAll(Expression<Func<T, object>>[] includes = null);
-    T GetById(string id, Expression<Func<T, object>>[] includes = null);
+    ICollection<T>? GetAll(Expression<Func<T, object>>[] includes = null);
+    T? GetById(string id, Expression<Func<T, object>>[] includes = null);
     void Create(T entity);
     void Update(T entity);
     void Delete(string id);
 }
 
-public class GenericService<T>(IGenericRepository<T> repository) : IGenericService<T> where T : class
+public class GenericService<T>(IGenericRepository<T> repository) : IGenericService<T> where T : BaseEntity
 {
     private readonly IGenericRepository<T> _repository = repository;
 
-    public ICollection<T> GetAll(Expression<Func<T, object>>[] includes = null)
+    public ICollection<T>? GetAll(Expression<Func<T, object>>[] includes = null)
     {
         return _repository.GetAll(includes);
     }
 
-    public T GetById(string id, Expression<Func<T, object>>[] includes = null)
+    public T? GetById(string id, Expression<Func<T, object>>[] includes = null)
     {
         return _repository.GetById(id, includes);
     }

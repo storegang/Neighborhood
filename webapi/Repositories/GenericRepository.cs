@@ -1,20 +1,22 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using webapi.DataContexts;
 using webapi.Models;
 
 namespace webapi.Repositories;
 
-public interface IGenericRepository<T> where T : class
+public interface IGenericRepository<T> where T : BaseEntity
 {
-    ICollection<T> GetAll(Expression<Func<T, object>>[] include = null);
-    T GetById(string id, Expression<Func<T, object>>[] include = null);
+    ICollection<T>? GetAll(Expression<Func<T, object>>[] include = null);
+    T? GetById(string id, Expression<Func<T, object>>[] include = null);
     void Add(T entity);
     void Update(T entity);
     void Delete(T entity);
 }
 
-public class GenericRepository<T> : IGenericRepository<T> where T : class
+public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 {
     private readonly NeighborhoodContext _context;
     private readonly DbSet<T> _dbSet;
@@ -25,7 +27,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         _dbSet = _context.Set<T>();
     }
 
-    public ICollection<T> GetAll(Expression<Func<T, object>>[] includes = null)
+    public ICollection<T>? GetAll(Expression<Func<T, object>>[] includes = null)
     {
         IQueryable<T> query = _dbSet;
 
@@ -44,7 +46,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
         return query?.ToList();
     }
 
-    public T GetById(string id, Expression<Func<T, object>>[] includes = null)
+    public T? GetById(string id, Expression<Func<T, object>>[] includes = null)
     {
         IQueryable<T> query = _dbSet;
 
@@ -65,14 +67,17 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class
 
     public void Add(T entity)
     {
+        if (_dbSet.Find(entity.Id) != null) return;
         _dbSet.Add(entity);
         _context.SaveChanges();
     }
 
     public void Update(T entity)
     {
-        _dbSet.Attach(entity);
-        _context.Entry(entity).State = EntityState.Modified;
+        var existingEntity = _context.Find<T>(entity.Id);
+        if (existingEntity == null) return;
+        _dbSet.Entry(existingEntity).CurrentValues.SetValues(entity);
+        //_context.Entry(entity).State = EntityState.Modified;
         _context.SaveChanges();
     }
 
