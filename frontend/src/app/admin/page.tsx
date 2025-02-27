@@ -1,4 +1,5 @@
 import { DashboardStats } from "./components"
+import { BoardMembers } from "./components/BoardMembers"
 
 export default function Page() {
     return (
@@ -10,6 +11,7 @@ export default function Page() {
                     totalProperites={100}
                     newUsersThisMonth={2}
                 />
+                <BoardMembers />
             </section>
         </main>
     )
