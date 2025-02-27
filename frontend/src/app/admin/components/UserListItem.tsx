@@ -23,7 +23,10 @@ export const UserListItem: React.FC<UserListItemProps> = ({
     isBoardMember,
 }) => {
     return (
-        <li className={`list-row ${!isBoardMember ? "items-center" : ""}`}>
+        <li
+            className={`list-row ${!isBoardMember ? "items-center" : ""}`}
+            key={name}
+        >
             <div>
                 <img alt={name} className="rounded-box size-10" src={avatar} />
             </div>
