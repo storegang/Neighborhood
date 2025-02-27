@@ -1,61 +1,60 @@
 ﻿
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using webapi.DTOs;
+using webapi.Interfaces;
 using webapi.Models;
 using webapi.Repositories;
 
 namespace webapi.Services;
 
-public interface ICommentService
+public interface ICommentService : IGenericService<Comment>, ILikeService<Comment>
 {
-    ICollection<Comment> GetAllComments();
-    Comment GetCommentById(string id);
-    void CreateComment(Comment comment);
-    void UpdateComment(Comment comment);
-    void DeleteComment(string id);
-    bool CheckIfCurrentUserLiked(Comment comment, ControllerBase user);
-
 }
 
-public class CommentService(ICommentRepository commentRepository) : ICommentService
+public class CommentService(IGenericService<Comment> genericService) : ICommentService
 {
-    private readonly ICommentRepository _commentRepository = commentRepository;
+    private readonly IGenericService<Comment> _genericService = genericService;
 
-    public ICollection<Comment> GetAllComments()
+    public ICollection<Comment>? GetAll(Expression<Func<Comment, object>>[]? includes = null, Expression<Func<Comment, object>>[]? thenInclude = null)
     {
-        return _commentRepository.GetAll();
+        return _genericService.GetAll(includes, thenInclude);
     }
 
-    public Comment GetCommentById(string id)
+    public Comment? GetById(string id, Expression<Func<Comment, object>>[]? includes = null, Expression<Func<Comment, object>>[]? thenInclude = null)
     {
-        return _commentRepository.GetById(id);
+        return _genericService.GetById(id, includes, thenInclude);
     }
 
-    public void CreateComment(Comment comment)
+    public void Create(Comment comment)
     {
-        _commentRepository.Add(comment);
+        _genericService.Create(comment);
     }
 
-    public void UpdateComment(Comment comment)
+    public void Update(Comment comment)
     {
-        _commentRepository.Update(comment);
+        _genericService.Update(comment);
     }
 
-    public void DeleteComment(string id)
+    public void Delete(string id)
     {
-        Comment comment = _commentRepository.GetById(id);
+        Comment comment = _genericService.GetById(id);
 
         if (comment != null)
         {
-            _commentRepository.Delete(comment);
+            _genericService.Delete(id);
         }
     }
 
-
-    public bool CheckIfCurrentUserLiked(Comment comment, ControllerBase user)
+    public bool Like(ICollection<string>? likeable, string? userId)
     {
-        if (comment.LikedByUserID.Contains(user.User.Claims.First(c => c.Type.Equals("user_id"))?.Value))
+        if (likeable == null || likeable.Count <= 0 || userId == null)
+        {
+            return false;
+        }
+
+        if (likeable.Contains(userId))
         {
             return true;
         }

@@ -1,54 +1,40 @@
-﻿using webapi.Models;
+﻿using System.Linq.Expressions;
+using webapi.DataContexts;
+using webapi.Models;
 using webapi.Repositories;
 
 namespace webapi.Services;
 
-public interface INeighborhoodService
+public interface INeighborhoodService : IGenericService<Neighborhood>
 {
-    ICollection<Neighborhood> GetAllNeighborhoods();
-    Neighborhood GetNeighborhoodById(string id);
-    Neighborhood GetNeighborhoodByIdWithChildren(string id);
-    void CreateNeighborhood(Neighborhood neighborhood);
-    void UpdateNeighborhood(Neighborhood neighborhood);
-    void DeleteNeighborhood(string id);
 }
 
-public class NeighborhoodService(INeighborhoodRepository neighborhoodRepository) : INeighborhoodService
+public class NeighborhoodService(IGenericService<Neighborhood> genericService) : INeighborhoodService
 {
-    private readonly INeighborhoodRepository _neighborhoodRepository = neighborhoodRepository;
+    private readonly IGenericService<Neighborhood> _genericService = genericService;
 
-    public ICollection<Neighborhood> GetAllNeighborhoods()
+    public ICollection<Neighborhood>? GetAll(Expression<Func<Neighborhood, object>>[]? includes = null, Expression<Func<Neighborhood, object>>[]? thenInclude = null)
     {
-        return _neighborhoodRepository.GetAll();
+        return _genericService.GetAll(includes, thenInclude);
     }
 
-    public Neighborhood GetNeighborhoodById(string id)
+    public Neighborhood? GetById(string id, Expression<Func<Neighborhood, object>>[]? includes = null, Expression<Func<Neighborhood, object>>[]? thenInclude = null)
     {
-        return _neighborhoodRepository.GetById(id);
+        return _genericService.GetById(id, includes, thenInclude);
     }
 
-    public Neighborhood GetNeighborhoodByIdWithChildren(string id)
+    public void Create(Neighborhood entity)
     {
-        return _neighborhoodRepository.GetByIdWithChildren(id);
+        _genericService.Create(entity);
     }
 
-    public void CreateNeighborhood(Neighborhood neighborhood)
+    public void Update(Neighborhood entity)
     {
-        _neighborhoodRepository.Add(neighborhood);
+        _genericService.Update(entity);
     }
 
-    public void UpdateNeighborhood(Neighborhood neighborhood)
+    public void Delete(string id)
     {
-        _neighborhoodRepository.Update(neighborhood);
-    }
-
-    public void DeleteNeighborhood(string id)
-    {
-        Neighborhood neighborhood = _neighborhoodRepository.GetById(id);
-
-        if (neighborhood != null)
-        {
-            _neighborhoodRepository.Delete(neighborhood);
-        }
+        _genericService.Delete(id);
     }
 }

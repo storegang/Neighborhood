@@ -1,8 +1,8 @@
 ﻿namespace webapi.Models;
 
-public class Category
+public class Category : BaseEntity
 {
-    public string Id { get; set; }
+    // INHERITS: public string Id { get; set; }
     public string Name { get; set; }
     public string Color { get; set; }
     public string NeighborhoodId { get; set; }
