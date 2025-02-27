@@ -6,6 +6,8 @@
         night --prefersdark;
 }
 
+@plugin "@tailwindcss/typography";
+
 @utility container {
     margin-left: auto;
     margin-right: auto;

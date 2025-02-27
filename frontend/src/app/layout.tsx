@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 })
 
-export default async function Layout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: ReactNode
