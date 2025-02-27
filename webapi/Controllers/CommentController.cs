@@ -4,18 +4,19 @@ using webapi.Models;
 using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Hosting;
+using webapi.Interfaces;
 
 namespace webapi.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(IGenericService<Comment> commentService, IGenericService<User> userService, IGenericService<Post> postService, ILikeService likeService) : ControllerBase
+public class CommentController(IGenericService<Comment> commentService, IGenericService<User> userService, IGenericService<Post> postService, ILikeService<Comment> likeService) : ControllerBase
 {
     private readonly IGenericService<Comment> _commentService = commentService;
     private readonly IGenericService<User> _userService = userService;
     private readonly IGenericService<Post> _postService = postService;
-    private readonly ILikeService _likeService = likeService;
+    private readonly ILikeService<Comment> _likeService = likeService;
 
     // GET: api/<CommentController>
     [HttpGet]
@@ -39,7 +40,7 @@ public class CommentController(IGenericService<Comment> commentService, IGeneric
         {
             if (comments[i].Id == commentDTOs[i].Id)
             {
-                commentDTOs[i].LikedByCurrentUser = _likeService.LikeComment(comments[i], this);
+                commentDTOs[i].LikedByCurrentUser = _likeService.Like(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -62,7 +63,7 @@ public class CommentController(IGenericService<Comment> commentService, IGeneric
 
         var commentData = new CommentDTO(comment);
 
-        commentData.LikedByCurrentUser = _likeService.LikeComment(comment, this);
+        commentData.LikedByCurrentUser = _likeService.Like(comment.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
         return Ok(commentData);
     }
@@ -91,7 +92,7 @@ public class CommentController(IGenericService<Comment> commentService, IGeneric
         {
             if (comments[i].Id == commentDTOs[i].Id)
             {
-                commentDTOs[i].LikedByCurrentUser = _likeService.LikeComment(comments[i], this);
+                commentDTOs[i].LikedByCurrentUser = _likeService.Like(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -134,7 +135,7 @@ public class CommentController(IGenericService<Comment> commentService, IGeneric
         {
             if (comments[i].Id == commentDTOs[i].Id)
             {
-                commentDTOs[i].LikedByCurrentUser = _likeService.LikeComment(comments[i], this);
+                commentDTOs[i].LikedByCurrentUser = _likeService.Like(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 

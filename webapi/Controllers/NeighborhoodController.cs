@@ -9,16 +9,16 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class NeighborhoodController(IGenericService<Neighborhood> neighborhoodService, IGenericService<User> userService) : ControllerBase
+public class NeighborhoodController(INeighborhoodService neighborhoodService, IGenericService<User> userService) : ControllerBase
 {
-    private readonly IGenericService<Neighborhood> _neighborhoodService = neighborhoodService;
+    private readonly INeighborhoodService _neighborhoodService = neighborhoodService;
     private readonly IGenericService<User> _userService = userService;
 
     // GET: api/<NeighborhoodController>
     [HttpGet]
     public ActionResult<NeighborhoodCollectionDTO> GetAll()
     {
-        ICollection<Neighborhood> neighborhoods = _neighborhoodService.GetAll();
+        ICollection<Neighborhood>? neighborhoods = _neighborhoodService.GetAll();
         if (neighborhoods == null)
         {
             return NotFound();

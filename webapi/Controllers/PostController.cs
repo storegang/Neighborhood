@@ -5,18 +5,19 @@ using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using webapi.Repositories;
 using Microsoft.Extensions.Hosting;
+using webapi.Interfaces;
 
 namespace webapi.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class PostController(IGenericService<Post> postService, IGenericService<Category> categoryService, IGenericService<User> userService, ILikeService likeService) : ControllerBase
+public class PostController(IGenericService<Post> postService, IGenericService<Category> categoryService, IGenericService<User> userService, ILikeService<Post> likeService) : ControllerBase
 {
     private readonly IGenericService<Post> _postService = postService;
     private readonly IGenericService<Category> _categoryService = categoryService;
     private readonly IGenericService<User> _userService = userService;
-    private readonly ILikeService _likeService = likeService;
+    private readonly ILikeService<Post> _likeService = likeService;
 
     // GET: api/<PostController>
     [HttpGet]
@@ -41,7 +42,7 @@ public class PostController(IGenericService<Post> postService, IGenericService<C
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
-                postDTOs[i].LikedByCurrentUser = _likeService.LikePost(posts[i], this);
+                postDTOs[i].LikedByCurrentUser = _likeService.Like(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -62,7 +63,7 @@ public class PostController(IGenericService<Post> postService, IGenericService<C
 
         PostDTO postData = new PostDTO(post);
 
-        postData.LikedByCurrentUser = _likeService.LikePost(post, this);
+        postData.LikedByCurrentUser = _likeService.Like(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
         return Ok(postData);
     }
@@ -91,7 +92,7 @@ public class PostController(IGenericService<Post> postService, IGenericService<C
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
-                postDTOs[i].LikedByCurrentUser = _likeService.LikePost(posts[i], this);
+                postDTOs[i].LikedByCurrentUser = _likeService.Like(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -134,7 +135,7 @@ public class PostController(IGenericService<Post> postService, IGenericService<C
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
-                postDTOs[i].LikedByCurrentUser = _likeService.LikePost(posts[i], this);
+                postDTOs[i].LikedByCurrentUser = _likeService.Like(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 

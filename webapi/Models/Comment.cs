@@ -1,6 +1,8 @@
-﻿namespace webapi.Models;
+﻿using webapi.Interfaces;
 
-public class Comment : BaseEntity
+namespace webapi.Models;
+
+public class Comment : BaseEntity, ILikeable
 {
     // INHERITS: public string Id { get; set; }
     public string Content { get; set; }

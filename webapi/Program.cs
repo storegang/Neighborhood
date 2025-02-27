@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi.Interfaces;
 using Microsoft.OpenApi.Any;
 using webapi.Models;
+using webapi.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -116,7 +117,7 @@ builder.Services.AddScoped<INeighborhoodService, NeighborhoodService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-builder.Services.AddScoped<ILikeService, LikeService>();
+builder.Services.AddScoped(typeof(ILikeService<>));
 builder.Services.AddScoped<IUserSortService, UserSortService>();
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();

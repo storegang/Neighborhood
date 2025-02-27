@@ -9,10 +9,10 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class CategoryController(IGenericService<Category> categoryService, IGenericService<Neighborhood> neighborhoodService) : ControllerBase
+public class CategoryController(IGenericService<Category> categoryService, INeighborhoodService neighborhoodService) : ControllerBase
 {
     private readonly IGenericService<Category> _categoryService = categoryService;
-    private readonly IGenericService<Neighborhood> _neighborhoodService = neighborhoodService;
+    private readonly INeighborhoodService _neighborhoodService = neighborhoodService;
 
     // GET: api/<CategoryController>
     [HttpGet]
@@ -68,6 +68,10 @@ public class CategoryController(IGenericService<Category> categoryService, IGene
         {
             return NotFound();
         }
+        if (categoryData == null)
+        {
+            return BadRequest();
+        }
 
         string newGuid;
         do
@@ -77,7 +81,7 @@ public class CategoryController(IGenericService<Category> categoryService, IGene
         while (_categoryService.GetById(newGuid) != null);
 
         categoryData.Id = newGuid;
-        var category = new Category 
+        var category = new Category
         {
             Id = categoryData.Id,
             Name = categoryData.Name,
@@ -86,6 +90,10 @@ public class CategoryController(IGenericService<Category> categoryService, IGene
         };
         _categoryService.Create(category);
 
+        if (neighborhood.Categories == null)
+        {
+            neighborhood.Categories = new List<Category>();
+        }
         neighborhood.Categories.Add(category);
         _neighborhoodService.Update(neighborhood);
 

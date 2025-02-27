@@ -6,8 +6,8 @@ namespace webapi.Services;
 
 public interface IGenericService<T> where T : BaseEntity
 {
-    ICollection<T>? GetAll(Expression<Func<T, object>>[] includes = null);
-    T? GetById(string id, Expression<Func<T, object>>[] includes = null);
+    ICollection<T>? GetAll(Expression<Func<T, object>>[]? includes = null, Expression<Func<T, object>>[]? thenInclude = null);
+    T? GetById(string id, Expression<Func<T, object>>[]? includes = null, Expression<Func<T, object>>[]? thenInclude = null);
     void Create(T entity);
     void Update(T entity);
     void Delete(string id);
@@ -17,14 +17,14 @@ public class GenericService<T>(IGenericRepository<T> repository) : IGenericServi
 {
     private readonly IGenericRepository<T> _repository = repository;
 
-    public ICollection<T>? GetAll(Expression<Func<T, object>>[] includes = null)
+    public ICollection<T>? GetAll(Expression<Func<T, object>>[]? includes = null, Expression<Func<T, object>>[]? thenInclude = null)
     {
-        return _repository.GetAll(includes);
+        return _repository.GetAll(includes, thenInclude);
     }
 
-    public T? GetById(string id, Expression<Func<T, object>>[] includes = null)
+    public T? GetById(string id, Expression<Func<T, object>>[]? includes = null, Expression<Func<T, object>>[]? thenInclude = null)
     {
-        return _repository.GetById(id, includes);
+        return _repository.GetById(id, includes, thenInclude);
     }
 
     public void Create(T entity)
