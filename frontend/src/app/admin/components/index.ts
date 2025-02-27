@@ -1,3 +1,3 @@
 export { DashboardStats } from "./DashboardStats"
-export { BoardMembersList } from "./BoardMembersList"
-export { BoardMember } from "./BoardMember"
+export { UsersList } from "./UsersList"
+export { UserListItem } from "./UserListItem"
