@@ -111,7 +111,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     [HttpGet("FromPost={postId}&Page={page}")]
     public ActionResult<CommentCollectionDTO> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
-        var post = _postService.GetById(postId, [p => p.User, p => p.Comments.Select(c => c.User)]);
+        var post = _postService.GetById(postId, [p => p.Comments]);
 
         if (post == null || post.Comments == null)
         {
