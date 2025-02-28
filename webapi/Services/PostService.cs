@@ -1,64 +1,25 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using webapi.DTOs;
+using webapi.Interfaces;
 using webapi.Models;
 using webapi.Repositories;
 
 namespace webapi.Services;
 
-public interface IPostService
+public interface IPostService : IBaseService<Post>, ILikeService<Post>
 {
-    ICollection<Post> GetAllPosts();
-    Post GetPostById(string id);
-    Post GetPostByIdWithChildren(string id);
-    void CreatePost(Post post);
-    void UpdatePost(Post post);
-    void DeletePost(string id);
-    bool CheckIfCurrentUserLiked(Post post, ControllerBase user);
 }
 
-public class PostService(IPostRepository postRepository) : IPostService
+public class PostService(IGenericRepository<Post> repository) : BaseService<Post>(repository), IPostService
 {
-    private readonly IPostRepository _postRepository = postRepository;
-
-    public ICollection<Post> GetAllPosts()
+    public bool Like(ICollection<string>? likeable, string? userId)
     {
-        return _postRepository.GetAll();
-    }
-
-    public Post GetPostById(string id)
-    {
-        return _postRepository.GetById(id);
-    }
-
-    public Post GetPostByIdWithChildren(string id)
-    {
-        return _postRepository.GetByIdWithChildren(id);
-    }
-
-    public void CreatePost(Post post)
-    {
-        _postRepository.Add(post);
-    }
-
-    public void UpdatePost(Post post)
-    {
-        _postRepository.Update(post);
-    }
-
-    public void DeletePost(string id)
-    {
-        Post post = _postRepository.GetById(id);
-
-        if (post != null)
+        if (likeable == null || likeable.Count <= 0 || userId == null)
         {
-            _postRepository.Delete(post);
+            return false;
         }
-    }
 
-
-    public bool CheckIfCurrentUserLiked(Post post, ControllerBase user)
-    {
-        if (post.LikedByUserID.Contains(user.User.Claims.First(c => c.Type.Equals("user_id"))?.Value))
+        if (likeable.Contains(userId))
         {
             return true;
         }

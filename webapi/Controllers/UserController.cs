@@ -9,10 +9,10 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(IGenericService<User> userService, IGenericService<Neighborhood> neighborhoodService, IUserSortService userSortService) : ControllerBase
+public class UserController(IBaseService<User> userService, IBaseService<Neighborhood> neighborhoodService, IUserSortService userSortService) : ControllerBase
 {
-    private readonly IGenericService<User> _userService = userService;
-    private readonly IGenericService<Neighborhood> _neighborhoodService = neighborhoodService;
+    private readonly IBaseService<User> _userService = userService;
+    private readonly IBaseService<Neighborhood> _neighborhoodService = neighborhoodService;
     private readonly IUserSortService _userSortService = userSortService;
 
     // GET: api/<UserController>

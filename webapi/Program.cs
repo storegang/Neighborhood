@@ -117,7 +117,10 @@ builder.Services.AddScoped<INeighborhoodService, NeighborhoodService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-builder.Services.AddScoped(typeof(ILikeService<>));
+builder.Services.AddScoped(typeof(ILikeService<Comment>), typeof(CommentService));
+builder.Services.AddScoped(typeof(ILikeService<Post>), typeof(PostService));
+builder.Services.AddScoped(typeof(IUserReference), typeof(Comment));
+builder.Services.AddScoped(typeof(IUserReference), typeof(Post));
 builder.Services.AddScoped<IUserSortService, UserSortService>();
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -129,7 +132,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 // builder.Services.AddScoped<IGenericChildRepository<GenericChildRepository>>;
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-builder.Services.AddScoped(typeof(IGenericService<>), typeof(GenericService<>));
+builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
 
 
 builder.Services.AddScoped<NeighborhoodContext>();

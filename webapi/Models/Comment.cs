@@ -2,7 +2,7 @@
 
 namespace webapi.Models;
 
-public class Comment : BaseEntity, ILikeable
+public class Comment : BaseEntity, ILikeable, IUserReference
 {
     // INHERITS: public string Id { get; set; }
     public string Content { get; set; }

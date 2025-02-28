@@ -11,11 +11,11 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(IGenericService<Comment> commentService, IGenericService<User> userService, IGenericService<Post> postService, ILikeService<Comment> likeService) : ControllerBase
+public class CommentController(IBaseService<Comment> commentService, IBaseService<User> userService, IBaseService<Post> postService, ILikeService<Comment> likeService) : ControllerBase
 {
-    private readonly IGenericService<Comment> _commentService = commentService;
-    private readonly IGenericService<User> _userService = userService;
-    private readonly IGenericService<Post> _postService = postService;
+    private readonly IBaseService<Comment> _commentService = commentService;
+    private readonly IBaseService<User> _userService = userService;
+    private readonly IBaseService<Post> _postService = postService;
     private readonly ILikeService<Comment> _likeService = likeService;
 
     // GET: api/<CommentController>
@@ -72,13 +72,18 @@ public class CommentController(IGenericService<Comment> commentService, IGeneric
     [HttpGet("AllFromPost={postId}")]
     public ActionResult<CommentCollectionDTO> GetCommentsByPostId(string postId)
     {
-        var post = _postService.GetById(postId, [c => c.User, c => c.Comments]);
+        var post = _postService.GetById(postId, [p => p.Comments]);
 
         if (post == null || post.Comments == null)
         {
             return NotFound();
         }
         var commentCollection = post.Comments;
+
+        foreach (var comment in commentCollection)
+        {
+            comment.User = _commentService.GetById(comment.Id, [c => c.User]).User;
+        }
 
         var commentDataCollection = new CommentCollectionDTO(commentCollection);
 
@@ -106,7 +111,7 @@ public class CommentController(IGenericService<Comment> commentService, IGeneric
     [HttpGet("FromPost={postId}&Page={page}")]
     public ActionResult<CommentCollectionDTO> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
-        var post = _postService.GetById(postId, [c => c.User, c => c.Comments]);
+        var post = _postService.GetById(postId, [p => p.User, p => p.Comments.Select(c => c.User)]);
 
         if (post == null || post.Comments == null)
         {
@@ -185,15 +190,14 @@ public class CommentController(IGenericService<Comment> commentService, IGeneric
 
     // PUT api/<CommentController>/{id}
     [HttpPut("{id}")]
-    public IActionResult Update(string id, CommentDTO commentData)
+    public IActionResult Update(CommentDTO commentData)
     {
-        var existingComment = _commentService.GetById(id, [c => c.User]);
+        var existingComment = _commentService.GetById(commentData.Id, [c => c.User]);
         if (existingComment == null)
         {
             return NotFound();
         }
 
-        commentData.Id = id;
         var comment = new Comment 
         {
             Id = existingComment.Id,

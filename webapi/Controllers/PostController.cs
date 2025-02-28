@@ -12,11 +12,11 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class PostController(IGenericService<Post> postService, IGenericService<Category> categoryService, IGenericService<User> userService, ILikeService<Post> likeService) : ControllerBase
+public class PostController(IBaseService<Post> postService, IBaseService<Category> categoryService, IBaseService<User> userService, ILikeService<Post> likeService) : ControllerBase
 {
-    private readonly IGenericService<Post> _postService = postService;
-    private readonly IGenericService<Category> _categoryService = categoryService;
-    private readonly IGenericService<User> _userService = userService;
+    private readonly IBaseService<Post> _postService = postService;
+    private readonly IBaseService<Category> _categoryService = categoryService;
+    private readonly IBaseService<User> _userService = userService;
     private readonly ILikeService<Post> _likeService = likeService;
 
     // GET: api/<PostController>

@@ -3,14 +3,15 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using webapi.DataContexts;
+using webapi.Interfaces;
 using webapi.Models;
 
 namespace webapi.Repositories;
 
 public interface IGenericRepository<T> where T : BaseEntity
 {
-    ICollection<T>? GetAll(Expression<Func<T, object>>[]? include = null, Expression<Func<T, object>>[]? thenInclude = null);
-    T? GetById(string id, Expression<Func<T, object>>[]? include = null, Expression<Func<T, object>>[]? thenInclude = null);
+    ICollection<T>? GetAll(Expression<Func<T, object>>[]? include = null);
+    T? GetById(string id, Expression<Func<T, object>>[]? include = null);
     void Add(T entity);
     void Update(T entity);
     void Delete(T entity);
@@ -27,7 +28,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         _dbSet = _context.Set<T>();
     }
 
-    public ICollection<T>? GetAll(Expression<Func<T, object>>[]? includes = null, Expression<Func<T, object>>[]? thenInclude = null)
+    public ICollection<T>? GetAll(Expression<Func<T, object>>[]? includes = null)
     {
         IQueryable<T> query = _dbSet;
 
@@ -46,13 +47,13 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         return query?.ToList();
     }
 
-    public T? GetById(string id, Expression<Func<T, object>>[]? includes = null, Expression<Func<T, object>>[]? thenInclude = null)
+    public T? GetById(string id, Expression<Func<T, object>>[]? includes = null)
     {
         IQueryable<T> query = _dbSet;
 
         if (includes == null)
         {
-            return query.FirstOrDefault(e => EF.Property<string>(e, "Id") == id);
+            return query.FirstOrDefault(e => e.Id == id);
         }
         else
         {
@@ -62,7 +63,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             }
         }
 
-        return query?.FirstOrDefault(e => EF.Property<string>(e, "Id") == id);
+        return query.FirstOrDefault(e => e.Id == id);
     }
 
     public void Add(T entity)

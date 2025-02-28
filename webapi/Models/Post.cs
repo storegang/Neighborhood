@@ -2,7 +2,7 @@
 
 namespace webapi.Models;
 
-public class Post : BaseEntity, ILikeable
+public class Post : BaseEntity, ILikeable, IUserReference
 {
     // INHERITS: public string Id { get; set; }
     public string Title { get; set; }
