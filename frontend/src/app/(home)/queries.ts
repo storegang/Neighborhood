@@ -1,16 +1,30 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { createPost, CreatePostInput, getCategories, getPosts } from "./actions"
-import { User } from "@/Models"
+import { Category, User } from "@/Models"
 
-export const useGetPosts = (user: User | null) => {
+/**
+ * Gets the posts from the server.
+ *
+ * @param user - User input, for the accessToken.
+ * @param category - Category input, for filtering posts if needed.
+ * @returns The query calling the getPosts function.
+ */
+export const useGetPosts = (user: User | null, category?: Category) => {
     const accessToken = user?.accessToken
     return useQuery({
-        queryKey: ["posts", accessToken],
+        queryKey: ["posts", accessToken, category],
         enabled: !!accessToken,
         queryFn: () => getPosts(accessToken!),
     })
 }
 
+// TODO: Add specific neighborhood to the query
+/**
+ * Gets the categories, in the specific neighborhood, from the server.
+ *
+ * @param user - User input, for the accessToken.
+ * @returns The query calling the getCategories function.
+ */
 export const useGetCategories = (user: User | null) => {
     const accessToken = user?.accessToken
     return useQuery({
@@ -20,6 +34,11 @@ export const useGetCategories = (user: User | null) => {
     })
 }
 
+/**
+ * Creates a post on the server.
+ *
+ * @returns The mutation calling the createPost function.
+ */
 export const useCreatePost = () => {
     return useMutation({
         mutationFn: (input: CreatePostInput) => {

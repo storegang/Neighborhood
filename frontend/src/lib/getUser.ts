@@ -7,6 +7,11 @@ import { auth } from "@/lib/firebase/clientApp.js"
 import { useRouter } from "next/navigation"
 import { User } from "@/Models/User"
 
+/**
+ * Custom hook to get the user from firebase auth
+ *
+ * @returns The user object
+ */
 export const useUser = () => {
     const [user, setUser] = useState<User | null>(null)
 
@@ -20,11 +25,11 @@ export const useUser = () => {
         return () => unsubscribe()
     }, [])
 
-    useEffect(() => {
+    /*   useEffect(() => {
         if (!user?.accessToken) {
             router.push("/")
         }
-    }, [user])
+    }, [user]) */
 
     return user
 }
