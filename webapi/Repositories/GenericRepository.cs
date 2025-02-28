@@ -10,7 +10,7 @@ namespace webapi.Repositories;
 
 public interface IGenericRepository<T> where T : BaseEntity
 {
-    ICollection<T>? GetAll(Expression<Func<T, object>>[]? include = null);
+    ICollection<T> GetAll(Expression<Func<T, object>>[]? include = null);
     T? GetById(string id, Expression<Func<T, object>>[]? include = null);
     void Add(T entity);
     void Update(T entity);
@@ -28,7 +28,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         _dbSet = _context.Set<T>();
     }
 
-    public ICollection<T>? GetAll(Expression<Func<T, object>>[]? includes = null)
+    public ICollection<T> GetAll(Expression<Func<T, object>>[]? includes = null)
     {
         IQueryable<T> query = _dbSet;
 

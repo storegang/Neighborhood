@@ -19,10 +19,7 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService, IB
     public ActionResult<NeighborhoodCollectionDTO> GetAll()
     {
         ICollection<Neighborhood>? neighborhoods = _neighborhoodService.GetAll();
-        if (neighborhoods == null)
-        {
-            return NotFound();
-        }
+        
         NeighborhoodCollectionDTO neighborhoodDataCollection = new NeighborhoodCollectionDTO(neighborhoods);
         return Ok(neighborhoodDataCollection);
     }

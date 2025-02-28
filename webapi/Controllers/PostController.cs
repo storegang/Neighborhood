@@ -25,11 +25,6 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
     {
         ICollection<Post> postCollection = _postService.GetAll([c => c.User]);
 
-        if (postCollection == null)
-        {
-            return NotFound();
-        }
-
         PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
 
         Post[] posts = new Post[postCollection.Count()];
@@ -51,6 +46,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         return Ok(postDataCollection);
     }
 
+    // GET api/<PostController>/{id}
     [HttpGet("{id}")]
     public ActionResult<PostDTO> GetById(string id)
     {

@@ -24,10 +24,6 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     {
         ICollection<Comment> commentCollection = _commentService.GetAll([c => c.User]);
         
-        if (commentCollection == null)
-        {
-            return NotFound();
-        }
         CommentCollectionDTO commentDataCollection = new CommentCollectionDTO(commentCollection);
 
         Comment[] comments = new Comment[commentCollection.Count()];

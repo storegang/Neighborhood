@@ -19,10 +19,6 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
     public ActionResult<CategoryCollectionDTO> GetAll()
     {
         var categories = _categoryService.GetAll();
-        if (categories == null)
-        {
-            return NotFound();
-        }
         var categoryDataCollection = new CategoryCollectionDTO(categories);
         return Ok(categoryDataCollection);
     }
@@ -67,10 +63,6 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         if (neighborhood == null)
         {
             return NotFound();
-        }
-        if (categoryData == null)
-        {
-            return BadRequest();
         }
 
         string newGuid;

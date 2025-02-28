@@ -20,11 +20,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
     public ActionResult<UserCollectionDTO> GetAll()
     {
         ICollection<User> users = _userService.GetAll();
-        if (users == null)
-        {
-            Console.WriteLine("No users found. Have you forgotten to add any?");
-            return NotFound();
-        }
+        
         UserCollectionDTO userDataCollection = new UserCollectionDTO(users);
         return Ok(userDataCollection);
     }

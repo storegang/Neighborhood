@@ -6,7 +6,7 @@ namespace webapi.Services;
 
 public interface IBaseService<T> where T : BaseEntity
 {
-    ICollection<T>? GetAll(Expression<Func<T, object>>[]? includes = null);
+    ICollection<T> GetAll(Expression<Func<T, object>>[]? includes = null);
     T? GetById(string id, Expression<Func<T, object>>[]? includes = null);
     void Create(T entity);
     void Update(T entity);
@@ -17,7 +17,7 @@ public class BaseService<T>(IGenericRepository<T> repository) : IBaseService<T> 
 {
     private readonly IGenericRepository<T> _repository = repository;
 
-    public ICollection<T>? GetAll(Expression<Func<T, object>>[]? includes = null)
+    public ICollection<T> GetAll(Expression<Func<T, object>>[]? includes = null)
     {
         return _repository.GetAll(includes);
     }
