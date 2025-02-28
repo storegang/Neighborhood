@@ -7,7 +7,7 @@ namespace webapi.Interfaces;
 
 public interface ILikeService<T> where T : ILikeable
 {
-    bool Like(ICollection<string>? likeable, string? userId);
+    bool IsLiked(ICollection<string>? likeable, string? userId);
 }
 
 public interface ILikeable

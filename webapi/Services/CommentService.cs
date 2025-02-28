@@ -15,7 +15,7 @@ public interface ICommentService : IBaseService<Comment>, ILikeService<Comment>
 
 public class CommentService(IGenericRepository<Comment> repository) : BaseService<Comment>(repository), ICommentService
 {
-    public bool Like(ICollection<string>? likeable, string? userId)
+    public bool IsLiked(ICollection<string>? likeable, string? userId)
     {
         if (likeable == null || likeable.Count <= 0 || userId == null)
         {

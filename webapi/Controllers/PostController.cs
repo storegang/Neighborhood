@@ -42,7 +42,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
-                postDTOs[i].LikedByCurrentUser = _likeService.Like(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                postDTOs[i].LikedByCurrentUser = _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -63,7 +63,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
         PostDTO postData = new PostDTO(post);
 
-        postData.LikedByCurrentUser = _likeService.Like(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+        postData.LikedByCurrentUser = _likeService.IsLiked(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
         return Ok(postData);
     }
@@ -92,7 +92,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
-                postDTOs[i].LikedByCurrentUser = _likeService.Like(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                postDTOs[i].LikedByCurrentUser = _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -135,7 +135,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
-                postDTOs[i].LikedByCurrentUser = _likeService.Like(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                postDTOs[i].LikedByCurrentUser = _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 

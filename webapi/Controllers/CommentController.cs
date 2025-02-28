@@ -40,7 +40,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         {
             if (comments[i].Id == commentDTOs[i].Id)
             {
-                commentDTOs[i].LikedByCurrentUser = _likeService.Like(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                commentDTOs[i].LikedByCurrentUser = _likeService.IsLiked(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -63,7 +63,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
         var commentData = new CommentDTO(comment);
 
-        commentData.LikedByCurrentUser = _likeService.Like(comment.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+        commentData.LikedByCurrentUser = _likeService.IsLiked(comment.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
         return Ok(commentData);
     }
@@ -82,7 +82,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
         foreach (var comment in commentCollection)
         {
-            comment.User = _commentService.GetById(comment.Id, [c => c.User]).User;
+            comment.User = _commentService.GetById(comment.Id, [c => c.User])?.User;
         }
 
         var commentDataCollection = new CommentCollectionDTO(commentCollection);
@@ -97,7 +97,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         {
             if (comments[i].Id == commentDTOs[i].Id)
             {
-                commentDTOs[i].LikedByCurrentUser = _likeService.Like(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                commentDTOs[i].LikedByCurrentUser = _likeService.IsLiked(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -140,7 +140,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         {
             if (comments[i].Id == commentDTOs[i].Id)
             {
-                commentDTOs[i].LikedByCurrentUser = _likeService.Like(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                commentDTOs[i].LikedByCurrentUser = _likeService.IsLiked(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
