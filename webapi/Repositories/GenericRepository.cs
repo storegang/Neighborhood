@@ -1,40 +1,94 @@
-﻿using webapi.Models;
+﻿using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
+using webapi.DataContexts;
+using webapi.Interfaces;
+using webapi.Models;
 
 namespace webapi.Repositories;
 
-public interface IGenericRepository
+public interface IGenericRepository<T> where T : BaseEntity
 {
-    ICollection<Comment> GetAll();
-    Comment GetById(string id);
-    void Add(Comment comment);
-    void Update(Comment comment);
-    void Delete(Comment comment);
+    ICollection<T> GetAll(Expression<Func<T, object>>[]? include = null);
+    T? GetById(string id, Expression<Func<T, object>>[]? include = null);
+    void Add(T entity);
+    void Update(T entity);
+    void Delete(T entity);
 }
 
-public class GenericRepository : IGenericRepository
+public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 {
-    public void Add(Comment comment)
+    private readonly NeighborhoodContext _context;
+    private readonly DbSet<T> _dbSet;
+
+    public GenericRepository(NeighborhoodContext context)
     {
-        throw new NotImplementedException();
+        _context = context;
+        _dbSet = _context.Set<T>();
     }
 
-    public void Delete(Comment comment)
+    public ICollection<T> GetAll(Expression<Func<T, object>>[]? includes = null)
     {
-        throw new NotImplementedException();
+        IQueryable<T> query = _dbSet;
+
+        if (includes == null)
+        {
+            return [.. query];
+        }
+        else
+        {
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+        }
+
+        return query?.ToList();
     }
 
-    public ICollection<Comment> GetAll()
+    public T? GetById(string id, Expression<Func<T, object>>[]? includes = null)
     {
-        throw new NotImplementedException();
+        IQueryable<T> query = _dbSet;
+
+        if (includes == null)
+        {
+            return query.FirstOrDefault(e => e.Id == id);
+        }
+        else
+        {
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+        }
+
+        return query.FirstOrDefault(e => e.Id == id);
     }
 
-    public Comment GetById(string id)
+    public void Add(T entity)
     {
-        throw new NotImplementedException();
+        if (_dbSet.Find(entity.Id) != null) return;
+        _dbSet.Add(entity);
+        _context.SaveChanges();
     }
 
-    public void Update(Comment comment)
+    public void Update(T entity)
     {
-        throw new NotImplementedException();
+        var existingEntity = _context.Find<T>(entity.Id);
+        if (existingEntity == null) return;
+        _dbSet.Entry(existingEntity).CurrentValues.SetValues(entity);
+        //_context.Entry(entity).State = EntityState.Modified;
+        _context.SaveChanges();
+    }
+
+    public void Delete(T entity)
+    {
+        if (_context.Entry(entity).State == EntityState.Detached)
+        {
+            _dbSet.Attach(entity);
+        }
+        _dbSet.Remove(entity);
+        _context.SaveChanges();
     }
 }

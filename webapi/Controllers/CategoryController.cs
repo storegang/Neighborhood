@@ -9,16 +9,16 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class CategoryController(ICategoryService categoryService, INeighborhoodService neighborhoodService) : ControllerBase
+public class CategoryController(IBaseService<Category> categoryService, INeighborhoodService neighborhoodService) : ControllerBase
 {
-    private readonly ICategoryService _categoryService = categoryService;
+    private readonly IBaseService<Category> _categoryService = categoryService;
     private readonly INeighborhoodService _neighborhoodService = neighborhoodService;
 
     // GET: api/<CategoryController>
     [HttpGet]
     public ActionResult<CategoryCollectionDTO> GetAll()
     {
-        var categories = _categoryService.GetAllCategories();
+        var categories = _categoryService.GetAll();
         var categoryDataCollection = new CategoryCollectionDTO(categories);
         return Ok(categoryDataCollection);
     }
@@ -27,7 +27,7 @@ public class CategoryController(ICategoryService categoryService, INeighborhoodS
     [HttpGet("{id}")]
     public ActionResult<CategoryDTO> GetById(string id)
     {
-        var category = _categoryService.GetCategoryById(id);
+        var category = _categoryService.GetById(id);
         
         if (category == null)
         {
@@ -42,13 +42,13 @@ public class CategoryController(ICategoryService categoryService, INeighborhoodS
     [HttpGet("FromNeighborhood={neighborhoodId}")]
     public ActionResult<CategoryCollectionDTO> GetCategoryByNeighborhoodId(string neighborhoodId)
     {
-        var neighborhood = _neighborhoodService.GetNeighborhoodByIdWithChildren(neighborhoodId);
-        var categories = neighborhood.Categories;
+        var neighborhood = _neighborhoodService.GetById(neighborhoodId);
 
         if (neighborhood == null || neighborhood.Categories == null)
         {
             return NotFound();
         }
+        var categories = neighborhood.Categories;
 
         var categoryData = new CategoryCollectionDTO(categories);
         return Ok(categoryData);
@@ -58,7 +58,7 @@ public class CategoryController(ICategoryService categoryService, INeighborhoodS
     [HttpPost]
     public ActionResult<CategoryDTO> Create(CategoryDTO categoryData)
     {
-        var neighborhood = _neighborhoodService.GetNeighborhoodById(categoryData.NeighborhoodId);
+        var neighborhood = _neighborhoodService.GetById(categoryData.NeighborhoodId);
 
         if (neighborhood == null)
         {
@@ -70,20 +70,24 @@ public class CategoryController(ICategoryService categoryService, INeighborhoodS
         {
             newGuid = Guid.NewGuid().ToString();
         }
-        while (_categoryService.GetCategoryById(newGuid) != null);
+        while (_categoryService.GetById(newGuid) != null);
 
         categoryData.Id = newGuid;
-        var category = new Category 
+        var category = new Category
         {
             Id = categoryData.Id,
             Name = categoryData.Name,
             Color = categoryData.Color,
             NeighborhoodId = categoryData.NeighborhoodId
         };
-        _categoryService.CreateCategory(category);
+        _categoryService.Create(category);
 
+        if (neighborhood.Categories == null)
+        {
+            neighborhood.Categories = new List<Category>();
+        }
         neighborhood.Categories.Add(category);
-        _neighborhoodService.UpdateNeighborhood(neighborhood);
+        _neighborhoodService.Update(neighborhood);
 
         return CreatedAtAction(nameof(GetById), new { id = categoryData.Id }, categoryData);
     }
@@ -92,7 +96,7 @@ public class CategoryController(ICategoryService categoryService, INeighborhoodS
     [HttpPut("{id}")]
     public IActionResult Update(string id, CategoryDTO categoryData)
     {
-        var existingCategory = _categoryService.GetCategoryById(id);
+        var existingCategory = _categoryService.GetById(id);
         if (existingCategory == null)
         {
             return NotFound();
@@ -106,7 +110,7 @@ public class CategoryController(ICategoryService categoryService, INeighborhoodS
             Color = categoryData.Color,
             NeighborhoodId = categoryData.NeighborhoodId
         };
-        _categoryService.UpdateCategory(category);
+        _categoryService.Update(category);
 
         return NoContent();
     }
@@ -115,13 +119,13 @@ public class CategoryController(ICategoryService categoryService, INeighborhoodS
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)
     {
-        var existingCategory = _categoryService.GetCategoryById(id);
+        var existingCategory = _categoryService.GetById(id);
         if (existingCategory == null)
         {
             return NotFound();
         }
 
-        _categoryService.DeleteCategory(id);
+        _categoryService.Delete(id);
 
         return NoContent();
     }

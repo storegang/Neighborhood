@@ -1,8 +1,10 @@
-﻿namespace webapi.Models;
+﻿using webapi.Interfaces;
 
-public class Comment
+namespace webapi.Models;
+
+public class Comment : BaseEntity, ILikeable, IUserReference
 {
-    public string Id { get; set; }
+    // INHERITS: public string Id { get; set; }
     public string Content { get; set; }
 
     public DateTime DatePosted { get; set; }

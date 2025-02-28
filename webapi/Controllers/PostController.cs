@@ -3,24 +3,46 @@ using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using webapi.Repositories;
+using Microsoft.Extensions.Hosting;
+using webapi.Interfaces;
 
 namespace webapi.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class PostController(IPostService postService, IUserService userService, ICategoryService categoryService) : ControllerBase
+public class PostController(IBaseService<Post> postService, IBaseService<Category> categoryService, IBaseService<User> userService, ILikeService<Post> likeService) : ControllerBase
 {
-    private readonly IPostService _postService = postService;
-    private readonly IUserService _userService = userService;
-    private readonly ICategoryService _categoryService = categoryService;
+    private readonly IBaseService<Post> _postService = postService;
+    private readonly IBaseService<Category> _categoryService = categoryService;
+    private readonly IBaseService<User> _userService = userService;
+    private readonly ILikeService<Post> _likeService = likeService;
 
     // GET: api/<PostController>
     [HttpGet]
     public ActionResult<PostCollectionDTO> GetAll()
     {
-        ICollection<Post> posts = _postService.GetAllPosts();
-        PostCollectionDTO postDataCollection = new PostCollectionDTO(posts);
+        ICollection<Post> postCollection = _postService.GetAll([c => c.User]);
+
+        PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
+
+        Post[] posts = new Post[postCollection.Count()];
+        posts = postCollection.ToArray();
+
+        PostDTO[] postDTOs = new PostDTO[postDataCollection.Posts.Count()];
+        postDTOs = postDataCollection.Posts.ToArray();
+
+        for (int i = 0; i < postCollection.Count; i++)
+        {
+            if (posts[i].Id == postDTOs[i].Id)
+            {
+                postDTOs[i].LikedByCurrentUser = _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+            }
+        }
+
+        postDataCollection.Posts = postDTOs;
+
         return Ok(postDataCollection);
     }
 
@@ -28,7 +50,7 @@ public class PostController(IPostService postService, IUserService userService, 
     [HttpGet("{id}")]
     public ActionResult<PostDTO> GetById(string id)
     {
-        var post = _postService.GetPostById(id);
+        var post = _postService.GetById(id, [ c => c.User]);
 
         if (post == null)
         {
@@ -37,7 +59,7 @@ public class PostController(IPostService postService, IUserService userService, 
 
         PostDTO postData = new PostDTO(post);
 
-        postData.LikedByCurrentUser = _postService.CheckIfCurrentUserLiked(post, this);
+        postData.LikedByCurrentUser = _likeService.IsLiked(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
         return Ok(postData);
     }
@@ -46,18 +68,33 @@ public class PostController(IPostService postService, IUserService userService, 
     [HttpGet("FromCategory={id}")]
     public ActionResult<PostCollectionDTO> GetPostByCategoryId(string categoryId)
     {
-        var category = _categoryService.GetCategoryByIdWithChildren(categoryId);
-        var posts = category.Posts;
+        var category = _categoryService.GetById(categoryId, [c => c.Posts]);
 
         if (category == null || category.Posts == null)
         {
             return NotFound();
         }
+        var postCollection = category.Posts;
 
+        PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
 
+        Post[] posts = new Post[postCollection.Count()];
+        posts = postCollection.ToArray();
 
-        PostCollectionDTO postData = new PostCollectionDTO(posts);
-        return Ok(postData);
+        PostDTO[] postDTOs = new PostDTO[postDataCollection.Posts.Count()];
+        postDTOs = postDataCollection.Posts.ToArray();
+
+        for (int i = 0; i < postCollection.Count; i++)
+        {
+            if (posts[i].Id == postDTOs[i].Id)
+            {
+                postDTOs[i].LikedByCurrentUser = _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+            }
+        }
+
+        postDataCollection.Posts = postDTOs;
+
+        return Ok(postDataCollection);
     }
 
     // GET api/<PostController>/FromCategory={postId}&Page={page}&Size={size}
@@ -65,8 +102,7 @@ public class PostController(IPostService postService, IUserService userService, 
     [HttpGet("FromCategory={postId}&Page={page}")]
     public ActionResult<PostCollectionDTO> GetSomeCommentsByPostId(string categoryId, string page, string size = "5")
     {
-        var category = _categoryService.GetCategoryByIdWithChildren(categoryId);
-
+        var category = _categoryService.GetById(categoryId, [c => c.Posts]);
 
         if (category == null || category.Posts == null)
         {
@@ -78,20 +114,37 @@ public class PostController(IPostService postService, IUserService userService, 
             return BadRequest();
         }
 
-        var posts = category.Posts
+        var postCollection = category.Posts
         .Skip((int.Parse(page) - 1) * int.Parse(size))
         .Take(int.Parse(size))
-        .ToList();
+        .ToList();;
 
-        var postsData = new PostCollectionDTO(posts);
-        return Ok(postsData);
+        PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
+
+        Post[] posts = new Post[postCollection.Count()];
+        posts = postCollection.ToArray();
+
+        PostDTO[] postDTOs = new PostDTO[postDataCollection.Posts.Count()];
+        postDTOs = postDataCollection.Posts.ToArray();
+
+        for (int i = 0; i < postCollection.Count; i++)
+        {
+            if (posts[i].Id == postDTOs[i].Id)
+            {
+                postDTOs[i].LikedByCurrentUser = _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+            }
+        }
+
+        postDataCollection.Posts = postDTOs;
+
+        return Ok(postDataCollection);
     }
 
     // POST api/<PostController>
     [HttpPost]
     public ActionResult<PostDTO> Create(PostDTO postData)
     {
-        var category = _categoryService.GetCategoryById(postData.CategoryId);
+        var category = _categoryService.GetById(postData.CategoryId, [c => c.Posts]);
 
         if (category == null)
         {
@@ -103,7 +156,7 @@ public class PostController(IPostService postService, IUserService userService, 
         {
             newGuid = Guid.NewGuid().ToString();
         }
-        while (_postService.GetPostById(newGuid) != null);
+        while (_postService.GetById(newGuid) != null);
 
         postData.Id = newGuid;
         
@@ -113,16 +166,16 @@ public class PostController(IPostService postService, IUserService userService, 
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = DateTime.Now,
-            User = _userService.GetUserById(postData.AuthorUserId),
+            User = _userService.GetById(postData.AuthorUserId),
             CategoryId = postData.CategoryId,
             Category = category,
             Images = (ICollection<string>)postData.ImageUrls
         };
 
-        _postService.CreatePost(post);
+        _postService.Create(post);
 
         category.Posts.Add(post);
-        _categoryService.UpdateCategory(category);
+        _categoryService.Update(category);
 
         return CreatedAtAction(nameof(GetById), new { id = postData.Id }, postData);
     }
@@ -131,7 +184,7 @@ public class PostController(IPostService postService, IUserService userService, 
     [HttpPut("{id}")]
     public IActionResult Update(string id, PostDTO postData)
     {
-        var existingPost = _postService.GetPostById(id);
+        var existingPost = _postService.GetById(id, [c => c.User]);
         if (existingPost == null)
         {
             return NotFound();
@@ -152,7 +205,7 @@ public class PostController(IPostService postService, IUserService userService, 
             Images = (ICollection<string>)postData.ImageUrls,
             LikedByUserID = existingPost.LikedByUserID
         };
-        _postService.UpdatePost(post);
+        _postService.Update(post);
 
         return NoContent();
     }
@@ -161,7 +214,7 @@ public class PostController(IPostService postService, IUserService userService, 
     [HttpPut("Like/{postId}")]
     public IActionResult Like(string postId)
     {
-        var post = _postService.GetPostById(postId);
+        var post = _postService.GetById(postId, [c => c.User]);
         if (post == null)
         {
             return NotFound();
@@ -180,7 +233,7 @@ public class PostController(IPostService postService, IUserService userService, 
         {
             post.LikedByUserID.Add(userId);
         }
-        _postService.UpdatePost(post);
+        _postService.Update(post);
         return NoContent();
     }
 
@@ -189,13 +242,13 @@ public class PostController(IPostService postService, IUserService userService, 
     [HttpDelete("{id}")]
     public IActionResult Delete(string id)
     {
-        var existingPost = _postService.GetPostById(id);
+        var existingPost = _postService.GetById(id);
         if (existingPost == null)
         {
             return NotFound();
         }
 
-        _postService.DeletePost(id);
+        _postService.Delete(id);
 
         return NoContent();
     }
