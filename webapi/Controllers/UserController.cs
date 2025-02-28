@@ -82,13 +82,13 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
 
     // GET api/<UserController>/{id}
     [HttpGet("FromNeighborhood={id}&sort={role}")]
-    public ActionResult<UserCollectionDTO> GetAllUsersOfNeighborhoodIdSortedBySort(string id, string role)
+    public ActionResult<UserCollectionDTO> GetAllUsersOfNeighborhoodIdSortedByGroup(string id, string role)
     {
         if (!int.TryParse(role, out _))
         {
             return BadRequest();
         }
-        UserSortService.RoleSort sortByRole = (UserSortService.RoleSort)int.Parse(role);
+        UserSortService.RoleGroup sortByRole = (UserSortService.RoleGroup)int.Parse(role);
 
         Neighborhood neighborhood = _neighborhoodService.GetById(id, [c => c.Users]);
 

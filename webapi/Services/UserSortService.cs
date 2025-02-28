@@ -6,7 +6,7 @@ namespace webapi.Services;
 public interface IUserSortService
 {
     ICollection<User> GetUsersFromRole(ICollection<User> users, UserSortService.Role role);
-    ICollection<User> GetUsersFromSort(ICollection<User> users, UserSortService.RoleSort sort);
+    ICollection<User> GetUsersFromSort(ICollection<User> users, UserSortService.RoleGroup sort);
 }
 
 public class UserSortService : IUserSortService
@@ -17,7 +17,7 @@ public class UserSortService : IUserSortService
         User = 1
     } 
 
-    public enum RoleSort
+    public enum RoleGroup
     {
         All = 0,
         Non_admins = 1,
@@ -35,7 +35,7 @@ public class UserSortService : IUserSortService
         return query.ToArray();
     }
 
-    public ICollection<User> GetUsersFromSort(ICollection<User> users, RoleSort sort)
+    public ICollection<User> GetUsersFromSort(ICollection<User> users, RoleGroup sort)
     {
         IQueryable<User> query = users.AsQueryable();
 
@@ -47,23 +47,23 @@ public class UserSortService : IUserSortService
         return query.ToArray();
     }
 
-    private Expression<Func<User, bool>>[]? SortSwitch(RoleSort sort)
+    private Expression<Func<User, bool>>[]? SortSwitch(RoleGroup sort)
     {
         switch (sort)
         {
-            case RoleSort.All:
+            case RoleGroup.All:
                 return [c => c.Id != null];
 
-            case RoleSort.Non_admins:
+            case RoleGroup.Non_admins:
                 return [c => c.UserRole == 1];
 
-            case RoleSort.Shareholders:
+            case RoleGroup.Shareholders:
                 return [c => c.UserRole == 1 || c.UserRole == 0];
 
-            case RoleSort.Admins:
+            case RoleGroup.Admins:
                 return [c => c.UserRole == 0];
 
-            case RoleSort.Over_Admins:
+            case RoleGroup.Over_Admins:
                 return [c => c.UserRole == 0];
 
             default:
