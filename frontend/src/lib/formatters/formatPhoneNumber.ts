@@ -2,10 +2,10 @@
  * Regular expressions for matching different types of phone numbers.
  */
 export const PHONE_NUMBER_REGEX = {
-    mobil: /^([8]\d{2})(\d{2})(\d{3})$/,
-    fast: /^([2-9]\d)(\d{2})(\d{2})(\d{2})$/,
-    mobilPartial: /^([8]\d{2})(\d{1,2})?(\d{1,3})?$/,
-    fastPartial: /^([2-9]\d)(\d{1,2})?(\d{1,2})?(\d{1,2})?$/,
+    mobile: /^([8]\d{2})(\d{2})(\d{3})$/,
+    landline: /^([2-9]\d)(\d{2})(\d{2})(\d{2})$/,
+    mobilePartial: /^([8]\d{2})(\d{1,2})?(\d{1,3})?$/,
+    landlinePartial: /^([2-9]\d)(\d{1,2})?(\d{1,2})?(\d{1,2})?$/,
 }
 
 /**
@@ -27,18 +27,19 @@ export const formatPhoneNumber = (
     input: string,
     options?: FormatPhoneNumberOptions
 ) => {
+    //
     // Remove all non-word characters from the input
     const strippedInput = input.replace(/\W/g, "")
 
-    const mobilRegex = options?.partial
-        ? PHONE_NUMBER_REGEX.mobilPartial
-        : PHONE_NUMBER_REGEX.mobil
-    const fastRegex = options?.partial
-        ? PHONE_NUMBER_REGEX.fastPartial
-        : PHONE_NUMBER_REGEX.fast
+    const mobileRegex = options?.partial
+        ? PHONE_NUMBER_REGEX.mobilePartial
+        : PHONE_NUMBER_REGEX.mobile
+    const landlineRegex = options?.partial
+        ? PHONE_NUMBER_REGEX.landlinePartial
+        : PHONE_NUMBER_REGEX.landline
 
     const match =
-        strippedInput.match(mobilRegex) || strippedInput.match(fastRegex)
+        strippedInput.match(mobileRegex) || strippedInput.match(landlineRegex)
 
     if (!match) {
         return input
