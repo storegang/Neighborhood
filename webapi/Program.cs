@@ -123,12 +123,6 @@ builder.Services.AddScoped(typeof(IUserReference), typeof(Comment));
 builder.Services.AddScoped(typeof(IUserReference), typeof(Post));
 builder.Services.AddScoped<IUserSortService, UserSortService>();
 
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
-builder.Services.AddScoped<INeighborhoodRepository, NeighborhoodRepository>();
-builder.Services.AddScoped<IPostRepository, PostRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-
 // builder.Services.AddScoped<IGenericChildRepository<GenericChildRepository>>;
 
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
