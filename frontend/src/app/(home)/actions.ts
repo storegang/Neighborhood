@@ -3,15 +3,29 @@
 import { apiFetcher } from "@/fetchers/apiFetcher"
 import { Post, Category } from "@/Models"
 
-export const getPosts = async (accessToken: string): Promise<Post[]> => {
+/**
+ *
+ * @param accessToken The accesToken to be used for the request
+ * @param category If a category is specified, only posts from that category will be returned
+ * @returns Posts from the server, either all posts or posts from a specific category
+ */
+export const getPosts = async (
+    accessToken: string,
+    category?: Category
+): Promise<Post[]> => {
     const response = await apiFetcher<{ posts: Post[] }>({
-        path: "/post",
+        path: category ? "/post/fromcategory=" + category : "/post",
         accessToken: accessToken,
     })
 
     return response.posts
 }
 
+/**
+ *
+ * @param accessToken The accesToken to be used for the request
+ * @returns The categories from the server
+ */
 export const getCategories = async (
     accessToken: string
 ): Promise<Category[]> => {
@@ -19,7 +33,6 @@ export const getCategories = async (
         path: "/category",
         accessToken: accessToken,
     })
-
     return response.categories
 }
 
@@ -30,7 +43,11 @@ export type CreatePostInput = {
     userUID: string
     accessToken: string
 }
-
+/**
+ *
+ * @param input The input for the post to be created
+ * @returns The created post
+ */
 export const createPost = async (
     input: CreatePostInput
 ): Promise<{
