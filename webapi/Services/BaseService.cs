@@ -8,6 +8,7 @@ public interface IBaseService<T> where T : BaseEntity
 {
     ICollection<T>? GetAll(Expression<Func<T, object>>[]? includes = null);
     T? GetById(string id, Expression<Func<T, object>>[]? includes = null);
+    ICollection<T>? GetPagination(int page, int size = 5, Expression<Func<T, object>>[]? includes = null);
     void Create(T entity);
     void Update(T entity);
     void Delete(string id);
@@ -25,6 +26,11 @@ public class BaseService<T>(IGenericRepository<T> repository) : IBaseService<T> 
     public T? GetById(string id, Expression<Func<T, object>>[]? includes = null)
     {
         return _repository.GetById(id, includes);
+    }
+
+    public ICollection<T>? GetPagination(int page, int size = 5, Expression<Func<T, object>>[]? includes = null)
+    {
+        return _repository.GetPagination(page, size, includes);
     }
 
     public void Create(T entity)

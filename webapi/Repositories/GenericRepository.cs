@@ -10,8 +10,9 @@ namespace webapi.Repositories;
 
 public interface IGenericRepository<T> where T : BaseEntity
 {
-    ICollection<T>? GetAll(Expression<Func<T, object>>[]? include = null);
-    T? GetById(string id, Expression<Func<T, object>>[]? include = null);
+    ICollection<T>? GetAll(Expression<Func<T, object>>[]? includes = null);
+    T? GetById(string id, Expression<Func<T, object>>[]? includes = null);
+    ICollection<T>? GetPagination(int page, int size = 5, Expression<Func<T, object>>[]? includes = null);
     void Add(T entity);
     void Update(T entity);
     void Delete(T entity);
@@ -64,6 +65,23 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         }
 
         return query.FirstOrDefault(e => e.Id == id);
+    }
+
+    public ICollection<T>? GetPagination(int page, int size = 5, Expression<Func<T, object>>[]? includes = null)
+    {
+        IQueryable<T> query = _dbSet;
+        if (includes == null)
+        {
+            return query.Skip((page - 1) * size).Take(size).ToList();
+        }
+        else
+        {
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+        }
+        return query.Skip((page - 1) * size).Take(size).ToList();
     }
 
     public void Add(T entity)
