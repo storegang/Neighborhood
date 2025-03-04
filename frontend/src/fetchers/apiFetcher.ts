@@ -24,7 +24,7 @@ export const apiFetcher = async <T>({
     method?: string
     accessToken?: string
     body?: Record<string, unknown>
-}): Promise<any> => {
+}): Promise<T> => {
     try {
         const response = await fetch(`${url}${path}`, {
             method,
