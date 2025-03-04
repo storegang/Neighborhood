@@ -36,12 +36,20 @@ export const getCategories = async (
     return response.categories
 }
 
+/**
+ * Sends a request to like a post.
+ *
+ * @param postId - The ID of the post to like.
+ * @param accessToken - The access token for authentication.
+ * @returns A promise that resolves when the request is complete.
+ */
 export const likePost = async (
     postId: string,
     accessToken: string
-): Promise<void> => {
+): Promise<any> => {
+    console.log({ postId })
     await apiFetcher<{ success: boolean }>({
-        path: `/post/${postId}/like`,
+        path: `/post/like/${postId}`,
         method: "PUT",
         accessToken: accessToken,
     })

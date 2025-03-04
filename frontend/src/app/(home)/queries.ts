@@ -53,6 +53,12 @@ export const useCreatePost = () => {
     })
 }
 
+/**
+ * Custom hook to like a post.
+ *
+ * @param {User | null} user - The user object containing the access token. If null, the user is not authenticated.
+ * @returns {UseMutationResult} The mutation result object from the `useMutation` hook.
+ */
 export const useLikePost = (user: User | null) => {
     const accessToken = user?.accessToken
     return useMutation({
