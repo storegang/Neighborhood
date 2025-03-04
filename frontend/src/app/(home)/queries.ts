@@ -1,5 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { createPost, CreatePostInput, getCategories, getPosts } from "./actions"
+import {
+    createPost,
+    CreatePostInput,
+    getCategories,
+    getPosts,
+    likePost,
+} from "./actions"
 import { Category, User } from "@/Models"
 
 /**
@@ -43,6 +49,15 @@ export const useCreatePost = () => {
     return useMutation({
         mutationFn: (input: CreatePostInput) => {
             return createPost(input)
+        },
+    })
+}
+
+export const useLikePost = (user: User | null) => {
+    const accessToken = user?.accessToken
+    return useMutation({
+        mutationFn: (postId: string) => {
+            return likePost(postId, accessToken!)
         },
     })
 }

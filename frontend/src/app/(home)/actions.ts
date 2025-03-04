@@ -36,6 +36,17 @@ export const getCategories = async (
     return response.categories
 }
 
+export const likePost = async (
+    postId: string,
+    accessToken: string
+): Promise<void> => {
+    await apiFetcher<{ success: boolean }>({
+        path: `/post/${postId}/like`,
+        method: "PUT",
+        accessToken: accessToken,
+    })
+}
+
 export type CreatePostInput = {
     title: string
     content: string
@@ -43,6 +54,7 @@ export type CreatePostInput = {
     userUID: string
     accessToken: string
 }
+
 /**
  *
  * @param input The input for the post to be created
