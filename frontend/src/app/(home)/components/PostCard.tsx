@@ -20,6 +20,8 @@ export const PostCard: React.FC<Post> = ({
 
     const { name, avatar } = authorUser
 
+    const { data: categories = [] } = useGetCategories(user)
+
     const { mutate: likePost } = useLikePost(user)
 
     return (
@@ -50,7 +52,7 @@ export const PostCard: React.FC<Post> = ({
                     </div>
                     <p className="w-1/2 truncate text-sm">{name}</p>
                     <div className="badge badge-soft badge-primary">
-                        Category
+                        {categories.find((c) => c.id === categoryId)?.name}
                     </div>
                 </div>
                 <p className="text-neutral-500">
