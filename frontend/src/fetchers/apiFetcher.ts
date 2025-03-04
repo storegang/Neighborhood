@@ -24,7 +24,7 @@ export const apiFetcher = async <T>({
     method?: string
     accessToken?: string
     body?: Record<string, unknown>
-}): Promise<T> => {
+}): Promise<any> => {
     try {
         const response = await fetch(`${url}${path}`, {
             method,
@@ -37,7 +37,8 @@ export const apiFetcher = async <T>({
         if (!response.ok) {
             throw new Error(`Error fetching data: ${response.statusText}`)
         }
-        return await response.json()
+        const data = response.status !== 204 ? await response.json() : null
+        return data
     } catch (error) {
         console.error("Error fetching data:", error)
         throw error
