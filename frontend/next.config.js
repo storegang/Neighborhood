@@ -1,5 +1,7 @@
 const nextConfig = {
-    /* config options here */
+    images: {
+        domains: ["pbs.twimg.com", "preview.redd.it"],
+    },
 }
 
 module.exports = nextConfig
