@@ -1,7 +1,7 @@
 import { formatRelativeDate } from "@/lib/formatters/formatDate"
 import { Post } from "@/Models/Post"
 import Image from "next/image"
-import { useGetCategories } from "../queries"
+import { useGetCategories, useLikePost } from "../queries"
 import { useUser } from "@/lib/getUser"
 
 export const PostCard: React.FC<Post> = ({
@@ -14,11 +14,13 @@ export const PostCard: React.FC<Post> = ({
     likedByUserCount,
     likedByCurrentUser,
     datePosted,
-    dateLastEdited,
+    id,
 }) => {
+    const user = useUser()
+
     const { name, avatar } = authorUser
 
-    likedByCurrentUser = true
+    const { mutate: likePost } = useLikePost(user)
 
     return (
         <div className="card shadow-sm">
@@ -73,7 +75,10 @@ export const PostCard: React.FC<Post> = ({
                     ) : null}
                 </div>
                 <div className="card-actions justify-start">
-                    <button className="btn btn-ghost btn-sm">
+                    <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => likePost(id)}
+                    >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
