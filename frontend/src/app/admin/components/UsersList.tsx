@@ -18,6 +18,7 @@ export const UsersList: React.FC = () => {
                 name="my_tabs_3"
                 className="tab"
                 aria-label="Board"
+                defaultChecked
             />
             <div className="tab-content bg-base-100 border-base-300 rounded-box overflow-y-scroll p-6 shadow-md">
                 <ul className="list">
