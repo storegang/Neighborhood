@@ -125,39 +125,25 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     [HttpGet("FromPost={postId}&Page={page}")]
     public async Task<ActionResult<CommentCollectionDTO>> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
-        Post? post = await _postService.GetById(postId, [p => p.Comments]);
+        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
+        {
+            return BadRequest();
+        }
+
+        Post? post = await _postService.GetPaginatedInclude(postId, p => p.Comments, 0, 2);
 
         if (post == null || post.Comments == null)
         {
             return NotFound();
         }
 
-        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
+        ICollection<Comment>? commentCollection = post.Comments;
+
+        foreach (Comment comment in post.Comments)
         {
-            return BadRequest();
-        }
-
-
-        ICollection<Comment> commentCollection = post.Comments
-        .Skip((int.Parse(page) - 1) * int.Parse(size))
-        .Take(int.Parse(size))
-        .ToArray();
-
-        foreach (Comment comment in commentCollection)
-        {
-            Comment? existingComment = await _commentService.GetById(comment.Id, [c => c.User]);
-            if (comment == null || existingComment == null)
+            if (comment == null)
             {
-                continue;
-            }
-            try
-            {
-                commentCollection.First(c => c.Id == comment.Id).User = existingComment.User;
-            }
-            catch
-            {
-                Console.WriteLine("Error Source: GetSomeCommentsByPostId. Could not find comment Id");
-                continue;
+                post.Comments.Remove(comment);
             }
         }
 

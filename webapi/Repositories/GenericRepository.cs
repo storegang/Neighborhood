@@ -12,6 +12,7 @@ public interface IGenericRepository<T> where T : BaseEntity
 {
     Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? include = null);
     Task<T?> GetById(string id, Expression<Func<T, object>>[]? include = null);
+    Task<T?> GetPaginatedInclude(string id, Expression<Func<T, object>> include, int page = 0, int pageSize = 5);
     Task Add(T entity);
     Task Update(T entity);
     Task Delete(T entity);
@@ -66,6 +67,18 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         }
 
         return await query.FirstOrDefaultAsync(e => e.Id == id).ConfigureAwait(false);
+    }
+
+    public async Task<T?> GetPaginatedInclude(string id, Expression<Func<T, object>> include, int page = 0, int pageSize = 5)
+    {
+        _context.ChangeTracker.LazyLoadingEnabled = false;
+        IQueryable<T> query = _context.Set<T>();
+
+        return await query.Where(query => query.Id == id)
+            .Include(include)
+            .Skip(page * pageSize)
+            .Take(pageSize)
+            .FirstOrDefaultAsync();
     }
 
     public async Task Add(T entity)
