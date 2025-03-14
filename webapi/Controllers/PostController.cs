@@ -25,7 +25,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
     {
         ICollection<Post> postCollection = await _postService.GetAll([c => c.User]);
 
-        PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
+        PostCollectionDTO postDataCollection = new(postCollection);
 
         Post[] posts = new Post[postCollection.Count()];
         posts = postCollection.ToArray();
@@ -57,7 +57,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             return NotFound();
         }
 
-        PostDTO postData = new PostDTO(post);
+        PostDTO postData = new(post);
 
         postData.LikedByCurrentUser = await _likeService.IsLiked(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
@@ -76,7 +76,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         }
         Post[] postCollection = category.Posts.ToArray();
 
-        PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
+        PostCollectionDTO postDataCollection = new(postCollection);
 
         Post[] posts = new Post[postCollection.Count()];
         posts = postCollection.ToArray();
@@ -119,7 +119,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         .Take(int.Parse(size))
         .ToArray();
 
-        PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
+        PostCollectionDTO postDataCollection = new(postCollection);
 
         Post[] posts = new Post[postCollection.Count()];
         posts = postCollection.ToArray();
@@ -160,7 +160,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
         postData.Id = newGuid;
         
-        Post post = new Post
+        Post post = new()
         {
             Id = postData.Id,
             Title = postData.Title,
@@ -191,7 +191,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         }
 
         postData.Id = id;
-        Post post = new Post
+        Post post = new()
         {
             Id = postData.Id,
             Title = postData.Title,

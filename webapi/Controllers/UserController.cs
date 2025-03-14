@@ -20,8 +20,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
     public async Task<ActionResult<UserCollectionDTO>> GetAll()
     {
         ICollection<User> users = await _userService.GetAll();
-        
-        UserCollectionDTO userDataCollection = new UserCollectionDTO(users);
+        UserCollectionDTO userDataCollection = new(users);
         return Ok(userDataCollection);
     }
 
@@ -36,7 +35,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
             return NotFound();
         }
 
-        var userData = new UserDTO(user);
+        UserDTO userData = new(user);
         return Ok(userData);
     }
 
@@ -52,7 +51,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         }
         ICollection<User> users = neighborhood.Users;
 
-        UserCollectionDTO userDataCollection = new UserCollectionDTO(users);
+        UserCollectionDTO userDataCollection = new(users);
 
         return Ok(userDataCollection);
     }
@@ -75,7 +74,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         }
         ICollection<User> users = neighborhood.Users;
 
-        UserCollectionDTO userDataCollection = new UserCollectionDTO(_userSortService.GetUsersFromRole(users, sortByRole));
+        UserCollectionDTO userDataCollection = new(_userSortService.GetUsersFromRole(users, sortByRole));
 
         return Ok(userDataCollection);
     }
@@ -98,7 +97,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         }
         ICollection<User> users = neighborhood.Users;
 
-        UserCollectionDTO userDataCollection = new UserCollectionDTO(_userSortService.GetUsersFromSort(users, sortByRole));
+        UserCollectionDTO userDataCollection = new(_userSortService.GetUsersFromSort(users, sortByRole));
 
         return Ok(userDataCollection);
     }
@@ -121,7 +120,8 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
             }
         }
 
-        User user = new User(
+        User user = new
+            (
             userData.Id,
             userData.Name,
             userData.Avatar,
@@ -142,7 +142,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         }
 
         userData.Id = id;
-        User user = new User
+        User user = new
             (
             userData.Id,
             userData.Name,

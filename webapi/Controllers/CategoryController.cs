@@ -19,11 +19,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
     public async Task<ActionResult<CategoryCollectionDTO>> GetAll()
     {
         ICollection<Category>? categories = await _categoryService.GetAll();
-        if (categories == null)
-        {
-            return NotFound();
-        }
-        CategoryCollectionDTO categoryDataCollection = new CategoryCollectionDTO(categories);
+        CategoryCollectionDTO categoryDataCollection = new(categories);
         return Ok(categoryDataCollection);
     }
 
@@ -38,7 +34,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
             return NotFound();
         }
 
-        CategoryDTO categoryData = new CategoryDTO(category);
+        CategoryDTO categoryData = new(category);
         return Ok(categoryData);
     }
 
@@ -54,7 +50,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         }
         ICollection<Category> categories = neighborhood.Categories;
 
-        CategoryCollectionDTO categoryData = new CategoryCollectionDTO(categories);
+        CategoryCollectionDTO categoryData = new(categories);
         return Ok(categoryData);
     }
 
@@ -77,7 +73,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         while (_categoryService.GetById(newGuid) != null);
 
         categoryData.Id = newGuid;
-        Category category = new Category
+        Category category = new()
         {
             Id = categoryData.Id,
             Name = categoryData.Name,
@@ -107,7 +103,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         }
 
         categoryData.Id = id;
-        Category category = new Category
+        Category category = new()
         {
             Id = categoryData.Id,
             Name = categoryData.Name,

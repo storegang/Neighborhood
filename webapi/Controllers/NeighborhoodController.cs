@@ -19,7 +19,6 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService, IB
     public async Task<ActionResult<NeighborhoodCollectionDTO>> GetAll()
     {
         ICollection<Neighborhood>? neighborhoods = await _neighborhoodService.GetAll();
-        
         NeighborhoodCollectionDTO neighborhoodDataCollection = new NeighborhoodCollectionDTO(neighborhoods);
         return Ok(neighborhoodDataCollection);
     }
@@ -35,7 +34,7 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService, IB
             return NotFound();
         }
 
-        NeighborhoodDTO neighborhoodData = new NeighborhoodDTO(neighborhood);
+        NeighborhoodDTO neighborhoodData = new(neighborhood);
         return Ok(neighborhoodData);
     }
 
@@ -51,7 +50,7 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService, IB
         while (await _neighborhoodService.GetById(newGuid) != null);
 
         neighborhoodData.Id = newGuid;
-        Neighborhood neighborhood = new Neighborhood 
+        Neighborhood neighborhood = new() 
         { 
             Id = neighborhoodData.Id,
             Name = neighborhoodData.Name,
@@ -73,7 +72,7 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService, IB
         }
 
         neighborhoodData.Id = id;
-        Neighborhood neighborhood = new Neighborhood
+        Neighborhood neighborhood = new()
         {
             Id = neighborhoodData.Id,
             Name = neighborhoodData.Name,
