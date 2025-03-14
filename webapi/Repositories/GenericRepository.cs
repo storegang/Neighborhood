@@ -10,11 +10,11 @@ namespace webapi.Repositories;
 
 public interface IGenericRepository<T> where T : BaseEntity
 {
-    Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? include = null, CancellationToken cancellationToken = default);
-    Task<T?> GetById(string id, Expression<Func<T, object>>[]? include = null, CancellationToken cancellationToken = default);
-    Task Add(T entity, CancellationToken cancellationToken = default);
-    Task Update(T entity, CancellationToken cancellationToken = default);
-    Task Delete(T entity, CancellationToken cancellationToken = default);
+    Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? include = null);
+    Task<T?> GetById(string id, Expression<Func<T, object>>[]? include = null);
+    Task Add(T entity);
+    Task Update(T entity);
+    Task Delete(T entity);
 }
 
 public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
@@ -28,8 +28,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         _dbSet = _context.Set<T>();
     }
 
-    public async Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? includes = null, CancellationToken cancellationToken = default)
+    public async Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? includes = null)
     {
+        // In case this is a very large fetch request, we can use "CancellationToken cancellationToken = default" to cancel the request
+
         IQueryable<T> query = _dbSet;
 
         if (includes == null)
@@ -44,10 +46,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             }
         }
 
-        return await query.ToListAsync(cancellationToken).ConfigureAwait(false);
+        return await query.ToListAsync().ConfigureAwait(false);
     }
 
-    public async Task<T?> GetById(string id, Expression<Func<T, object>>[]? includes = null, CancellationToken cancellationToken = default)
+    public async Task<T?> GetById(string id, Expression<Func<T, object>>[]? includes = null)
     {
         IQueryable<T> query = _dbSet;
 
@@ -63,31 +65,31 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             }
         }
 
-        return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken).ConfigureAwait(false);
+        return await query.FirstOrDefaultAsync(e => e.Id == id).ConfigureAwait(false);
     }
 
-    public async Task Add(T entity, CancellationToken cancellationToken = default)
+    public async Task Add(T entity)
     {
-        if (await _dbSet.FindAsync(entity, cancellationToken).ConfigureAwait(false) != null) return;
-        await _dbSet.AddAsync(entity, cancellationToken).ConfigureAwait(false);
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        if (await _dbSet.FindAsync(entity).ConfigureAwait(false) != null) return;
+        await _dbSet.AddAsync(entity).ConfigureAwait(false);
+        await _context.SaveChangesAsync().ConfigureAwait(false);
     }
 
-    public async Task Update(T entity, CancellationToken cancellationToken = default)
+    public async Task Update(T entity)
     {
-        var existingEntity = await _context.FindAsync<T>(entity.Id, cancellationToken).ConfigureAwait(false);
+        var existingEntity = await _context.FindAsync<T>(entity.Id).ConfigureAwait(false);
         if (existingEntity == null) return;
         _dbSet.Entry(existingEntity).CurrentValues.SetValues(entity);
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync().ConfigureAwait(false);
     }
 
-    public async Task Delete(T entity, CancellationToken cancellationToken = default)
+    public async Task Delete(T entity)
     {
         if (_context.Entry(entity).State == EntityState.Detached)
         {
             _dbSet.Attach(entity);
         }
         _dbSet.Remove(entity);
-        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync().ConfigureAwait(false);
     }
 }
