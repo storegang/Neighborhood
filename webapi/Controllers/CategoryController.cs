@@ -16,49 +16,53 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
 
     // GET: api/<CategoryController>
     [HttpGet]
-    public ActionResult<CategoryCollectionDTO> GetAll()
+    public async Task<ActionResult<CategoryCollectionDTO>> GetAll()
     {
-        var categories = _categoryService.GetAll();
-        var categoryDataCollection = new CategoryCollectionDTO(categories);
+        ICollection<Category>? categories = await _categoryService.GetAll();
+        if (categories == null)
+        {
+            return NotFound();
+        }
+        CategoryCollectionDTO categoryDataCollection = new CategoryCollectionDTO(categories);
         return Ok(categoryDataCollection);
     }
 
     // GET api/<CategoryController>/{id}
     [HttpGet("{id}")]
-    public ActionResult<CategoryDTO> GetById(string id)
+    public async Task<ActionResult<CategoryDTO>> GetById(string id)
     {
-        var category = _categoryService.GetById(id);
+        Category? category = await _categoryService.GetById(id);
         
         if (category == null)
         {
             return NotFound();
         }
 
-        var categoryData = new CategoryDTO(category);
+        CategoryDTO categoryData = new CategoryDTO(category);
         return Ok(categoryData);
     }
 
     // GET api/<CategoryController>/FromNeighborhood={neighborhoodId}
     [HttpGet("FromNeighborhood={neighborhoodId}")]
-    public ActionResult<CategoryCollectionDTO> GetCategoryByNeighborhoodId(string neighborhoodId)
+    public async Task<ActionResult<CategoryCollectionDTO>> GetCategoryByNeighborhoodId(string neighborhoodId)
     {
-        var neighborhood = _neighborhoodService.GetById(neighborhoodId);
+        Neighborhood? neighborhood = await _neighborhoodService.GetById(neighborhoodId);
 
         if (neighborhood == null || neighborhood.Categories == null)
         {
             return NotFound();
         }
-        var categories = neighborhood.Categories;
+        ICollection<Category> categories = neighborhood.Categories;
 
-        var categoryData = new CategoryCollectionDTO(categories);
+        CategoryCollectionDTO categoryData = new CategoryCollectionDTO(categories);
         return Ok(categoryData);
     }
 
     // POST api/<CategoryController>
     [HttpPost]
-    public ActionResult<CategoryDTO> Create(CategoryDTO categoryData)
+    public async Task<ActionResult<CategoryDTO>> Create(CategoryDTO categoryData)
     {
-        var neighborhood = _neighborhoodService.GetById(categoryData.NeighborhoodId);
+        Neighborhood? neighborhood = await _neighborhoodService.GetById(categoryData.NeighborhoodId);
 
         if (neighborhood == null)
         {
@@ -73,59 +77,59 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         while (_categoryService.GetById(newGuid) != null);
 
         categoryData.Id = newGuid;
-        var category = new Category
+        Category category = new Category
         {
             Id = categoryData.Id,
             Name = categoryData.Name,
             Color = categoryData.Color,
             NeighborhoodId = categoryData.NeighborhoodId
         };
-        _categoryService.Create(category);
+        await _categoryService.Create(category);
 
         if (neighborhood.Categories == null)
         {
             neighborhood.Categories = new List<Category>();
         }
         neighborhood.Categories.Add(category);
-        _neighborhoodService.Update(neighborhood);
+        await _neighborhoodService.Update(neighborhood);
 
         return CreatedAtAction(nameof(GetById), new { id = categoryData.Id }, categoryData);
     }
 
     // PUT api/<CategoryController>/{id}
     [HttpPut("{id}")]
-    public IActionResult Update(string id, CategoryDTO categoryData)
+    public async Task<IActionResult> Update(string id, CategoryDTO categoryData)
     {
-        var existingCategory = _categoryService.GetById(id);
+        Category? existingCategory = await _categoryService.GetById(id);
         if (existingCategory == null)
         {
             return NotFound();
         }
 
         categoryData.Id = id;
-        var category = new Category
+        Category category = new Category
         {
             Id = categoryData.Id,
             Name = categoryData.Name,
             Color = categoryData.Color,
             NeighborhoodId = categoryData.NeighborhoodId
         };
-        _categoryService.Update(category);
+        await _categoryService.Update(category);
 
         return NoContent();
     }
 
     // DELETE api/<CategoryController>/{id}
     [HttpDelete("{id}")]
-    public IActionResult Delete(string id)
+    public async Task<IActionResult> Delete(string id)
     {
-        var existingCategory = _categoryService.GetById(id);
+        Category? existingCategory = await _categoryService.GetById(id);
         if (existingCategory == null)
         {
             return NotFound();
         }
 
-        _categoryService.Delete(id);
+        await _categoryService.Delete(id);
 
         return NoContent();
     }

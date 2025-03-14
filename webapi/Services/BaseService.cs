@@ -6,44 +6,44 @@ namespace webapi.Services;
 
 public interface IBaseService<T> where T : BaseEntity
 {
-    ICollection<T> GetAll(Expression<Func<T, object>>[]? includes = null);
-    T? GetById(string id, Expression<Func<T, object>>[]? includes = null);
-    void Create(T entity);
-    void Update(T entity);
-    void Delete(string id);
+    Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? includes = null, CancellationToken cancellationToken = default);
+    Task<T?> GetById(string id, Expression<Func<T, object>>[]? includes = null, CancellationToken cancellationToken = default);
+    Task Create(T entity, CancellationToken cancellationToken = default);
+    Task Update(T entity, CancellationToken cancellationToken = default);
+    Task Delete(string id, CancellationToken cancellationToken = default);
 }
 
 public class BaseService<T>(IGenericRepository<T> repository) : IBaseService<T> where T : BaseEntity
 {
     private readonly IGenericRepository<T> _repository = repository;
 
-    public ICollection<T> GetAll(Expression<Func<T, object>>[]? includes = null)
+    public async Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? includes = null, CancellationToken cancellationToken = default)
     {
-        return _repository.GetAll(includes);
+        return await _repository.GetAll(includes, cancellationToken).ConfigureAwait(false);
     }
 
-    public T? GetById(string id, Expression<Func<T, object>>[]? includes = null)
+    public async Task<T?> GetById(string id, Expression<Func<T, object>>[]? includes = null, CancellationToken cancellationToken = default)
     {
-        return _repository.GetById(id, includes);
+        return await _repository.GetById(id, includes, cancellationToken).ConfigureAwait(false);
     }
 
-    public void Create(T entity)
+    public async Task Create(T entity, CancellationToken cancellationToken = default)
     {
-        _repository.Add(entity);
+        await _repository.Add(entity, cancellationToken).ConfigureAwait(false);
     }
 
-    public void Update(T entity)
+    public async Task Update(T entity, CancellationToken cancellationToken = default)
     {
-        _repository.Update(entity);
+        await _repository.Update(entity, cancellationToken).ConfigureAwait(false);
     }
 
-    public void Delete(string id)
+    public async Task Delete(string id, CancellationToken cancellationToken = default)
     {
-        T entity = _repository.GetById(id, null);
+        var entity = await _repository.GetById(id, null, cancellationToken).ConfigureAwait(false);
 
         if (entity != null)
         {
-            _repository.Delete(entity);
+            await _repository.Delete(entity, cancellationToken).ConfigureAwait(false);
         }
     }
 }

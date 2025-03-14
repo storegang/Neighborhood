@@ -10,11 +10,11 @@ namespace webapi.Repositories;
 
 public interface IGenericRepository<T> where T : BaseEntity
 {
-    ICollection<T> GetAll(Expression<Func<T, object>>[]? include = null);
-    T? GetById(string id, Expression<Func<T, object>>[]? include = null);
-    void Add(T entity);
-    void Update(T entity);
-    void Delete(T entity);
+    Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? include = null, CancellationToken cancellationToken = default);
+    Task<T?> GetById(string id, Expression<Func<T, object>>[]? include = null, CancellationToken cancellationToken = default);
+    Task Add(T entity, CancellationToken cancellationToken = default);
+    Task Update(T entity, CancellationToken cancellationToken = default);
+    Task Delete(T entity, CancellationToken cancellationToken = default);
 }
 
 public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
@@ -28,7 +28,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         _dbSet = _context.Set<T>();
     }
 
-    public ICollection<T> GetAll(Expression<Func<T, object>>[]? includes = null)
+    public async Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? includes = null, CancellationToken cancellationToken = default)
     {
         IQueryable<T> query = _dbSet;
 
@@ -44,10 +44,10 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             }
         }
 
-        return query?.ToList();
+        return await query.ToListAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public T? GetById(string id, Expression<Func<T, object>>[]? includes = null)
+    public async Task<T?> GetById(string id, Expression<Func<T, object>>[]? includes = null, CancellationToken cancellationToken = default)
     {
         IQueryable<T> query = _dbSet;
 
@@ -63,32 +63,31 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             }
         }
 
-        return query.FirstOrDefault(e => e.Id == id);
+        return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken).ConfigureAwait(false);
     }
 
-    public void Add(T entity)
+    public async Task Add(T entity, CancellationToken cancellationToken = default)
     {
-        if (_dbSet.Find(entity.Id) != null) return;
-        _dbSet.Add(entity);
-        _context.SaveChanges();
+        if (await _dbSet.FindAsync(entity, cancellationToken).ConfigureAwait(false) != null) return;
+        await _dbSet.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public void Update(T entity)
+    public async Task Update(T entity, CancellationToken cancellationToken = default)
     {
-        var existingEntity = _context.Find<T>(entity.Id);
+        var existingEntity = await _context.FindAsync<T>(entity.Id, cancellationToken).ConfigureAwait(false);
         if (existingEntity == null) return;
         _dbSet.Entry(existingEntity).CurrentValues.SetValues(entity);
-        //_context.Entry(entity).State = EntityState.Modified;
-        _context.SaveChanges();
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 
-    public void Delete(T entity)
+    public async Task Delete(T entity, CancellationToken cancellationToken = default)
     {
         if (_context.Entry(entity).State == EntityState.Detached)
         {
             _dbSet.Attach(entity);
         }
         _dbSet.Remove(entity);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
     }
 }
