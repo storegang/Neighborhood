@@ -24,7 +24,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     {
         ICollection<Comment> commentCollection = await _commentService.GetAll([c => c.User]);
         
-        CommentCollectionDTO commentDataCollection = new CommentCollectionDTO(commentCollection);
+        CommentCollectionDTO commentDataCollection = new(commentCollection);
 
         Comment[] comments = new Comment[commentCollection.Count()];
         comments = commentCollection.ToArray();
@@ -57,7 +57,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
             return NotFound();
         }
 
-        CommentDTO commentData = new CommentDTO(comment);
+        CommentDTO commentData = new(comment);
 
         commentData.LikedByCurrentUser = await _likeService.IsLiked(comment.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
@@ -94,7 +94,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
             }
         }
 
-        CommentCollectionDTO commentDataCollection = new CommentCollectionDTO(commentCollection);
+        CommentCollectionDTO commentDataCollection = new(commentCollection);
 
         ICollection<Comment> comments = new Comment[commentCollection.Count()];
         comments = commentCollection.ToArray();
@@ -161,7 +161,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
             }
         }
 
-        CommentCollectionDTO commentDataCollection = new CommentCollectionDTO(commentCollection);
+        CommentCollectionDTO commentDataCollection = new(commentCollection);
 
         ICollection<Comment> comments = new Comment[commentCollection.Count()];
         comments = commentCollection.ToArray();
@@ -209,7 +209,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         while (_commentService.GetById(newGuid) != null);
 
         commentData.Id = newGuid;
-        Comment comment = new Comment
+        Comment comment = new()
         {
             Id = commentData.Id,
             Content = commentData.Content,
@@ -236,7 +236,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
             return NotFound();
         }
 
-        var comment = new Comment 
+        Comment comment = new() 
         {
             Id = existingComment.Id,
             Content = commentData.Content,
