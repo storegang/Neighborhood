@@ -19,7 +19,6 @@ public class NeighborhoodController(INeighborhoodService neighborhoodService, IB
     public async Task<ActionResult<NeighborhoodCollectionDTO>> GetAll()
     {
         ICollection<Neighborhood>? neighborhoods = await _neighborhoodService.GetAll();
-        
         NeighborhoodCollectionDTO neighborhoodDataCollection = new NeighborhoodCollectionDTO(neighborhoods);
         return Ok(neighborhoodDataCollection);
     }

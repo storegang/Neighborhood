@@ -20,7 +20,6 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
     public async Task<ActionResult<UserCollectionDTO>> GetAll()
     {
         ICollection<User> users = await _userService.GetAll();
-        
         UserCollectionDTO userDataCollection = new UserCollectionDTO(users);
         return Ok(userDataCollection);
     }

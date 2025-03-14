@@ -19,10 +19,6 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
     public async Task<ActionResult<CategoryCollectionDTO>> GetAll()
     {
         ICollection<Category>? categories = await _categoryService.GetAll();
-        if (categories == null)
-        {
-            return NotFound();
-        }
         CategoryCollectionDTO categoryDataCollection = new CategoryCollectionDTO(categories);
         return Ok(categoryDataCollection);
     }
