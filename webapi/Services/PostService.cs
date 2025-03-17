@@ -12,17 +12,17 @@ public interface IPostService : IBaseService<Post>, ILikeService<Post>
 
 public class PostService(IGenericRepository<Post> repository) : BaseService<Post>(repository), IPostService
 {
-    public bool IsLiked(ICollection<string>? likeable, string? userId)
+    public Task<bool> IsLiked(ICollection<string>? likeable, string? userId)
     {
         if (likeable == null || likeable.Count <= 0 || userId == null)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         if (likeable.Contains(userId))
         {
-            return true;
+            return Task.FromResult(true);
         }
-        return false;
+        return Task.FromResult(false);
     }
 }

@@ -15,17 +15,17 @@ public interface ICommentService : IBaseService<Comment>, ILikeService<Comment>
 
 public class CommentService(IGenericRepository<Comment> repository) : BaseService<Comment>(repository), ICommentService
 {
-    public bool IsLiked(ICollection<string>? likeable, string? userId)
+    public Task<bool> IsLiked(ICollection<string>? likeable, string? userId)
     {
         if (likeable == null || likeable.Count <= 0 || userId == null)
         {
-            return false;
+            return Task.FromResult(false);
         }
 
         if (likeable.Contains(userId))
         {
-            return true;
+            return Task.FromResult(true);
         }
-        return false;
+        return Task.FromResult(false);
     }
 }

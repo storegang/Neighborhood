@@ -6,44 +6,44 @@ namespace webapi.Services;
 
 public interface IBaseService<T> where T : BaseEntity
 {
-    ICollection<T> GetAll(Expression<Func<T, object>>[]? includes = null);
-    T? GetById(string id, Expression<Func<T, object>>[]? includes = null);
-    void Create(T entity);
-    void Update(T entity);
-    void Delete(string id);
+    Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? includes = null);
+    Task<T?> GetById(string id, Expression<Func<T, object>>[]? includes = null);
+    Task Create(T entity);
+    Task Update(T entity);
+    Task Delete(string id);
 }
 
 public class BaseService<T>(IGenericRepository<T> repository) : IBaseService<T> where T : BaseEntity
 {
     private readonly IGenericRepository<T> _repository = repository;
 
-    public ICollection<T> GetAll(Expression<Func<T, object>>[]? includes = null)
+    public async Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? includes = null)
     {
-        return _repository.GetAll(includes);
+        return await _repository.GetAll(includes).ConfigureAwait(false);
     }
 
-    public T? GetById(string id, Expression<Func<T, object>>[]? includes = null)
+    public async Task<T?> GetById(string id, Expression<Func<T, object>>[]? includes = null)
     {
-        return _repository.GetById(id, includes);
+        return await _repository.GetById(id, includes).ConfigureAwait(false);
     }
 
-    public void Create(T entity)
+    public async Task Create(T entity)
     {
-        _repository.Add(entity);
+        await _repository.Add(entity).ConfigureAwait(false);
     }
 
-    public void Update(T entity)
+    public async Task Update(T entity)
     {
-        _repository.Update(entity);
+        await _repository.Update(entity).ConfigureAwait(false);
     }
 
-    public void Delete(string id)
+    public async Task Delete(string id)
     {
-        T entity = _repository.GetById(id, null);
+        var entity = await _repository.GetById(id, null).ConfigureAwait(false);
 
         if (entity != null)
         {
-            _repository.Delete(entity);
+            await _repository.Delete(entity).ConfigureAwait(false);
         }
     }
 }
