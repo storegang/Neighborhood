@@ -125,25 +125,41 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     [HttpGet("FromPost={postId}&Page={page}")]
     public async Task<ActionResult<CommentCollectionDTO>> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
-        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
-        {
-            return BadRequest();
-        }
-
-        Post? post = await _postService.GetPaginatedInclude(postId, p => p.Comments, 0, 2);
+        Post? post = await _postService.GetById(postId, [p => p.Comments]);
 
         if (post == null || post.Comments == null)
         {
             return NotFound();
         }
 
-        ICollection<Comment>? commentCollection = post.Comments;
-
-        foreach (Comment comment in post.Comments)
+        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
         {
-            if (comment == null)
+            return BadRequest();
+        }
+
+
+        ICollection<Comment> commentCollection = post.Comments
+        .Skip((int.Parse(page) - 1) * int.Parse(size))
+        .Take(int.Parse(size))
+        .ToArray();
+
+        foreach (Comment comment in commentCollection)
+        {
+            // The reason we fetch the comment again, is that it doesn't yet include an user, so in this new fetch, it includes the user. 
+            // This will be fixed in the future, but for now, this is the solution.
+            Comment? existingComment = await _commentService.GetById(comment.Id, [c => c.User]);
+            if (comment == null || existingComment == null)
             {
-                post.Comments.Remove(comment);
+                continue;
+            }
+            try
+            {
+                commentCollection.First(c => c.Id == comment.Id).User = existingComment.User;
+            }
+            catch
+            {
+                Console.WriteLine("Error Source: GetSomeCommentsByPostId. Could not find comment Id");
+                continue;
             }
         }
 
@@ -251,7 +267,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         string? userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
         if (userId == null)
         {
-            return BadRequest();
+            return Unauthorized();
         }
 
         if (comment.LikedByUserID == null)
