@@ -116,7 +116,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
             }
             catch
             {
-                return BadRequest();
+                return Unauthorized();
             }
         }
 

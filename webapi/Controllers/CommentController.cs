@@ -145,6 +145,8 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
         foreach (Comment comment in commentCollection)
         {
+            // The reason we fetch the comment again, is that it doesn't yet include an user, so in this new fetch, it includes the user. 
+            // This will be fixed in the future, but for now, this is the solution.
             Comment? existingComment = await _commentService.GetById(comment.Id, [c => c.User]);
             if (comment == null || existingComment == null)
             {
@@ -265,7 +267,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         string? userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
         if (userId == null)
         {
-            return BadRequest();
+            return Unauthorized();
         }
 
         if (comment.LikedByUserID == null)
