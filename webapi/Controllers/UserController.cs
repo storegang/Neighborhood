@@ -3,6 +3,7 @@ using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace webapi.Controllers;
 
@@ -43,7 +44,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
     [HttpGet("FromNeighborhood={id}")]
     public async Task<ActionResult<UserCollectionDTO>> GetAllUsersOfNeighborhoodId(string id)
     {
-        Neighborhood? neighborhood = await _neighborhoodService.GetById(id, [c => c.Users]);
+        Neighborhood? neighborhood = await _neighborhoodService.GetById(id, [query => query.Include(c => c.Users)]);
 
         if (neighborhood == null || neighborhood.Users == null)
         {
@@ -66,7 +67,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         }
         UserSortService.Role sortByRole = (UserSortService.Role)int.Parse(role);
 
-        Neighborhood? neighborhood = await _neighborhoodService.GetById(id, [c => c.Users]);
+        Neighborhood? neighborhood = await _neighborhoodService.GetById(id, [query => query.Include(c => c.Users)]);
 
         if (neighborhood == null || neighborhood.Users == null)
         {
@@ -89,7 +90,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         }
         UserSortService.RoleGroup sortByRole = (UserSortService.RoleGroup)int.Parse(role);
 
-        Neighborhood? neighborhood = await _neighborhoodService.GetById(id, [c => c.Users]);
+        Neighborhood? neighborhood = await _neighborhoodService.GetById(id, [query => query.Include(c => c.Users)]);
 
         if (neighborhood == null || neighborhood.Users == null)
         {
@@ -154,8 +155,8 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         {
             // Joining a neighborhood from another neighborhood
 
-            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [c => c.Users]);
-            Neighborhood? existingNeighborhood = await _neighborhoodService.GetById(existingUser.NeighborhoodId, [c => c.Users]);
+            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.Include(c => c.Users)]);
+            Neighborhood? existingNeighborhood = await _neighborhoodService.GetById(existingUser.NeighborhoodId, [query => query.Include(c => c.Users)]);
             if (neighborhood == null)
             {
                 return NotFound();
@@ -170,7 +171,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         {
             // Leaving a neighborhood
 
-            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [c => c.Users]);
+            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.Include(c => c.Users)]);
 
             if (neighborhood != null)
             {
@@ -182,7 +183,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         {
             // Joining a neighborhood without another neighborhood
 
-            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [c => c.Users]);
+            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.Include(c => c.Users)]);
 
             if (neighborhood == null)
             {

@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore.Query;
 using webapi.Models;
 using webapi.Repositories;
 
@@ -6,9 +7,9 @@ namespace webapi.Services;
 
 public interface IBaseService<T> where T : BaseEntity
 {
-    Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? includes = null);
-    Task<T?> GetById(string id, Expression<Func<T, object>>[]? includes = null);
-    Task<T?> GetPaginatedInclude(string id, Expression<Func<T, object>> include, int page = 0, int pageSize = 5);
+    Task<ICollection<T>> GetAll(Func<IQueryable<T>, IIncludableQueryable<T, object>>[]? includes = null);
+    Task<T?> GetById(string id, Func<IQueryable<T>, IIncludableQueryable<T, object>>[]? includes = null);
+    Task<T?> GetPaginatedInclude(string id, int page = 0, int pageSize = 5, Func<IQueryable<T>, IIncludableQueryable<T, object>>[]? includes = null);
     Task Create(T entity);
     Task Update(T entity);
     Task Delete(string id);
@@ -18,19 +19,19 @@ public class BaseService<T>(IGenericRepository<T> repository) : IBaseService<T> 
 {
     private readonly IGenericRepository<T> _repository = repository;
 
-    public async Task<ICollection<T>> GetAll(Expression<Func<T, object>>[]? includes = null)
+    public async Task<ICollection<T>> GetAll(Func<IQueryable<T>, IIncludableQueryable<T, object>>[]? includes = null)
     {
         return await _repository.GetAll(includes).ConfigureAwait(false);
     }
 
-    public async Task<T?> GetById(string id, Expression<Func<T, object>>[]? includes = null)
+    public async Task<T?> GetById(string id, Func<IQueryable<T>, IIncludableQueryable<T, object>>[]? includes = null)
     {
         return await _repository.GetById(id, includes).ConfigureAwait(false);
     }
 
-    public async Task<T?> GetPaginatedInclude(string id, Expression<Func<T, object>> include, int page = 0, int pageSize = 5)
+    public async Task<T?> GetPaginatedInclude(string id, int page = 0, int pageSize = 5, Func<IQueryable<T>, IIncludableQueryable<T, object>>[]? includes = null)
     {
-        return await _repository.GetPaginatedInclude(id, include, page, pageSize).ConfigureAwait(false);
+        return await _repository.GetPaginatedInclude(id, page, pageSize, includes).ConfigureAwait(false);
     }
 
     public async Task Create(T entity)

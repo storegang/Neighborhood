@@ -32,8 +32,6 @@ namespace webapi.DataContexts
                 .WithOne(c => c.ParentPost)
                 .HasForeignKey(c => c.ParentPostId)
                 .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<Post>()
-                .has
         }
     }
 }
