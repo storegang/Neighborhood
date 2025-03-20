@@ -105,7 +105,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
     // GET api/<CommentController>/FromPost={postId}&Page={page}&Size={size}
     // GET api/<CommentController>/FromPost={postId}&Page={page}
-    [HttpGet("FromPost={postId}&Page={page}")]
+    [HttpGet("FromPost={postId}&Page={page}&Size={size}")]
     public async Task<ActionResult<CommentCollectionDTO>> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
         if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
@@ -113,13 +113,13 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
             return BadRequest();
         }
 
-        Post? post = await _postService.GetPaginatedInclude(postId, 0, 5, 
+        Post? post = await _postService.GetById(postId, 
             [query => query.Include(p => p.Comments
                 .Skip(int.Parse(page) * int.Parse(size))
                 .Take(int.Parse(size)))
                 .ThenInclude(c => c.User)]);
 
-        if (post == null || post.Comments == null)
+        if (post == null)
         {
             return NotFound();
         }

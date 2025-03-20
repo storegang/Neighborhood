@@ -108,7 +108,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             return BadRequest();
         }
 
-        Category? category = await _categoryService.GetPaginatedInclude(categoryId, int.Parse(page), int.Parse(size), [query => query.Include(c => c.Posts).ThenInclude(c => c.User)]);
+        Category? category = await _categoryService.GetById(categoryId, [query => query.Include(c => c.Posts).ThenInclude(c => c.User)]);
 
         if (category == null || category.Posts == null)
         {

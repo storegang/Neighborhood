@@ -13,7 +13,6 @@ public interface IGenericRepository<T> where T : BaseEntity
 {
     Task<ICollection<T>> GetAll(Func<IQueryable<T>, IIncludableQueryable<T, object>>[]? includes = null);
     Task<T?> GetById(string id, Func<IQueryable<T>, IIncludableQueryable<T, object>>[]? includes = null);
-    Task<T?> GetPaginatedInclude(string id, int page = 0, int pageSize = 5, Func<IQueryable<T>, IIncludableQueryable<T, object>>[]? includes = null);
     Task Add(T entity);
     Task Update(T entity);
     Task Delete(T entity);
@@ -37,11 +36,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 
         IQueryable<T> query = _dbSet;
 
-        if (includes == null)
-        {
-            return [.. query];
-        }
-        else
+        if (includes != null)
         {
             foreach (var include in includes)
             {
@@ -56,26 +51,6 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
     {
         IQueryable<T> query = _dbSet;
 
-        if (includes == null)
-        {
-            return query.FirstOrDefault(e => e.Id == id);
-        }
-        else
-        {
-            foreach (var include in includes)
-            {
-                query = include(query);
-            }
-        }
-
-        return await query.FirstOrDefaultAsync(e => e.Id == id).ConfigureAwait(false);
-    }
-
-    public async Task<T?> GetPaginatedInclude(string id, int page = 0, int pageSize = 5, Func<IQueryable<T>, IIncludableQueryable<T, object>>[]? includes = null)
-    {
-        _context.ChangeTracker.LazyLoadingEnabled = false;
-        IQueryable<T> query = _context.Set<T>();
-
         if (includes != null)
         {
             foreach (var include in includes)
@@ -84,10 +59,7 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
             }
         }
 
-        T result = await query.FirstOrDefaultAsync().ConfigureAwait(false);
-
-
-        return result;
+        return await query.FirstOrDefaultAsync(e => e.Id == id).ConfigureAwait(false);
     }
 
     public async Task Add(T entity)

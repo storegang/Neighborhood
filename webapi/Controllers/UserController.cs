@@ -58,6 +58,32 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
     }
 
     // GET api/<UserController>/{id}
+    [HttpGet("FromNeighborhood={id}&Page={page}&Size={size}")]
+    public async Task<ActionResult<UserCollectionDTO>> GetSomeUsersOfNeighborhoodId(string id, string page = "0", string size = "8")
+    {
+        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
+        {
+            return BadRequest();
+        }
+
+        Neighborhood? neighborhood = await _neighborhoodService.GetById
+            (id, [query => query.Include(c => c.Users
+                .Skip(int.Parse(page) * int.Parse(size))
+                .Take(int.Parse(size)))]
+            );
+
+        if (neighborhood == null || neighborhood.Users == null)
+        {
+            return NotFound();
+        }
+        ICollection<User> users = neighborhood.Users;
+
+        UserCollectionDTO userDataCollection = new(users);
+
+        return Ok(userDataCollection);
+    }
+
+    // GET api/<UserController>/{id}
     [HttpGet("FromNeighborhood={id}&role={role}")]
     public async Task<ActionResult<UserCollectionDTO>> GetAllUsersOfNeighborhoodIdSortedByRole(string id, string role)
     {
