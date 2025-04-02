@@ -66,7 +66,7 @@ export const useLikePost = (user: User | null) => {
     return useMutation({
         mutationFn: (postId: string) => likePost(postId, accessToken!),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["posts"] }) // Oppdaterer postene
+            queryClient.invalidateQueries({ queryKey: ["posts"] })
         },
     })
 }
