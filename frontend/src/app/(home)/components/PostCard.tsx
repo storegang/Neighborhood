@@ -3,6 +3,8 @@ import { Post } from "@/Models/Post"
 import Image from "next/image"
 import { useGetCategories, useLikePost } from "../queries"
 import { useUser } from "@/lib/getUser"
+import { Category } from "@/Models"
+import { useQueryClient } from "@tanstack/react-query"
 
 export const PostCard: React.FC<Post> = ({
     title,
@@ -16,6 +18,8 @@ export const PostCard: React.FC<Post> = ({
     datePosted,
     id,
 }) => {
+    const queryClient = useQueryClient()
+
     const user = useUser()
 
     const { name, avatar } = authorUser
@@ -23,6 +27,14 @@ export const PostCard: React.FC<Post> = ({
     const { data: categories = [] } = useGetCategories(user)
 
     const { mutate: likePost } = useLikePost(user)
+
+    const handleLikePost = (postId: string) => {
+        likePost(postId, {
+            onSuccess: () => {
+                queryClient.invalidateQueries(["posts"])
+            },
+        })
+    }
 
     return (
         <div className="card shadow-sm">
@@ -52,7 +64,11 @@ export const PostCard: React.FC<Post> = ({
                     </div>
                     <p className="w-1/2 truncate text-sm">{name}</p>
                     <div className="badge badge-soft badge-primary">
-                        {categories.find((c) => c.id === categoryId)?.name}
+                        {
+                            categories.find(
+                                (c: Category) => c.id === categoryId
+                            )?.name
+                        }
                     </div>
                 </div>
                 <p className="text-neutral-500">
@@ -79,7 +95,7 @@ export const PostCard: React.FC<Post> = ({
                 <div className="card-actions justify-start">
                     <button
                         className="btn btn-ghost btn-sm"
-                        onClick={() => likePost(id)}
+                        onClick={() => handleLikePost(id)}
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
