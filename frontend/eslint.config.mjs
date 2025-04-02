@@ -16,6 +16,9 @@ export default [
                 sourceType: "module",
             },
         },
+        plugins: {
+            "@typescript-eslint": tseslint,
+        },
         rules: {
             ...tseslint.configs.recommended.rules,
         },
@@ -34,7 +37,7 @@ export default [
     {
         files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
         languageOptions: {
-            globals: globals.browser, // eller globals.node avhengig av miljø
+            globals: globals.browser, // or globals.node depending on the environment
         },
         rules: {
             quotes: ["error", "double", { avoidEscape: true }],
