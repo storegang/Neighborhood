@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
     createPost,
     CreatePostInput,
@@ -61,9 +61,12 @@ export const useCreatePost = () => {
  */
 export const useLikePost = (user: User | null) => {
     const accessToken = user?.accessToken
+    const queryClient = useQueryClient()
+
     return useMutation({
-        mutationFn: (postId: string) => {
-            return likePost(postId, accessToken!)
+        mutationFn: (postId: string) => likePost(postId, accessToken!),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["posts"] }) // Oppdaterer postene
         },
     })
 }

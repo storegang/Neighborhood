@@ -28,14 +28,6 @@ export const PostCard: React.FC<Post> = ({
 
     const { mutate: likePost } = useLikePost(user)
 
-    const handleLikePost = (postId: string) => {
-        likePost(postId, {
-            onSuccess: () => {
-                queryClient.invalidateQueries(["posts"])
-            },
-        })
-    }
-
     return (
         <div className="card shadow-sm">
             {imageUrls && imageUrls.length ? (
@@ -95,7 +87,7 @@ export const PostCard: React.FC<Post> = ({
                 <div className="card-actions justify-start">
                     <button
                         className="btn btn-ghost btn-sm"
-                        onClick={() => handleLikePost(id)}
+                        onClick={() => likePost(id)}
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
