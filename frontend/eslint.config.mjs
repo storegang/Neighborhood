@@ -3,6 +3,7 @@ import pluginReact from "eslint-plugin-react"
 import tseslint from "@typescript-eslint/eslint-plugin"
 import pluginPrettier from "eslint-plugin-prettier"
 import pluginNext from "@next/eslint-plugin-next"
+import eslintParser from "@typescript-eslint/parser"
 
 /** @type {import('eslint').Linter.FlatConfig[]} */
 export default [
@@ -10,11 +11,14 @@ export default [
     {
         files: ["**/*.{ts,tsx}"],
         languageOptions: {
-            parser: "@typescript-eslint/parser",
+            parser: eslintParser,
             parserOptions: {
                 ecmaVersion: "latest",
                 sourceType: "module",
             },
+        },
+        plugins: {
+            "@typescript-eslint": tseslint,
         },
         rules: {
             ...tseslint.configs.recommended.rules,
@@ -34,7 +38,7 @@ export default [
     {
         files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
         languageOptions: {
-            globals: globals.browser, // eller globals.node avhengig av miljø
+            globals: globals.browser, // or globals.node depending on the environment
         },
         rules: {
             quotes: ["error", "double", { avoidEscape: true }],
