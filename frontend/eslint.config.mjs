@@ -1,67 +1,19 @@
-import globals from "globals"
-import pluginReact from "eslint-plugin-react"
-import tseslint from "@typescript-eslint/eslint-plugin"
-import pluginPrettier from "eslint-plugin-prettier"
-import pluginNext from "@next/eslint-plugin-next"
-import eslintParser from "@typescript-eslint/parser"
+import js from "@eslint/js"
+import { FlatCompat } from "@eslint/eslintrc"
 
-/** @type {import('eslint').Linter.FlatConfig[]} */
-export default [
-    // TypeScript Configuration
-    {
-        files: ["**/*.{ts,tsx}"],
-        languageOptions: {
-            parser: eslintParser,
-            parserOptions: {
-                ecmaVersion: "latest",
-                sourceType: "module",
-            },
-        },
-        plugins: {
-            "@typescript-eslint": tseslint,
-        },
+const compat = new FlatCompat({
+    // import.meta.dirname is available after Node.js v20.11.0
+    baseDirectory: import.meta.dirname,
+    recommendedConfig: js.configs.recommended,
+})
+
+const eslintConfig = [
+    ...compat.config({
+        extends: ["eslint:recommended", "next"],
         rules: {
-            ...tseslint.configs.recommended.rules,
+            "@typescript-eslint/no-explicit-any": "warn",
         },
-    },
-    // React Configuration
-    {
-        files: ["**/*.{jsx,tsx}"],
-        plugins: {
-            react: pluginReact,
-        },
-        rules: {
-            ...pluginReact.configs.recommended.rules,
-        },
-    },
-    // Global Settings and Overrides
-    {
-        files: ["**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-        languageOptions: {
-            globals: globals.browser, // or globals.node depending on the environment
-        },
-        rules: {
-            quotes: ["error", "double", { avoidEscape: true }],
-        },
-    },
-    // Prettier Integration
-    {
-        files: ["**/*.{js,ts,jsx,tsx}"],
-        plugins: {
-            prettier: pluginPrettier,
-        },
-        rules: {
-            "prettier/prettier": "error", // Ensure Prettier issues are treated as errors
-        },
-    },
-    // Next.js Configuration
-    {
-        files: ["**/*.{js,ts,jsx,tsx}"],
-        plugins: {
-            next: pluginNext,
-        },
-        rules: {
-            "next/no-img-element": "warn", // Example of Next.js specific rule
-        },
-    },
+    }),
 ]
+
+export default eslintConfig
