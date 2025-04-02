@@ -10,9 +10,6 @@ const compat = new FlatCompat({
 const eslintConfig = [
     ...compat.config({
         extends: ["eslint:recommended", "next"],
-        rules: {
-            "@typescript-eslint/no-explicit-any": "warn",
-        },
     }),
 ]
 
