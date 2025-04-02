@@ -5,6 +5,7 @@ import { useGetUsers } from "../queries"
 import { useUser } from "@/lib/getUser"
 import { UserListItemSkeleton } from "./UserListItemSkeleton"
 import { Alert } from "@/components"
+import { User } from "@/Models"
 
 export const UsersList: React.FC = () => {
     const user = useUser()
@@ -32,7 +33,7 @@ export const UsersList: React.FC = () => {
                     ) : users?.length === 0 ? (
                         <Alert type="info" message="No users found!" />
                     ) : users && users.length > 0 ? (
-                        users.map((user) => (
+                        users.map((user: User) => (
                             <UserListItem
                                 key={user.uid}
                                 name={user.name}
@@ -54,7 +55,7 @@ export const UsersList: React.FC = () => {
             />
             <div className="tab-content bg-base-100 border-base-300 rounded-box overflow-y-scroll p-6 shadow-md">
                 <ul className="list">
-                    {users?.map((user) => (
+                    {users?.map((user: User) => (
                         <UserListItem
                             key={user.uid}
                             name={user.name}

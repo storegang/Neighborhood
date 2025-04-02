@@ -34,7 +34,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
         isError && setDisplayError(true)
 
         const selectedCategoryObj = categories?.find(
-            (category) => category.id === selectedCategory
+            (category: Category) => category.id === selectedCategory
         )
 
         createPost(
@@ -56,7 +56,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                     setCategoryWarning(false)
                     setDisplayError(false)
                 },
-                onError: (error) => {
+                onError: (error: Error) => {
                     console.error("Error creating post:", error)
                 },
             }
@@ -118,7 +118,7 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                     onChange={(e) => setContent(e.target.value)}
                 ></textarea>
                 <div className="flex flex-wrap gap-4">
-                    {categories?.map((category) => (
+                    {categories?.map((category: Category) => (
                         <button
                             type="button"
                             className={`btn btn-xs ${
@@ -133,9 +133,9 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                         </button>
                     ))}
                 </div>
-                <div className="flex justify-end gap-4">
+                <div className="flex flex-col justify-end gap-4">
                     <button
-                        className="btn btn-sm btn-primary"
+                        className="btn btn-sm btn-primary grow-0 self-start"
                         type="submit"
                         disabled={isPending}
                     >
