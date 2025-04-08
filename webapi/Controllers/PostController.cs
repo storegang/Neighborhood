@@ -22,16 +22,16 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
     // GET: api/<PostController>
     [HttpGet]
-    public async Task<ActionResult<PostCollectionDTO>> GetAll()
+    public async Task<ActionResult<ServerPostCollectionDTO>> GetAll()
     {
         ICollection<Post> postCollection = await _postService.GetAll([query => query.Include(c => c.User)]);
 
-        PostCollectionDTO postDataCollection = new(postCollection);
+        ServerPostCollectionDTO postDataCollection = new(postCollection);
 
         Post[] posts = new Post[postCollection.Count()];
         posts = postCollection.ToArray();
 
-        PostDTO[] postDTOs = new PostDTO[postDataCollection.Posts.Count()];
+        ServerPostDTO[] postDTOs = new ServerPostDTO[postDataCollection.Posts.Count()];
         postDTOs = postDataCollection.Posts.ToArray();
 
         for (int i = 0; i < postCollection.Count; i++)
@@ -49,7 +49,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
     // GET api/<PostController>/{id}
     [HttpGet("{id}")]
-    public async Task<ActionResult<PostDTO>> GetById(string id)
+    public async Task<ActionResult<ServerPostDTO>> GetById(string id)
     {
         Post? post = await _postService.GetById(id, [query => query.Include(c => c.User)]);
 
@@ -58,7 +58,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             return NotFound();
         }
 
-        PostDTO postData = new(post);
+        ServerPostDTO postData = new(post);
 
         postData.LikedByCurrentUser = await _likeService.IsLiked(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
@@ -67,7 +67,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
     // GET api/<PostController>/{id}
     [HttpGet("FromCategory={id}")]
-    public async Task<ActionResult<PostCollectionDTO>> GetPostByCategoryId(string categoryId)
+    public async Task<ActionResult<ServerPostCollectionDTO>> GetPostByCategoryId(string categoryId)
     {
         Category? category = await _categoryService.GetById(categoryId, [query => query.Include(c => c.Posts).ThenInclude(p => p.User)]);
 
@@ -77,12 +77,12 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         }
         Post[] postCollection = category.Posts.ToArray();
 
-        PostCollectionDTO postDataCollection = new(postCollection);
+        ServerPostCollectionDTO postDataCollection = new(postCollection);
 
         Post[] posts = new Post[postCollection.Count()];
         posts = postCollection.ToArray();
 
-        PostDTO[] postDTOs = new PostDTO[postDataCollection.Posts.Count()];
+        ServerPostDTO[] postDTOs = new ServerPostDTO[postDataCollection.Posts.Count()];
         postDTOs = postDataCollection.Posts.ToArray();
 
         for (int i = 0; i < postCollection.Count(); i++)
@@ -101,7 +101,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
     // GET api/<PostController>/FromCategory={postId}&Page={page}&Size={size}
     // GET api/<PostController>/FromCategory={postId}&Page={page}
     [HttpGet("FromCategory={postId}&Page={page}")]
-    public async Task<ActionResult<PostCollectionDTO>> GetSomeCommentsByPostId(string categoryId, string page = "0", string size = "5")
+    public async Task<ActionResult<ServerPostCollectionDTO>> GetSomeCommentsByPostId(string categoryId, string page = "0", string size = "5")
     {
         if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
         {
@@ -117,12 +117,12 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
         ICollection<Post> postCollection = category.Posts;
 
-        PostCollectionDTO postDataCollection = new(postCollection);
+        ServerPostCollectionDTO postDataCollection = new(postCollection);
 
         Post[] posts = new Post[postCollection.Count()];
         posts = postCollection.ToArray();
 
-        PostDTO[] postDTOs = new PostDTO[postDataCollection.Posts.Count()];
+        ServerPostDTO[] postDTOs = new ServerPostDTO[postDataCollection.Posts.Count()];
         postDTOs = postDataCollection.Posts.ToArray();
 
         for (int i = 0; i < postCollection.Count(); i++)
@@ -140,13 +140,18 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
     // POST api/<PostController>
     [HttpPost]
-    public async Task<ActionResult<PostDTO>> Create(PostDTO postData)
+    public async Task<ActionResult<ServerPostDTO>> Create(ClientPostDTO postData)
     {
         Category? category = await _categoryService.GetById(postData.CategoryId, [query => query.Include(c => c.Posts).ThenInclude(p => p.User)]);
-
         if (category == null)
         {
             return NotFound();
+        }
+
+        User? user = await _userService.GetById(User.Claims.First(c => c.Type.Equals("user_id")).Value);
+        if (user == null)
+        {
+            return Unauthorized();
         }
 
         string newGuid;
@@ -164,7 +169,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = DateTime.Now,
-            User = postData.AuthorUser == null ? await _userService.GetById(postData.AuthorUserId) : postData.AuthorUser,
+            User = user,
             CategoryId = postData.CategoryId,
             Category = category,
             Images = (ICollection<string>?)postData.ImageUrls
@@ -180,7 +185,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
     // PUT api/<PostController>/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, PostDTO postData)
+    public async Task<IActionResult> Update(string id, ServerPostDTO postData)
     {
         Post? existingPost = await _postService.GetById(id, [query => query.Include(c => c.User)]);
         if (existingPost == null)
@@ -191,7 +196,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         postData.Id = id;
         Post post = new()
         {
-            Id = postData.Id,
+            Id = existingPost.Id,
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = existingPost.DatePosted,
