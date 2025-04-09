@@ -10,15 +10,9 @@ type CommentSectionProps = {
 export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
     const user = useUser()
 
-    /* const { data: comments, isLoading, isError } = useGetPosts(user) */
-    /*     const { mutate: deleteComment } = useDeleteComment(user)
-    const { mutate: editComment } = useEditComment(user) */
-
     const { mutate: addComment } = useAddComment(user!, postId)
 
     const { data: comments } = useGetComments(user!, postId)
-
-    // TODO: fit-content on badge
 
     return (
         <section>
