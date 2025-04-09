@@ -3,7 +3,7 @@ using webapi.Models;
 
 namespace webapi.DTOs;
 
-public class PostDTO
+public class ServerPostDTO
 {
     public string Id { get; set; }
     public string Title { get; set; }
@@ -19,9 +19,9 @@ public class PostDTO
     public int? LikedByUserCount { get; set; }
     public bool? LikedByCurrentUser { get; set; }
 
-    public PostDTO(){}
+    public ServerPostDTO(){}
 
-    public PostDTO(Post post)
+    public ServerPostDTO(Post post)
     {
         Id = post.Id;
         Title = post.Title;
@@ -36,7 +36,7 @@ public class PostDTO
         LikedByUserCount = post.LikedByUserID?.Count();
     }
 
-    public PostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, 
+    public ServerPostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, 
         User? authorUser, string categoryId, IEnumerable<string>? imageUrls, int? commentCount, int? likedByUserCount, bool likedByCurrentUser)
     {
         Id = id;
@@ -53,7 +53,7 @@ public class PostDTO
         LikedByCurrentUser = likedByCurrentUser;
     }
 
-    public PostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, string authorUserId,
+    public ServerPostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, string authorUserId,
         User? authorUser, string categoryId, IEnumerable<string>? imageUrls, int? commentCount, int? likedByUserCount, bool likedByCurrentUser)
     {
         Id = id;
@@ -71,12 +71,12 @@ public class PostDTO
     }
 }
 
-public class PostCollectionDTO
+public class ServerPostCollectionDTO
 {
-    public IEnumerable<PostDTO> Posts { get; set; }
+    public IEnumerable<ServerPostDTO> Posts { get; set; }
 
-    public PostCollectionDTO(ICollection<Post> posts)
+    public ServerPostCollectionDTO(ICollection<Post> posts)
     {
-        Posts = posts.Select(post => new PostDTO(post));
+        Posts = posts.Select(post => new ServerPostDTO(post));
     }
 }
