@@ -149,6 +149,12 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             return NotFound();
         }
 
+        User? user = await _userService.GetById(User.Claims.First(c => c.Type.Equals("user_id")).Value);
+        if (user == null)
+        {
+            return Unauthorized();
+        }
+
         string newGuid;
         do
         {
@@ -164,7 +170,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = DateTime.Now,
-            User = string.IsNullOrEmpty(postData.AuthorUserId) ? await _userService.GetById(User.Claims.First(c => c.Type.Equals("user_id"))?.Value) : await _userService.GetById(postData.AuthorUserId),
+            User = user,
             CategoryId = postData.CategoryId,
             Category = category,
             Images = (ICollection<string>?)postData.ImageUrls
