@@ -1,14 +1,14 @@
 "use client"
 
 import { formatRelativeDate } from "@/lib/formatters/formatDate"
-import { Post } from "@/Models/Post"
+import { PostResponse } from "@/Models/Post"
 import Image from "next/image"
 import { useGetCategories, useLikePost } from "../queries"
 import { useUser } from "@/lib/getUser"
 import { useState } from "react"
 import { CommentSection } from "./CommentSection"
 
-export const PostCard: React.FC<Post> = ({
+export const PostCard: React.FC<PostResponse> = ({
     title,
     description,
     imageUrls,
@@ -52,12 +52,15 @@ export const PostCard: React.FC<Post> = ({
                             <img
                                 alt={name}
                                 className="h-full w-full"
-                                src={avatar}
+                                src={
+                                    avatar ||
+                                    "https://png.pngtree.com/png-vector/20220608/ourmid/pngtree-man-avatar-isolated-on-white-background-png-image_4891418.png"
+                                }
                             />
                         </div>
                     </div>
                     <p className="w-1/2 truncate text-sm">{name}</p>
-                    <div className="badge badge-soft badge-primary">
+                    <div className="badge badge-soft badge-primary fit-content">
                         {categories.find((c) => c.id === categoryId)?.name}
                     </div>
                 </div>
