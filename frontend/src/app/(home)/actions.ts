@@ -3,6 +3,7 @@
 import { apiFetcher } from "@/fetchers/apiFetcher"
 import { Post, Category, User } from "@/Models"
 import { CommentResponse } from "@/Models/Comment"
+import { LikeRequest } from "@/Models/Likes"
 
 /**
  *
@@ -49,7 +50,7 @@ export const getComments = async (
  * @returns A promise that resolves when the request is complete.
  */
 export const likePost = async (
-    postId: string,
+    postId: LikeRequest["postId"],
     accessToken: string
 ): Promise<any> => {
     await apiFetcher<{ success: boolean }>({
@@ -81,6 +82,7 @@ export type CreatePostInput = {
     userUID: string
     accessToken: string
 }
+
 /**
  *
  * @param input The input for the post to be created

@@ -11,6 +11,7 @@ import {
 } from "./actions"
 
 import { Category, User } from "@/Models"
+import { LikeRequest } from "@/Models/Likes"
 
 /**
  * Gets the posts from the server.
@@ -68,7 +69,8 @@ export const useLikePost = (user: User | null) => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (postId: string) => likePost(postId, accessToken!),
+        mutationFn: (postId: LikeRequest["postId"]) =>
+            likePost(postId, accessToken!),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["posts"] })
         },
