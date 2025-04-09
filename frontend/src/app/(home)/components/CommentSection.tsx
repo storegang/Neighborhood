@@ -1,10 +1,10 @@
 import { useUser } from "@/lib/getUser"
 import { useAddComment, useGetComments } from "../queries"
-import { FormEventHandler } from "react"
-import { addComment } from "../actions"
+import { Comment } from "./Comment"
+import { Post } from "@/Models"
 
 type CommentSectionProps = {
-    postId: string
+    postId: Post["id"]
 }
 
 export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
@@ -16,16 +16,21 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
 
     const { mutate: addComment } = useAddComment(user!, postId)
 
+    const { data: comments } = useGetComments(user!, postId)
+
     // TODO: fit-content on badge
 
     return (
         <section>
-            <div className="flex gap-2">
-                <div className="w-8">
-                    <div className="mask mask-squircle">
+            {comments?.map((comment) => (
+                <Comment key={comment.id} comment={comment} />
+            ))}
+            <div className="chat chat-start">
+                <div className="chat-image">
+                    <div className="chat avatar mask mask-squircle w-8">
                         <img
                             alt={user?.name}
-                            className="w-fulln h-full object-contain"
+                            className="h-full w-full object-contain"
                             src={user?.photoURL || undefined}
                         />
                     </div>
@@ -43,11 +48,13 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                     }}
                     className="flex w-1/2 gap-2"
                 >
-                    <textarea
-                        name="comment"
-                        placeholder="Comment"
-                        className="textarea textarea-secondary resize-none"
-                    ></textarea>
+                    <div className="chat-bubble w-full p-1">
+                        <textarea
+                            name="comment"
+                            placeholder="Comment"
+                            className="chat-bubble w-full resize-none ps-2 pe-2"
+                        ></textarea>
+                    </div>
                     <button
                         type="submit"
                         aria-label="comment"
