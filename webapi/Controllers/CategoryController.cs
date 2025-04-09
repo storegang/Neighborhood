@@ -70,7 +70,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         {
             newGuid = Guid.NewGuid().ToString();
         }
-        while (_categoryService.GetById(newGuid) != null);
+        while (await _categoryService.GetById(newGuid) != null);
 
         categoryData.Id = newGuid;
         Category category = new()
