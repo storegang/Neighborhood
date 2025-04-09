@@ -1,5 +1,15 @@
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { createPost, CreatePostInput, getCategories, getPosts } from "./actions"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+
+import {
+    createPost,
+    CreatePostInput,
+    getCategories,
+    getComments,
+    getPosts,
+    addComment,
+    likePost,
+} from "./actions"
+
 import { Category, User } from "@/Models"
 
 /**
@@ -46,3 +56,48 @@ export const useCreatePost = () => {
         },
     })
 }
+
+/**
+ * Custom hook to like a post.
+ *
+ * @param {User | null} user - The user object containing the access token. If null, the user is not authenticated.
+ * @returns {UseMutationResult} The mutation result object from the `useMutation` hook.
+ */
+export const useLikePost = (user: User | null) => {
+    const accessToken = user?.accessToken
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (postId: string) => likePost(postId, accessToken!),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["posts"] })
+        },
+    })
+}
+
+export const useGetComments = (user: User | null, postId: string) => {
+    const accessToken = user?.accessToken
+    return useQuery({
+        queryKey: ["comments", postId, accessToken],
+        enabled: !!accessToken,
+        queryFn: () => getComments(accessToken!, postId),
+    })
+}
+
+export const useAddComment = (user: User, postId: string) => {
+    const accessToken = user?.accessToken
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (comment: string) =>
+            addComment(comment, postId, accessToken!, user.uid),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["comments", postId] })
+        },
+        onError: (error) => {
+            console.error("Error adding comment:", error)
+        },
+    })
+}
+
+export const useDeleteComment = (user: User | null, postId: string) => {}

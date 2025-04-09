@@ -1,7 +1,7 @@
 "use server"
 
 import { apiFetcher } from "@/fetchers/apiFetcher"
-import { Post, Category } from "@/Models"
+import { Post, Category, User } from "@/Models"
 
 /**
  *
@@ -13,12 +13,42 @@ export const getPosts = async (
     accessToken: string,
     category?: Category
 ): Promise<Post[]> => {
+    console.log(category ? "/post/fromcategory=" + category : "/post")
     const response = await apiFetcher<{ posts: Post[] }>({
         path: category ? "/post/fromcategory=" + category : "/post",
         accessToken: accessToken,
     })
 
     return response.posts
+}
+
+export const getComments = async (
+    accessToken: string,
+    postId: string
+): Promise<Comment[]> => {
+    const response = await apiFetcher<{ comments: Comment[] }>({
+        path: `/comment/allfrompost=${postId}`,
+        accessToken: accessToken,
+    })
+    return response.comments
+}
+
+/**
+ * Sends a request to like a post.
+ *
+ * @param postId - The ID of the post to like.
+ * @param accessToken - The access token for authentication.
+ * @returns A promise that resolves when the request is complete.
+ */
+export const likePost = async (
+    postId: string,
+    accessToken: string
+): Promise<any> => {
+    await apiFetcher<{ success: boolean }>({
+        path: `/post/like/${postId}`,
+        method: "PUT",
+        accessToken: accessToken,
+    })
 }
 
 /**
@@ -79,6 +109,45 @@ export const createPost = async (
             commentCount: 0,
             likedByUserCount: 0,
             likedByCurrentUser: false,
+        },
+    })
+
+    return response
+}
+
+/**
+ *
+ */
+export const addComment = async (
+    comment: string,
+    postId: string,
+    accessToken: string,
+    userId: User["uid"]
+) => {
+    const response = await apiFetcher<{ comment: Comment }>({
+        path: "/comment",
+        method: "POST",
+        accessToken: accessToken,
+
+        body: {
+            content: comment,
+            authorUserId: userId,
+            parentPostId: postId,
+
+            /* Flyttes til backend */
+            id: "string",
+            datePosted: "2025-04-08T19:10:41.186Z",
+            dateLastEdited: "2025-04-08T19:10:41.186Z",
+            authorUser: {
+                id: "string",
+                name: "string",
+                avatar: "string",
+                neighborhoodId: "string",
+                userRole: 0,
+            },
+            imageUrl: "string",
+            likedByUserCount: 0,
+            likedByCurrentUser: true,
         },
     })
 
