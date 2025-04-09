@@ -5,7 +5,6 @@ using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Hosting;
 using webapi.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace webapi.Controllers;
 
@@ -23,7 +22,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     [HttpGet]
     public async Task<ActionResult<CommentCollectionDTO>> GetAll()
     {
-        ICollection<Comment> commentCollection = await _commentService.GetAll([query => query.Include(c => c.User)]);
+        ICollection<Comment> commentCollection = await _commentService.GetAll([c => c.User]);
         
         CommentCollectionDTO commentDataCollection = new(commentCollection);
 
@@ -69,13 +68,31 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     [HttpGet("AllFromPost={postId}")]
     public async Task<ActionResult<CommentCollectionDTO>> GetCommentsByPostId(string postId)
     {
-        Post? post = await _postService.GetById(postId, [query => query.Include(p => p.Comments).ThenInclude(c => c.User)]);
+        Post? post = await _postService.GetById(postId, [p => p.Comments]);
 
         if (post == null || post.Comments == null)
         {
             return NotFound();
         }
         ICollection<Comment>? commentCollection = post.Comments;
+
+        foreach (Comment comment in post.Comments)
+        {
+            Comment? existingComment = await _commentService.GetById(comment.Id, [c => c.User]);
+            if (comment == null || existingComment == null)
+            {
+                continue;
+            }
+            try
+            {
+                commentCollection.First(c => c.Id == comment.Id).User = existingComment.User;
+            }
+            catch
+            {
+                Console.WriteLine("Error Source: GetCommentsByPostId. Could not find comment Id");
+                continue;
+            }
+        }
 
         CommentCollectionDTO commentDataCollection = new(commentCollection);
 
@@ -105,26 +122,46 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
     // GET api/<CommentController>/FromPost={postId}&Page={page}&Size={size}
     // GET api/<CommentController>/FromPost={postId}&Page={page}
-    [HttpGet("FromPost={postId}&Page={page}&Size={size}")]
+    [HttpGet("FromPost={postId}&Page={page}")]
     public async Task<ActionResult<CommentCollectionDTO>> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
+        Post? post = await _postService.GetById(postId, [p => p.Comments]);
+
+        if (post == null || post.Comments == null)
+        {
+            return NotFound();
+        }
+
         if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
         {
             return BadRequest();
         }
 
-        Post? post = await _postService.GetById(postId, 
-            [query => query.Include(p => p.Comments
-                .Skip(int.Parse(page) * int.Parse(size))
-                .Take(int.Parse(size)))
-                .ThenInclude(c => c.User)]);
 
-        if (post == null)
+        ICollection<Comment> commentCollection = post.Comments
+        .Skip((int.Parse(page) - 1) * int.Parse(size))
+        .Take(int.Parse(size))
+        .ToArray();
+
+        foreach (Comment comment in commentCollection)
         {
-            return NotFound();
+            // The reason we fetch the comment again, is that it doesn't yet include an user, so in this new fetch, it includes the user. 
+            // This will be fixed in the future, but for now, this is the solution.
+            Comment? existingComment = await _commentService.GetById(comment.Id, [c => c.User]);
+            if (comment == null || existingComment == null)
+            {
+                continue;
+            }
+            try
+            {
+                commentCollection.First(c => c.Id == comment.Id).User = existingComment.User;
+            }
+            catch
+            {
+                Console.WriteLine("Error Source: GetSomeCommentsByPostId. Could not find comment Id");
+                continue;
+            }
         }
-
-        ICollection<Comment> commentCollection = post.Comments;
 
         CommentCollectionDTO commentDataCollection = new(commentCollection);
 
@@ -159,7 +196,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     [HttpPost]
     public async Task<ActionResult<CommentDTO>> Create(CommentDTO commentData)
     {
-        Post? post = await _postService.GetById(commentData.ParentPostId, [query => query.Include(c => c.User)]);
+        Post? post = await _postService.GetById(commentData.ParentPostId, [c => c.User]);
 
         if (post == null)
         {
@@ -171,7 +208,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         {
             newGuid = Guid.NewGuid().ToString();
         }
-        while (await _commentService.GetById(newGuid) != null);
+        while (_commentService.GetById(newGuid) != null);
 
         commentData.Id = newGuid;
         Comment comment = new()
@@ -195,7 +232,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(CommentDTO commentData)
     {
-        Comment? existingComment = await _commentService.GetById(commentData.Id, [query => query.Include(c => c.User)]);
+        Comment? existingComment = await _commentService.GetById(commentData.Id, [c => c.User]);
         if (existingComment == null)
         {
             return NotFound();
@@ -222,7 +259,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     [HttpPut("Likes/{commentId}")]
     public async Task<IActionResult> Like(string commentId)
     {
-        Comment? comment = await _commentService.GetById(commentId, [query => query.Include(c => c.User)]);
+        Comment? comment = await _commentService.GetById(commentId, [c => c.User]);
         if (comment == null)
         {
             return NotFound();
