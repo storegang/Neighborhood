@@ -179,7 +179,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
             Id = commentData.Id,
             Content = commentData.Content,
             DatePosted = DateTime.Now,
-            User = commentData.AuthorUser == null ? await _userService.GetById(commentData.AuthorUserId) : commentData.AuthorUser,
+            User = string.IsNullOrEmpty(commentData.AuthorUserId) ? await _userService.GetById(User.Claims.First(c => c.Type.Equals("user_id"))?.Value) : await _userService.GetById(commentData.AuthorUserId),
             ParentPostId = commentData.ParentPostId,
             ImageUrl = commentData.ImageUrl
         };

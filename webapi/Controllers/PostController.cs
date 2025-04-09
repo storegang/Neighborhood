@@ -164,7 +164,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = DateTime.Now,
-            User = postData.AuthorUser == null ? await _userService.GetById(postData.AuthorUserId) : postData.AuthorUser,
+            User = string.IsNullOrEmpty(postData.AuthorUserId) ? await _userService.GetById(User.Claims.First(c => c.Type.Equals("user_id"))?.Value) : await _userService.GetById(postData.AuthorUserId),
             CategoryId = postData.CategoryId,
             Category = category,
             Images = (ICollection<string>?)postData.ImageUrls
