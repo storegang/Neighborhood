@@ -2,6 +2,7 @@
 
 import { apiFetcher } from "@/fetchers/apiFetcher"
 import { Post, Category, User } from "@/Models"
+import { CommentResponse } from "@/Models/Comment"
 
 /**
  *
@@ -22,11 +23,18 @@ export const getPosts = async (
     return response.posts
 }
 
+/**
+ * Fetches comments for a specific post.
+ *
+ * @param accessToken - The access token for authentication.
+ * @param postId - The ID of the post to fetch comments from.
+ * @returns A promise that resolves to an array of comments.
+ */
 export const getComments = async (
     accessToken: string,
     postId: string
-): Promise<Comment[]> => {
-    const response = await apiFetcher<{ comments: Comment[] }>({
+): Promise<CommentResponse[]> => {
+    const response = await apiFetcher<{ comments: CommentResponse[] }>({
         path: `/comment/allfrompost=${postId}`,
         accessToken: accessToken,
     })
@@ -135,16 +143,9 @@ export const addComment = async (
             parentPostId: postId,
 
             /* Flyttes til backend */
-            id: "string",
+            id: "",
             datePosted: "2025-04-08T19:10:41.186Z",
             dateLastEdited: "2025-04-08T19:10:41.186Z",
-            authorUser: {
-                id: "string",
-                name: "string",
-                avatar: "string",
-                neighborhoodId: "string",
-                userRole: 0,
-            },
             imageUrl: "string",
             likedByUserCount: 0,
             likedByCurrentUser: true,
