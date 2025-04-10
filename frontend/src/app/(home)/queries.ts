@@ -101,5 +101,3 @@ export const useAddComment = (user: User, postId: string) => {
         },
     })
 }
-
-export const useDeleteComment = (user: User | null, postId: string) => {}
