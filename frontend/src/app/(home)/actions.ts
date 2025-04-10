@@ -21,7 +21,6 @@ export const getPosts = async (
     accessToken: string,
     category?: Category
 ): Promise<PostResponse[]> => {
-    console.log(category ? "/post/fromcategory=" + category : "/post")
     const response = await apiFetcher<{ posts: PostResponse[] }>({
         path: category ? "/post/fromcategory=" + category : "/post",
         accessToken: accessToken,
