@@ -1,6 +1,6 @@
 "use client"
 
-import { User, Post, Category } from "@/Models"
+import { User, PostRequest, Category } from "@/Models"
 import { useState } from "react"
 import { useCreatePost, useGetCategories } from "../queries"
 import { useQueryClient } from "@tanstack/react-query"
@@ -8,7 +8,7 @@ import { Alert } from "@/components"
 
 type CreatePostProps = {
     user: User
-    onPostCreated?: (newPost: Post) => void
+    onPostCreated?: (newPost: PostRequest) => void
 }
 
 export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {

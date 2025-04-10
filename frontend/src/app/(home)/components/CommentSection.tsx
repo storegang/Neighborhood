@@ -1,10 +1,10 @@
 import { useUser } from "@/lib/getUser"
 import { useAddComment, useGetComments } from "../queries"
 import { Comment } from "./Comment"
-import { Post } from "@/Models"
+import { PostResponse } from "@/Models"
 
 type CommentSectionProps = {
-    postId: Post["id"]
+    postId: PostResponse["id"]
 }
 
 export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {

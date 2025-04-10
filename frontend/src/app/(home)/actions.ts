@@ -1,10 +1,15 @@
 "use server"
 
 import { apiFetcher } from "@/fetchers/apiFetcher"
-import { Post, Category, User } from "@/Models"
-import { CommentRequest, CommentResponse } from "@/Models/Comment"
-import { LikeRequest } from "@/Models/Likes"
-import { PostResponse } from "@/Models/Post"
+import {
+    PostResponse,
+    PostRequest,
+    Category,
+    User,
+    LikeRequest,
+    CommentRequest,
+    CommentResponse,
+} from "@/Models"
 
 /**
  *
@@ -15,9 +20,9 @@ import { PostResponse } from "@/Models/Post"
 export const getPosts = async (
     accessToken: string,
     category?: Category
-): Promise<Post[]> => {
+): Promise<PostResponse[]> => {
     console.log(category ? "/post/fromcategory=" + category : "/post")
-    const response = await apiFetcher<{ posts: Post[] }>({
+    const response = await apiFetcher<{ posts: PostResponse[] }>({
         path: category ? "/post/fromcategory=" + category : "/post",
         accessToken: accessToken,
     })
@@ -94,9 +99,9 @@ export type CreatePostInput = {
 export const createPost = async (
     input: CreatePostInput
 ): Promise<{
-    post: Post
+    post: PostRequest
 }> => {
-    const response = apiFetcher<{ post: Post }>({
+    const response = apiFetcher<{ post: PostRequest }>({
         path: "/post",
         method: "POST",
         accessToken: input.accessToken,
@@ -107,21 +112,6 @@ export const createPost = async (
             imageUrls: [],
             // AccessToken kan brukes til å hente brukerdata istedet
             authorUserId: input.userUID,
-
-            // Alle disse kan flyttes til backend
-            authorUser: {
-                id: "",
-                name: "",
-                avatar: "",
-                neighborhoodId: "",
-            },
-            id: "",
-            datePosted: new Date().toISOString(),
-            dateLastEdited: new Date().toISOString(),
-
-            commentCount: 0,
-            likedByUserCount: 0,
-            likedByCurrentUser: false,
         },
     })
 
