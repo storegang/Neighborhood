@@ -7,6 +7,7 @@ using webapi.Repositories;
 using Microsoft.Extensions.Hosting;
 using webapi.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace webapi.Controllers;
 
@@ -60,6 +61,9 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
         ServerPostDTO postData = new(post);
 
+        // postData.CommentCount = await _postService.Count(id, p => p.Where(b => b.Id == id).SelectMany(d => d.Comments).CountAsync());
+
+
         postData.LikedByCurrentUser = await _likeService.IsLiked(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
         return Ok(postData);
@@ -67,9 +71,9 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
     // GET api/<PostController>/{id}
     [HttpGet("FromCategory={id}")]
-    public async Task<ActionResult<ServerPostCollectionDTO>> GetPostByCategoryId(string categoryId)
+    public async Task<ActionResult<ServerPostCollectionDTO>> GetPostByCategoryId(string id)
     {
-        Category? category = await _categoryService.GetById(categoryId, [query => query.Include(c => c.Posts).ThenInclude(p => p.User)]);
+        Category? category = await _categoryService.GetById(id, [query => query.Include(c => c.Posts).ThenInclude(p => p.User)]);
 
         if (category == null || category.Posts == null)
         {
@@ -140,7 +144,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
     // POST api/<PostController>
     [HttpPost]
-    public async Task<ActionResult<ServerPostDTO>> Create(ClientPostDTO postData)
+    public async Task<ActionResult<ClientPostDTO>> Create(ClientPostDTO postData)
     {
         Category? category = await _categoryService.GetById(postData.CategoryId, [query => query.Include(c => c.Posts).ThenInclude(p => p.User)]);
         if (category == null)
@@ -160,12 +164,10 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             newGuid = Guid.NewGuid().ToString();
         }
         while (await _postService.GetById(newGuid) != null);
-
-        postData.Id = newGuid;
         
         Post post = new()
         {
-            Id = postData.Id,
+            Id = newGuid,
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = DateTime.Now,
@@ -180,12 +182,12 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         category.Posts.Add(post);
         await _categoryService.Update(category);
 
-        return CreatedAtAction(nameof(GetById), new { id = postData.Id }, postData);
+        return CreatedAtAction(nameof(GetById), new { id = newGuid }, postData);
     }
 
     // PUT api/<PostController>/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, ServerPostDTO postData)
+    public async Task<IActionResult> Update(string id, ClientPostDTO postData)
     {
         Post? existingPost = await _postService.GetById(id, [query => query.Include(c => c.User)]);
         if (existingPost == null)
@@ -193,7 +195,6 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             return NotFound();
         }
 
-        postData.Id = id;
         Post post = new()
         {
             Id = existingPost.Id,

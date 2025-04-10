@@ -181,8 +181,8 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         {
             // Joining a neighborhood from another neighborhood
 
-            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.Include(c => c.Users)]);
-            Neighborhood? existingNeighborhood = await _neighborhoodService.GetById(existingUser.NeighborhoodId, [query => query.Include(c => c.Users)]);
+            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
+            Neighborhood? existingNeighborhood = await _neighborhoodService.GetById(existingUser.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
             if (neighborhood == null)
             {
                 return NotFound();
@@ -197,7 +197,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         {
             // Leaving a neighborhood
 
-            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.Include(c => c.Users)]);
+            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
 
             if (neighborhood != null)
             {
@@ -209,7 +209,7 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         {
             // Joining a neighborhood without another neighborhood
 
-            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.Include(c => c.Users)]);
+            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
 
             if (neighborhood == null)
             {
