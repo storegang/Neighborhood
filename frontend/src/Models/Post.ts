@@ -2,8 +2,8 @@ import { Category } from "./Category"
 import { User } from "./User"
 
 export type PostRequest = {
-    title: "string"
-    description: "string"
+    title: string
+    description: string
     categoryId: Category["id"]
     imageUrls: string[]
 }
