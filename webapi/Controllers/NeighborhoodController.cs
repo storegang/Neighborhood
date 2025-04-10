@@ -9,10 +9,9 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class NeighborhoodController(INeighborhoodService neighborhoodService, IBaseService<User> userService) : ControllerBase
+public class NeighborhoodController(INeighborhoodService neighborhoodService) : ControllerBase
 {
     private readonly INeighborhoodService _neighborhoodService = neighborhoodService;
-    private readonly IBaseService<User> _userService = userService;
 
     // GET: api/<NeighborhoodController>
     [HttpGet]

@@ -3,6 +3,7 @@ using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using webapi.Repositories;
 using Microsoft.Extensions.Hosting;
 using webapi.Interfaces;
@@ -13,12 +14,12 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class PostController(IBaseService<Post> postService, IBaseService<Category> categoryService, IBaseService<User> userService, ILikeService<Post> likeService) : ControllerBase
+public class PostController(IBaseService<Post> postService, IBaseService<Category> categoryService, ILikeService<Post> likeService, UserManager<User> userManager) : ControllerBase
 {
     private readonly IBaseService<Post> _postService = postService;
     private readonly IBaseService<Category> _categoryService = categoryService;
-    private readonly IBaseService<User> _userService = userService;
     private readonly ILikeService<Post> _likeService = likeService;
+    private readonly UserManager<User> _userManager = userManager;
 
     // GET: api/<PostController>
     [HttpGet]
@@ -148,7 +149,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             return NotFound();
         }
 
-        User? user = await _userService.GetById(User.Claims.First(c => c.Type.Equals("user_id")).Value);
+        User? user = await _userManager.FindByIdAsync(User.Claims.First(c => c.Type.Equals("user_id")).Value);
         if (user == null)
         {
             return Unauthorized();
@@ -162,7 +163,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         while (await _postService.GetById(newGuid) != null);
 
         postData.Id = newGuid;
-        
+
         Post post = new()
         {
             Id = postData.Id,

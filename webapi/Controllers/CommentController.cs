@@ -3,21 +3,21 @@ using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Hosting;
 using webapi.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace webapi.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(IBaseService<Comment> commentService, IBaseService<User> userService, IBaseService<Post> postService, ILikeService<Comment> likeService) : ControllerBase
+public class CommentController(IBaseService<Comment> commentService, IBaseService<Post> postService, ILikeService<Comment> likeService, UserManager<User> userManager) : ControllerBase
 {
     private readonly IBaseService<Comment> _commentService = commentService;
-    private readonly IBaseService<User> _userService = userService;
     private readonly IBaseService<Post> _postService = postService;
     private readonly ILikeService<Comment> _likeService = likeService;
+    private readonly UserManager<User> _userManager = userManager;
 
     // GET: api/<CommentController>
     [HttpGet]
@@ -174,12 +174,16 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         while (await _commentService.GetById(newGuid) != null);
 
         commentData.Id = newGuid;
+
+        // TODO: Should check if the id is valid when making the comment.
+        User? user = await _userManager.FindByIdAsync(commentData.AuthorUserId);
+
         Comment comment = new()
         {
             Id = commentData.Id,
             Content = commentData.Content,
             DatePosted = DateTime.Now,
-            User = commentData.AuthorUser == null ? await _userService.GetById(commentData.AuthorUserId) : commentData.AuthorUser,
+            User = user,
             ParentPostId = commentData.ParentPostId,
             ImageUrl = commentData.ImageUrl
         };
