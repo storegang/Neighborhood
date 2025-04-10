@@ -21,16 +21,16 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
     // GET: api/<CommentController>
     [HttpGet]
-    public async Task<ActionResult<CommentCollectionDTO>> GetAll()
+    public async Task<ActionResult<ServerCommentCollectionDTO>> GetAll()
     {
         ICollection<Comment> commentCollection = await _commentService.GetAll([query => query.Include(c => c.User)]);
         
-        CommentCollectionDTO commentDataCollection = new(commentCollection);
+        ServerCommentCollectionDTO commentDataCollection = new(commentCollection);
 
         Comment[] comments = new Comment[commentCollection.Count()];
         comments = commentCollection.ToArray();
 
-        CommentDTO[] commentDTOs = new CommentDTO[commentDataCollection.Comments.Count()];
+        ServerCommentDTO[] commentDTOs = new ServerCommentDTO[commentDataCollection.Comments.Count()];
         commentDTOs = commentDataCollection.Comments.ToArray();
 
         for (int i = 0; i < commentCollection.Count; i++)
@@ -49,7 +49,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
     // GET api/<CommentController>/{id}
     [HttpGet("{id}")]
-    public async Task<ActionResult<CommentDTO>> GetById(string id)
+    public async Task<ActionResult<ServerCommentDTO>> GetById(string id)
     {
         Comment? comment = await _commentService.GetById(id);
         
@@ -58,7 +58,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
             return NotFound();
         }
 
-        CommentDTO commentData = new(comment);
+        ServerCommentDTO commentData = new(comment);
 
         commentData.LikedByCurrentUser = await _likeService.IsLiked(comment.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
@@ -67,7 +67,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
     // GET api/<CommentController>/AllFromPost={postId}
     [HttpGet("AllFromPost={postId}")]
-    public async Task<ActionResult<CommentCollectionDTO>> GetCommentsByPostId(string postId)
+    public async Task<ActionResult<ServerCommentCollectionDTO>> GetCommentsByPostId(string postId)
     {
         Post? post = await _postService.GetById(postId, [query => query.Include(p => p.Comments).ThenInclude(c => c.User)]);
 
@@ -77,16 +77,16 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         }
         ICollection<Comment>? commentCollection = post.Comments;
 
-        CommentCollectionDTO commentDataCollection = new(commentCollection);
+        ServerCommentCollectionDTO commentDataCollection = new(commentCollection);
 
         ICollection<Comment> comments = new Comment[commentCollection.Count()];
         comments = commentCollection.ToArray();
 
-        IEnumerable<CommentDTO> commentDTOs = new CommentDTO[commentDataCollection.Comments.Count()];
+        IEnumerable<ServerCommentDTO> commentDTOs = new ServerCommentDTO[commentDataCollection.Comments.Count()];
         commentDTOs = commentDataCollection.Comments.ToArray();
 
 
-        foreach (CommentDTO commentData in commentDTOs)
+        foreach (ServerCommentDTO commentData in commentDTOs)
         {
             Comment? comment = comments.FirstOrDefault(c => c.Id == commentData.Id);
 
@@ -106,7 +106,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     // GET api/<CommentController>/FromPost={postId}&Page={page}&Size={size}
     // GET api/<CommentController>/FromPost={postId}&Page={page}
     [HttpGet("FromPost={postId}&Page={page}&Size={size}")]
-    public async Task<ActionResult<CommentCollectionDTO>> GetSomeCommentsByPostId(string postId, string page, string size = "5")
+    public async Task<ActionResult<ServerCommentCollectionDTO>> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
         if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
         {
@@ -126,16 +126,16 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
         ICollection<Comment> commentCollection = post.Comments;
 
-        CommentCollectionDTO commentDataCollection = new(commentCollection);
+        ServerCommentCollectionDTO commentDataCollection = new(commentCollection);
 
         ICollection<Comment> comments = new Comment[commentCollection.Count()];
         comments = commentCollection.ToArray();
 
-        IEnumerable<CommentDTO> commentDTOs = new CommentDTO[commentDataCollection.Comments.Count()];
+        IEnumerable<ServerCommentDTO> commentDTOs = new ServerCommentDTO[commentDataCollection.Comments.Count()];
         commentDTOs = commentDataCollection.Comments.ToArray();
 
 
-        foreach (CommentDTO commentData in commentDTOs)
+        foreach (ServerCommentDTO commentData in commentDTOs)
         {
             Comment? comment = comments.FirstOrDefault(c => c.Id == commentData.Id);
 
@@ -157,13 +157,19 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
     // POST api/<CommentController>
     [HttpPost]
-    public async Task<ActionResult<CommentDTO>> Create(CommentDTO commentData)
+    public async Task<ActionResult<ClientCommentDTO>> Create(ClientCommentDTO commentData)
     {
         Post? post = await _postService.GetById(commentData.ParentPostId, [query => query.Include(c => c.User)]);
 
         if (post == null)
         {
             return NotFound();
+        }
+
+        User? user = await _userManager.FindByIdAsync(User.Claims.First(c => c.Type.Equals("user_id")).Value);
+        if (user == null)
+        {
+            return Unauthorized();
         }
 
         string newGuid;
@@ -173,14 +179,9 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         }
         while (await _commentService.GetById(newGuid) != null);
 
-        commentData.Id = newGuid;
-
-        // TODO: Should check if the id is valid when making the comment.
-        User? user = await _userManager.FindByIdAsync(commentData.AuthorUserId);
-
         Comment comment = new()
         {
-            Id = commentData.Id,
+            Id = newGuid,
             Content = commentData.Content,
             DatePosted = DateTime.Now,
             User = user,
@@ -192,14 +193,14 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         post.Comments.Add(comment);
         await _postService.Update(post);
 
-        return CreatedAtAction(nameof(GetById), new { id = commentData.Id }, commentData);
+        return CreatedAtAction(nameof(GetById), new { id = newGuid }, commentData);
     }
 
     // PUT api/<CommentController>/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(CommentDTO commentData)
+    public async Task<IActionResult> Update(string id, ClientCommentDTO commentData)
     {
-        Comment? existingComment = await _commentService.GetById(commentData.Id, [query => query.Include(c => c.User)]);
+        Comment? existingComment = await _commentService.GetById(id, [query => query.Include(c => c.User)]);
         if (existingComment == null)
         {
             return NotFound();

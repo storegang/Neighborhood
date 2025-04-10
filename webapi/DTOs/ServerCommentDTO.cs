@@ -2,7 +2,7 @@
 
 namespace webapi.DTOs;
 
-public class CommentDTO
+public class ServerCommentDTO
 {
     public string Id { get; set; }
     public string Content { get; set; }
@@ -16,9 +16,9 @@ public class CommentDTO
     public int? LikedByUserCount { get; set; }
     public bool? LikedByCurrentUser { get; set; }
 
-    public CommentDTO(){}
+    public ServerCommentDTO(){}
 
-    public CommentDTO(Comment comment)
+    public ServerCommentDTO(Comment comment)
     {
         Id = comment.Id;
         Content = comment.Content;
@@ -31,7 +31,7 @@ public class CommentDTO
         LikedByUserCount = comment.LikedByUserID?.Count();
     }
 
-    public CommentDTO(string id, string content, DateTime? datePosted, DateTime? dateLastEdited, 
+    public ServerCommentDTO(string id, string content, DateTime? datePosted, DateTime? dateLastEdited, 
         string authorUserId, User? authorUser, string parentPostId, string? imageUrl, ICollection<string>? likedByUserIds)
     {
         Id = id;
@@ -46,12 +46,12 @@ public class CommentDTO
     }
 }
 
-public class CommentCollectionDTO
+public class ServerCommentCollectionDTO
 {
-    public IEnumerable<CommentDTO> Comments { get; set; }
+    public IEnumerable<ServerCommentDTO> Comments { get; set; }
 
-    public CommentCollectionDTO(ICollection<Comment> comments)
+    public ServerCommentCollectionDTO(ICollection<Comment> comments)
     {
-        Comments = comments.Select(comment => new CommentDTO(comment));
+        Comments = comments.Select(comment => new ServerCommentDTO(comment));
     }
 }
