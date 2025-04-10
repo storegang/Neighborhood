@@ -1,6 +1,12 @@
 "use server"
 
-const url = process.env.API_URL
+const url = process.env.API_URL || "http://localhost:5233/api"
+
+if (!process.env.API_URL) {
+    console.warn(
+        "⚠️ Warning: API_URL is not set, using fallback http://localhost:5233/api"
+    )
+}
 
 if (!url) {
     throw new Error("API_URL is not set")
