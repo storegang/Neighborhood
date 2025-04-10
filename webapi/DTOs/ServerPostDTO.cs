@@ -12,7 +12,7 @@ public class ServerPostDTO
     public DateTime? DateLastEdited { get; set; }
 
     public string AuthorUserId { get; set; }
-    public User? AuthorUser { get; set; }
+    public UserDTO? AuthorUser { get; set; }
     public string CategoryId { get; set; }
     public IEnumerable<string>? ImageUrls { get; set; }
     public int? CommentCount { get; set; }
@@ -29,7 +29,7 @@ public class ServerPostDTO
         DatePosted = post.DatePosted;
         DateLastEdited = post.DateLastEdited;
         AuthorUserId = post.User.Id;
-        AuthorUser = post.User;
+        AuthorUser = new UserDTO(post.User);
         CategoryId = post.CategoryId;
         ImageUrls = post.Images;
         CommentCount = post.Comments.Count();
@@ -45,7 +45,7 @@ public class ServerPostDTO
         DatePosted = datePosted;
         DateLastEdited = dateLastEdited;
         AuthorUserId = authorUser.Id;
-        AuthorUser = authorUser;
+        AuthorUser = new UserDTO(authorUser);
         CategoryId = categoryId;
         ImageUrls = imageUrls;
         CommentCount = commentCount;
@@ -62,7 +62,7 @@ public class ServerPostDTO
         DatePosted = datePosted;
         DateLastEdited = dateLastEdited;
         AuthorUserId = authorUserId;
-        AuthorUser = authorUser;
+        AuthorUser = new UserDTO(authorUser);
         CategoryId = categoryId;
         ImageUrls = imageUrls;
         CommentCount = commentCount;
