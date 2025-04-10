@@ -4,7 +4,6 @@ namespace webapi.DTOs
 {
     public class ClientCommentDTO
     {
-        public string Id { get; set; }
         public string Content { get; set; }
         public string ParentPostId { get; set; }
 
@@ -14,7 +13,6 @@ namespace webapi.DTOs
 
         public ClientCommentDTO(Comment comment)
         {
-            Id = comment.Id;
             Content = comment.Content;
             ParentPostId = comment.ParentPostId;
             ImageUrl = comment.ImageUrl;
@@ -22,7 +20,6 @@ namespace webapi.DTOs
 
         public ClientCommentDTO(string id, string content, string parentPostId, string? imageUrl)
         {
-            Id = id;
             Content = content;
             ParentPostId = parentPostId;
             ImageUrl = imageUrl;

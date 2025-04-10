@@ -164,12 +164,10 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             newGuid = Guid.NewGuid().ToString();
         }
         while (await _postService.GetById(newGuid) != null);
-
-        postData.Id = newGuid;
         
         Post post = new()
         {
-            Id = postData.Id,
+            Id = newGuid,
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = DateTime.Now,
@@ -184,7 +182,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         category.Posts.Add(post);
         await _categoryService.Update(category);
 
-        return CreatedAtAction(nameof(GetById), new { id = postData.Id }, postData);
+        return CreatedAtAction(nameof(GetById), new { id = newGuid }, postData);
     }
 
     // PUT api/<PostController>/{id}
@@ -197,7 +195,6 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             return NotFound();
         }
 
-        postData.Id = id;
         Post post = new()
         {
             Id = existingPost.Id,

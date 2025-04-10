@@ -179,10 +179,9 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         }
         while (await _commentService.GetById(newGuid) != null);
 
-        commentData.Id = newGuid;
         Comment comment = new()
         {
-            Id = commentData.Id,
+            Id = newGuid,
             Content = commentData.Content,
             DatePosted = DateTime.Now,
             User = user,
@@ -194,14 +193,14 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         post.Comments.Add(comment);
         await _postService.Update(post);
 
-        return CreatedAtAction(nameof(GetById), new { id = commentData.Id }, commentData);
+        return CreatedAtAction(nameof(GetById), new { id = newGuid }, commentData);
     }
 
     // PUT api/<CommentController>/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(ClientCommentDTO commentData)
+    public async Task<IActionResult> Update(string id, ClientCommentDTO commentData)
     {
-        Comment? existingComment = await _commentService.GetById(commentData.Id, [query => query.Include(c => c.User)]);
+        Comment? existingComment = await _commentService.GetById(id, [query => query.Include(c => c.User)]);
         if (existingComment == null)
         {
             return NotFound();
