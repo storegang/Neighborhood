@@ -63,6 +63,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
         // postData.CommentCount = await _postService.Count(id, p => p.Where(b => b.Id == id).SelectMany(d => d.Comments).CountAsync());
 
+
         postData.LikedByCurrentUser = await _likeService.IsLiked(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
         return Ok(postData);
