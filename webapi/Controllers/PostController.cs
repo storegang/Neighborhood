@@ -70,9 +70,9 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
     // GET api/<PostController>/{id}
     [HttpGet("FromCategory={id}")]
-    public async Task<ActionResult<ServerPostCollectionDTO>> GetPostByCategoryId(string categoryId)
+    public async Task<ActionResult<ServerPostCollectionDTO>> GetPostByCategoryId(string id)
     {
-        Category? category = await _categoryService.GetById(categoryId, [query => query.Include(c => c.Posts).ThenInclude(p => p.User)]);
+        Category? category = await _categoryService.GetById(id, [query => query.Include(c => c.Posts).ThenInclude(p => p.User)]);
 
         if (category == null || category.Posts == null)
         {
