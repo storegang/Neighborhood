@@ -2,8 +2,9 @@
 
 import { apiFetcher } from "@/fetchers/apiFetcher"
 import { Post, Category, User } from "@/Models"
-import { CommentResponse } from "@/Models/Comment"
+import { CommentRequest, CommentResponse } from "@/Models/Comment"
 import { LikeRequest } from "@/Models/Likes"
+import { PostResponse } from "@/Models/Post"
 
 /**
  *
@@ -61,6 +62,7 @@ export const likePost = async (
 }
 
 /**
+ * Fetches categories from the server.
  *
  * @param accessToken The accesToken to be used for the request
  * @returns The categories from the server
@@ -84,6 +86,7 @@ export type CreatePostInput = {
 }
 
 /**
+ * Creates a post on the server.
  *
  * @param input The input for the post to be created
  * @returns The created post
@@ -126,15 +129,22 @@ export const createPost = async (
 }
 
 /**
+ * Adds a comment to a post.
+ *
+ * @param comment The comment to be added
+ * @param postId The ID of the post to add the comment to
+ * @param accessToken The access token for authentication
+ * @param userId The ID of the user adding the comment
+ * @returns The response from the server
  *
  */
 export const addComment = async (
-    comment: string,
-    postId: string,
-    accessToken: string,
+    comment: CommentRequest["content"],
+    postId: PostResponse["id"],
+    accessToken: User["accessToken"],
     userId: User["uid"]
-) => {
-    const response = await apiFetcher<{ comment: Comment }>({
+): Promise<CommentResponse> => {
+    const response = await apiFetcher<{ comment: CommentResponse }>({
         path: "/comment",
         method: "POST",
         accessToken: accessToken,
@@ -144,15 +154,14 @@ export const addComment = async (
             authorUserId: userId,
             parentPostId: postId,
 
-            /* Flyttes til backend */
             id: "",
             datePosted: "2025-04-08T19:10:41.186Z",
             dateLastEdited: "2025-04-08T19:10:41.186Z",
-            imageUrl: "string",
+            imageUrl: "",
             likedByUserCount: 0,
             likedByCurrentUser: true,
         },
     })
 
-    return response
+    return response.comment
 }
