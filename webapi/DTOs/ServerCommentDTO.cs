@@ -9,7 +9,7 @@ public class ServerCommentDTO
     public DateTime? DatePosted { get; set; }
     public DateTime? DateLastEdited { get; set; }
     public string AuthorUserId { get; set; }
-    public User? AuthorUser { get; set; }
+    public UserDTO? AuthorUser { get; set; }
     public string ParentPostId { get; set; }
 
     public string? ImageUrl { get; set; }
@@ -24,8 +24,8 @@ public class ServerCommentDTO
         Content = comment.Content;
         DatePosted = comment.DatePosted;
         DateLastEdited = comment.DateLastEdited;
-        AuthorUserId = comment.User.Id;
-        AuthorUser = comment.User;
+        AuthorUserId = comment.User.Id; // TODO: Errors if user that made the comment doesn't exist
+        AuthorUser = new UserDTO(comment.User);
         ParentPostId = comment.ParentPostId;
         ImageUrl = comment.ImageUrl;
         LikedByUserCount = comment.LikedByUserID?.Count();
@@ -39,7 +39,7 @@ public class ServerCommentDTO
         DatePosted = datePosted;
         DateLastEdited = dateLastEdited;
         AuthorUserId = authorUserId;
-        AuthorUser = authorUser;
+        AuthorUser = new UserDTO(authorUser);
         ParentPostId = parentPostId;
         ImageUrl = imageUrl;
         LikedByUserCount = likedByUserIds?.Count();
