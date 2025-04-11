@@ -3,7 +3,7 @@ using webapi.Models;
 
 namespace webapi.DTOs;
 
-public class UserDTO
+public class ServerUserDTO
 {
     public string Id { get; set; }
     public string Name { get; set; }
@@ -11,9 +11,9 @@ public class UserDTO
     public string? NeighborhoodId { get; set; }
     public IEnumerable<string>? Roles { get; set; }
 
-    public UserDTO(){}
+    public ServerUserDTO(){}
 
-    public UserDTO(User user, IEnumerable<string>? roles = null)
+    public ServerUserDTO(User user, IEnumerable<string>? roles = null)
     {
         Id = user.Id;
         Name = user.Name;
@@ -22,7 +22,7 @@ public class UserDTO
         Roles = roles;
     }
 
-    public UserDTO(string id, string name, string? avatar, string neighborhoodId, IEnumerable<string>? roles = null)
+    public ServerUserDTO(string id, string name, string? avatar, string neighborhoodId, IEnumerable<string>? roles = null)
     {
         Id = id;
         Name = name;
@@ -32,12 +32,12 @@ public class UserDTO
     }
 }
 
-public class UserCollectionDTO
+public class ServerUserCollectionDTO
 {
-    public IEnumerable<UserDTO> Users { get; set; }
+    public IEnumerable<ServerUserDTO> Users { get; set; }
 
-    public UserCollectionDTO(ICollection<User> users)
+    public ServerUserCollectionDTO(ICollection<User> users)
     {
-        Users = users.Select(user => new UserDTO(user));
+        Users = users.Select(user => new ServerUserDTO(user));
     }
 }
