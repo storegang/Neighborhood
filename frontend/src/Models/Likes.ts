@@ -1,6 +1,7 @@
+import { PostResponse } from "./Post"
 import { User } from "./User"
 
-export type Likes = {
-    count: number
-    likedBy: User[]
+export type LikeRequest = {
+    postId: PostResponse["id"]
+    user: User
 }

@@ -1,10 +1,23 @@
-export type Comment = {
+import { User } from "./User"
+
+export type CommentRequest = {
     id: string
-    authorId: string
+    authorUserId: string
     content: string
     datePosted?: Date
     dateLastEdited?: Date
     parentPostId: string
-    likes?: string[]
-    image?: string
+}
+
+export type CommentResponse = {
+    authorUser: User
+    authorUserId: User["uid"]
+    content: string
+    dateLastEdited: Date
+    datePosted: Date
+    id: string
+    imageUrls: string[]
+    likedByCurrentUser: boolean
+    likedByUserCount: number
+    parentPostId: string
 }

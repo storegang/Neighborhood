@@ -1,6 +1,12 @@
 "use server"
 
-const url = process.env.API_URL
+const url = process.env.API_URL || "http://localhost:5233/api"
+
+if (!process.env.API_URL) {
+    console.warn(
+        "⚠️ Warning: API_URL is not set, using fallback http://localhost:5233/api"
+    )
+}
 
 if (!url) {
     throw new Error("API_URL is not set")
@@ -36,6 +42,9 @@ export const apiFetcher = async <T>({
         })
         if (!response.ok) {
             throw new Error(`Error fetching data: ${response.statusText}`)
+        }
+        if (response.status === 204) {
+            return {} as T // Return an empty object for 204 No Content
         }
         return await response.json()
     } catch (error) {
