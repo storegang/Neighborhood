@@ -16,6 +16,7 @@ public interface IGenericRepository<T> where T : BaseEntity
     Task Add(T entity);
     Task Update(T entity);
     Task Delete(T entity);
+    Task<int> Count(Expression<Func<T, bool>> parentFilter, Expression<Func<T, int>> childSelector);
 }
 
 public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
@@ -85,5 +86,14 @@ public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
         }
         _dbSet.Remove(entity);
         await _context.SaveChangesAsync().ConfigureAwait(false);
+    }
+
+    public async Task<int> Count(Expression<Func<T, bool>> parentFilter, Expression<Func<T, int>> childSelector)
+    {
+        return await _dbSet
+            .Where(parentFilter)
+            .Select(childSelector)
+            .SumAsync()
+            .ConfigureAwait(false);
     }
 }

@@ -40,6 +40,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
+                postDTOs[i].CommentCount = await _postService.Count(p => p.Id == postDTOs[i].Id, p => p.Comments.Count());
                 postDTOs[i].LikedByCurrentUser = await _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
@@ -62,9 +63,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
         ServerPostDTO postData = new(post);
 
-        // postData.CommentCount = await _postService.Count(id, p => p.Where(b => b.Id == id).SelectMany(d => d.Comments).CountAsync());
-
-
+        postData.CommentCount = await _postService.Count(p => p.Id == postData.Id, p => p.Comments.Count());
         postData.LikedByCurrentUser = await _likeService.IsLiked(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
         return Ok(postData);
@@ -94,6 +93,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
+                postDTOs[i].CommentCount = await _postService.Count(p => p.Id == postDTOs[i].Id, p => p.Comments.Count());
                 postDTOs[i].LikedByCurrentUser = await _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
@@ -134,6 +134,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
+                postDTOs[i].CommentCount = await _postService.Count(p => p.Id == postDTOs[i].Id, p => p.Comments.Count());
                 postDTOs[i].LikedByCurrentUser = await _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
