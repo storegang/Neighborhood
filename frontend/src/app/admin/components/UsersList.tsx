@@ -37,7 +37,7 @@ export const UsersList: React.FC = () => {
                                 key={user.uid}
                                 name={user.name}
                                 role="Board member"
-                                phoneNumber="93629473"
+                                phoneNumber="89911223"
                                 avatar={user.avatar || ""}
                                 isBoardMember
                             />
@@ -58,7 +58,7 @@ export const UsersList: React.FC = () => {
                         <UserListItem
                             key={user.uid}
                             name={user.name}
-                            phoneNumber="93629473"
+                            phoneNumber="899112233"
                             avatar={user.avatar || ""}
                         />
                     ))}
