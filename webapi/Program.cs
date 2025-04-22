@@ -17,7 +17,6 @@ using webapi.Identity;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Last .env og miljøvariabler
 DotEnv.Load();
 builder.Configuration.AddEnvironmentVariables();
 
@@ -26,7 +25,6 @@ if (builder.Environment.IsDevelopment())
     builder.Configuration.AddUserSecrets<Program>();
 }
 
-// Hent connection string basert på miljø
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 if (string.IsNullOrEmpty(connectionString))
 {
@@ -36,7 +34,6 @@ if (string.IsNullOrEmpty(connectionString))
 builder.Services.AddDbContext<NeighborhoodContext>(options =>
     options.UseNpgsql(connectionString));
 
-// Auth-konfig
 string jwtIssuer = builder.Configuration["AUTH_DOMAIN"] ?? throw new ArgumentNullException("AUTH_DOMAIN");
 string jwtAudience = builder.Configuration["AUTH_AUDIENCE"] ?? throw new ArgumentNullException("AUTH_AUDIENCE");
 
@@ -164,7 +161,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Dependency Injection
+
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<INeighborhoodService, NeighborhoodService>();
