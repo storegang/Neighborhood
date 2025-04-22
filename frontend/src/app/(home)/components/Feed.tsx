@@ -12,9 +12,9 @@ export const Feed: React.FC = () => {
         data: posts = [],
         isLoading: postsLoading,
         isError: postsError,
-    } = useGetPosts(user)
+    } = useGetPosts(user ?? null)
     const { data: categories = [], isLoading: categoriesLoading } =
-        useGetCategories(user)
+        useGetCategories(user ?? null)
 
     if (!user || postsLoading || categoriesLoading) {
         return (
