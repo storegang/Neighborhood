@@ -11,7 +11,7 @@ public class User : IdentityUser
 
     public User() { }
 
-    public User(UserDTO userDTO)
+    public User(ServerUserDTO userDTO)
     {
         Id = userDTO.Id;
         Name = userDTO.Name;
