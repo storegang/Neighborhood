@@ -17,40 +17,38 @@ using webapi.Identity;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.Sources.Clear();
 DotEnv.Load();
 builder.Configuration.AddEnvironmentVariables();
+
+string jwtIssuer = builder.Configuration.GetValue<string>("AUTH_DOMAIN") ?? throw new ArgumentNullException("AUTH_DOMAIN");
+string jwtAudience = builder.Configuration.GetValue<string>("AUTH_AUDIENCE") ?? throw new ArgumentNullException("AUTH_AUDIENCE");
+
+HttpClient client = new();
+string googleKeys = client.GetStringAsync("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com").Result;
+IEnumerable<SecurityKey> jwtKeyset = new JsonWebKeySet(googleKeys).GetSigningKeys();
+
 
 if (builder.Environment.IsDevelopment())
 {
     builder.Configuration.AddUserSecrets<Program>();
 }
 
-string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-if (string.IsNullOrEmpty(connectionString))
+builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<NeighborhoodContext>().AddDefaultTokenProviders();
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddAuthorization(options =>
 {
-    throw new Exception("Connection string 'DefaultConnection' is not set.");
-}
-
-builder.Services.AddDbContext<NeighborhoodContext>(options =>
-    options.UseNpgsql(connectionString));
-
-string jwtIssuer = builder.Configuration["AUTH_DOMAIN"] ?? throw new ArgumentNullException("AUTH_DOMAIN");
-string jwtAudience = builder.Configuration["AUTH_AUDIENCE"] ?? throw new ArgumentNullException("AUTH_AUDIENCE");
-
-HttpClient client = new();
-string googleKeys = client.GetStringAsync("https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com").Result;
-IEnumerable<SecurityKey> jwtKeyset = new JsonWebKeySet(googleKeys).GetSigningKeys();
-
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<NeighborhoodContext>()
-    .AddDefaultTokenProviders();
+    //options.AddPolicy(UserRoles.BoardAdmin, p => p.RequireRole(UserRoles.BoardAdmin));
+    //options.AddPolicy(UserRoles.BoardMember, p => p.RequireRole(UserRoles.BoardMember, UserRoles.BoardAdmin));
+});
 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
+}).AddJwtBearer((Action<JwtBearerOptions>)(options =>
 {
     options.IncludeErrorDetails = true;
     options.Authority = jwtIssuer;
@@ -77,6 +75,7 @@ builder.Services.AddAuthentication(options =>
                 var userManager = context.HttpContext.RequestServices.GetRequiredService<UserManager<User>>();
                 User? user = await userManager.FindByIdAsync(firebaseUid);
 
+                // Create user in database if it doesn't exist
                 if (user == null)
                 {
                     string? name = firebaseToken?.Claims.FirstOrDefault(c => c.Type == "name")?.Value ?? "";
@@ -86,8 +85,9 @@ builder.Services.AddAuthentication(options =>
                     user = new User
                     {
                         Id = firebaseUid,
-                        UserName = firebaseUid,
+                        UserName = firebaseUid, // UserName seems required and does not support spaces. Will fail creating user silently.
                         Email = email,
+
                         Name = name,
                         Avatar = picture,
                     };
@@ -95,7 +95,9 @@ builder.Services.AddAuthentication(options =>
                     await userManager.CreateAsync(user);
                 }
 
+                // Add users roles to their claim.
                 IList<string> userRoles = await userManager.GetRolesAsync(user);
+
                 if (context.Principal?.Identity is ClaimsIdentity identity)
                 {
                     foreach (string role in userRoles)
@@ -106,19 +108,27 @@ builder.Services.AddAuthentication(options =>
             }
         }
     };
-});
+}));
 
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddAuthorization();
+string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-string corsPolicy = "LocalFrontend";
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new Exception("Connection string 'DefaultConnection' is not set.");
+}
+
+builder.Services.AddDbContext<NeighborhoodContext>(options =>
+    options.UseNpgsql(connectionString));
+
+string localFrontendCorsPolicy = "AllowSpecificOrigin";
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(corsPolicy, builder => builder
-        .WithOrigins("http://localhost:3000")
-        .AllowAnyMethod()
-        .AllowAnyHeader());
+    options.AddPolicy(localFrontendCorsPolicy,
+        builder => builder
+            .WithOrigins("http://localhost:3000")
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 });
 
 builder.Services.AddControllers();
@@ -161,21 +171,27 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 builder.Services.AddScoped<INeighborhoodService, NeighborhoodService>();
 builder.Services.AddScoped<IPostService, PostService>();
+
 builder.Services.AddScoped(typeof(ILikeService<Comment>), typeof(CommentService));
 builder.Services.AddScoped(typeof(ILikeService<Post>), typeof(PostService));
 builder.Services.AddScoped(typeof(IUserReference), typeof(Comment));
 builder.Services.AddScoped(typeof(IUserReference), typeof(Post));
+
+// builder.Services.AddScoped<IGenericChildRepository<GenericChildRepository>>;
+
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped(typeof(IBaseService<>), typeof(BaseService<>));
+
+
 builder.Services.AddScoped<NeighborhoodContext>();
 
 WebApplication app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -186,11 +202,13 @@ else
     app.UseHttpsRedirection();
 }
 
-app.UseCors(corsPolicy);
+app.UseCors(localFrontendCorsPolicy);
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
 RoleUtils.InitializeRolesAsync(app.Services);
 
 app.Run();
