@@ -19,14 +19,15 @@ import {
  */
 export const getPosts = async (
     accessToken: string,
-    category?: Category
+    category: Category | null
 ): Promise<PostResponse[]> => {
     const response = await apiFetcher<{ posts: PostResponse[] }>({
-        path: category ? "/post/fromcategory=" + category : "/post",
+        path: "/post",
+        query: category ? { fromCategory: category.id } : undefined,
         accessToken: accessToken,
     })
 
-    return response.posts
+    return response.posts ?? []
 }
 
 /**
