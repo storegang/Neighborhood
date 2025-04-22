@@ -9,92 +9,90 @@ namespace webapi.Controllers;
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class NeighborhoodController(INeighborhoodService neighborhoodService, IBaseService<User> userService) : ControllerBase
+public class NeighborhoodController(INeighborhoodService neighborhoodService) : ControllerBase
 {
     private readonly INeighborhoodService _neighborhoodService = neighborhoodService;
-    private readonly IBaseService<User> _userService = userService;
 
     // GET: api/<NeighborhoodController>
     [HttpGet]
-    public ActionResult<NeighborhoodCollectionDTO> GetAll()
+    public async Task<ActionResult<NeighborhoodCollectionDTO>> GetAll()
     {
-        ICollection<Neighborhood>? neighborhoods = _neighborhoodService.GetAll();
-        
+        ICollection<Neighborhood>? neighborhoods = await _neighborhoodService.GetAll();
         NeighborhoodCollectionDTO neighborhoodDataCollection = new NeighborhoodCollectionDTO(neighborhoods);
         return Ok(neighborhoodDataCollection);
     }
 
     // GET api/<NeighborhoodController>/{id}
     [HttpGet("{id}")]
-    public ActionResult<NeighborhoodDTO> GetById(string id)
+    public async Task<ActionResult<NeighborhoodDTO>> GetById(string id)
     {
-        var neighborhood = _neighborhoodService.GetById(id);
+        Neighborhood? neighborhood = await _neighborhoodService.GetById(id);
         
         if (neighborhood == null)
         {
             return NotFound();
         }
 
-        NeighborhoodDTO neighborhoodData = new NeighborhoodDTO(neighborhood);
+        NeighborhoodDTO neighborhoodData = new(neighborhood);
         return Ok(neighborhoodData);
     }
 
     // POST api/<NeighborhoodController>
     [HttpPost]
-    public ActionResult<NeighborhoodDTO> Create(NeighborhoodDTO neighborhoodData)
+    public async Task<ActionResult<NeighborhoodDTO>> Create(NeighborhoodDTO neighborhoodData)
     {
         string newGuid;
         do
         {
             newGuid = Guid.NewGuid().ToString();
         }
-        while (_neighborhoodService.GetById(newGuid) != null);
+        while (await _neighborhoodService.GetById(newGuid) != null);
 
         neighborhoodData.Id = newGuid;
-        var neighborhood = new Neighborhood 
+        Neighborhood neighborhood = new() 
         { 
             Id = neighborhoodData.Id,
             Name = neighborhoodData.Name,
             Description = neighborhoodData.Description
         };
-        _neighborhoodService.Create(neighborhood);
+        await _neighborhoodService.Create(neighborhood);
 
         return CreatedAtAction(nameof(GetById), new { id = neighborhoodData.Id }, neighborhoodData);
     }
 
     // PUT api/<NeighborhoodController>/{id}
     [HttpPut("{id}")]
-    public IActionResult Update(string id, NeighborhoodDTO neighborhoodData)
+    public async Task<IActionResult> Update(string id, NeighborhoodDTO neighborhoodData)
     {
-        var existingNeighborhood = _neighborhoodService.GetById(id);
+        Neighborhood? existingNeighborhood = await _neighborhoodService.GetById(id);
         if (existingNeighborhood == null)
         {
             return NotFound();
         }
 
         neighborhoodData.Id = id;
-        var neighborhood = new Neighborhood
+        Neighborhood neighborhood = new()
         {
             Id = neighborhoodData.Id,
             Name = neighborhoodData.Name,
             Description = neighborhoodData.Description
         };
-        _neighborhoodService.Update(neighborhood);
+        await _neighborhoodService.Update(neighborhood);
 
         return NoContent();
     }
 
     // DELETE api/<NeighborhoodController>/{id}
     [HttpDelete("{id}")]
-    public IActionResult Delete(string id)
+    public async Task<IActionResult> Delete(string id)
     {
-        var existingNeighborhood = _neighborhoodService.GetById(id);
+        Neighborhood? existingNeighborhood = await _neighborhoodService.GetById(id);
         if (existingNeighborhood == null)
         {
             return NotFound();
         }
 
-        _neighborhoodService.Delete(id);
+        await _neighborhoodService.Delete(id);
 
         return NoContent();
     }

@@ -1,10 +1,14 @@
-import { formatRelativeDate } from "@/lib/formatters/formatDate"
-import { Post } from "@/Models/Post"
-import Image from "next/image"
-import { useGetCategories } from "../queries"
-import { useUser } from "@/lib/getUser"
+"use client"
 
-export const PostCard: React.FC<Post> = ({
+import { formatRelativeDate } from "@/lib/formatters/formatDate"
+import { PostResponse } from "@/Models/Post"
+import Image from "next/image"
+import { useGetCategories, useLikePost } from "../queries"
+import { useUser } from "@/lib/getUser"
+import { useState } from "react"
+import { CommentSection } from "./CommentSection"
+
+export const PostCard: React.FC<PostResponse> = ({
     title,
     description,
     imageUrls,
@@ -14,11 +18,17 @@ export const PostCard: React.FC<Post> = ({
     likedByUserCount,
     likedByCurrentUser,
     datePosted,
-    dateLastEdited,
+    id,
 }) => {
+    const [showCommentSection, setShowCommentSection] = useState(false)
+
     const { name, avatar } = authorUser
 
-    likedByCurrentUser = true
+    const user = useUser()
+
+    const { data: categories = [] } = useGetCategories(user)
+
+    const { mutate: likePost } = useLikePost(user)
 
     return (
         <div className="card shadow-sm">
@@ -42,13 +52,16 @@ export const PostCard: React.FC<Post> = ({
                             <img
                                 alt={name}
                                 className="h-full w-full"
-                                src={avatar}
+                                src={
+                                    avatar ||
+                                    "https://png.pngtree.com/png-vector/20220608/ourmid/pngtree-man-avatar-isolated-on-white-background-png-image_4891418.png"
+                                }
                             />
                         </div>
                     </div>
                     <p className="w-1/2 truncate text-sm">{name}</p>
-                    <div className="badge badge-soft badge-primary">
-                        Category
+                    <div className="badge badge-soft badge-primary fit-content">
+                        {categories.find((c) => c.id === categoryId)?.name}
                     </div>
                 </div>
                 <p className="text-neutral-500">
@@ -73,7 +86,10 @@ export const PostCard: React.FC<Post> = ({
                     ) : null}
                 </div>
                 <div className="card-actions justify-start">
-                    <button className="btn btn-ghost btn-sm">
+                    <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => likePost(id)}
+                    >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
@@ -91,7 +107,10 @@ export const PostCard: React.FC<Post> = ({
 
                         <span>{likedByUserCount}</span>
                     </button>
-                    <button className="btn btn-ghost btn-sm">
+                    <button
+                        className="btn btn-ghost btn-sm"
+                        onClick={() => setShowCommentSection((prev) => !prev)}
+                    >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
@@ -109,6 +128,7 @@ export const PostCard: React.FC<Post> = ({
                         <span>{commentCount}</span>
                     </button>
                 </div>
+                {showCommentSection && <CommentSection postId={id} />}
             </div>
         </div>
     )

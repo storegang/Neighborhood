@@ -3,40 +3,41 @@ using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Hosting;
 using webapi.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace webapi.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class CommentController(IBaseService<Comment> commentService, IBaseService<User> userService, IBaseService<Post> postService, ILikeService<Comment> likeService) : ControllerBase
+public class CommentController(IBaseService<Comment> commentService, IBaseService<Post> postService, ILikeService<Comment> likeService, UserManager<User> userManager) : ControllerBase
 {
     private readonly IBaseService<Comment> _commentService = commentService;
-    private readonly IBaseService<User> _userService = userService;
     private readonly IBaseService<Post> _postService = postService;
     private readonly ILikeService<Comment> _likeService = likeService;
+    private readonly UserManager<User> _userManager = userManager;
 
     // GET: api/<CommentController>
     [HttpGet]
-    public ActionResult<CommentCollectionDTO> GetAll()
+    public async Task<ActionResult<ServerCommentCollectionDTO>> GetAll()
     {
-        ICollection<Comment> commentCollection = _commentService.GetAll([c => c.User]);
+        ICollection<Comment> commentCollection = await _commentService.GetAll([query => query.Include(c => c.User)]);
         
-        CommentCollectionDTO commentDataCollection = new CommentCollectionDTO(commentCollection);
+        ServerCommentCollectionDTO commentDataCollection = new(commentCollection);
 
         Comment[] comments = new Comment[commentCollection.Count()];
         comments = commentCollection.ToArray();
 
-        CommentDTO[] commentDTOs = new CommentDTO[commentDataCollection.Comments.Count()];
+        ServerCommentDTO[] commentDTOs = new ServerCommentDTO[commentDataCollection.Comments.Count()];
         commentDTOs = commentDataCollection.Comments.ToArray();
 
         for (int i = 0; i < commentCollection.Count; i++)
         {
             if (comments[i].Id == commentDTOs[i].Id)
             {
-                commentDTOs[i].LikedByCurrentUser = _likeService.IsLiked(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                commentDTOs[i].LikedByCurrentUser = await _likeService.IsLiked(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -48,53 +49,53 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
     // GET api/<CommentController>/{id}
     [HttpGet("{id}")]
-    public ActionResult<CommentDTO> GetById(string id)
+    public async Task<ActionResult<ServerCommentDTO>> GetById(string id)
     {
-        var comment = _commentService.GetById(id);
+        Comment? comment = await _commentService.GetById(id);
         
         if (comment == null)
         {
             return NotFound();
         }
 
-        var commentData = new CommentDTO(comment);
+        ServerCommentDTO commentData = new(comment);
 
-        commentData.LikedByCurrentUser = _likeService.IsLiked(comment.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+        commentData.LikedByCurrentUser = await _likeService.IsLiked(comment.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
         return Ok(commentData);
     }
 
     // GET api/<CommentController>/AllFromPost={postId}
     [HttpGet("AllFromPost={postId}")]
-    public ActionResult<CommentCollectionDTO> GetCommentsByPostId(string postId)
+    public async Task<ActionResult<ServerCommentCollectionDTO>> GetCommentsByPostId(string postId)
     {
-        var post = _postService.GetById(postId, [p => p.Comments]);
+        Post? post = await _postService.GetById(postId, [query => query.Include(p => p.Comments).ThenInclude(c => c.User)]);
 
         if (post == null || post.Comments == null)
         {
             return NotFound();
         }
-        var commentCollection = post.Comments;
+        ICollection<Comment>? commentCollection = post.Comments;
 
-        foreach (var comment in commentCollection)
-        {
-            comment.User = _commentService.GetById(comment.Id, [c => c.User])?.User;
-        }
+        ServerCommentCollectionDTO commentDataCollection = new(commentCollection);
 
-        var commentDataCollection = new CommentCollectionDTO(commentCollection);
-
-        Comment[] comments = new Comment[commentCollection.Count()];
+        ICollection<Comment> comments = new Comment[commentCollection.Count()];
         comments = commentCollection.ToArray();
 
-        CommentDTO[] commentDTOs = new CommentDTO[commentDataCollection.Comments.Count()];
+        IEnumerable<ServerCommentDTO> commentDTOs = new ServerCommentDTO[commentDataCollection.Comments.Count()];
         commentDTOs = commentDataCollection.Comments.ToArray();
 
-        for (int i = 0; i < commentCollection.Count; i++)
+
+        foreach (ServerCommentDTO commentData in commentDTOs)
         {
-            if (comments[i].Id == commentDTOs[i].Id)
+            Comment? comment = comments.FirstOrDefault(c => c.Id == commentData.Id);
+
+            if (comment == null)
             {
-                commentDTOs[i].LikedByCurrentUser = _likeService.IsLiked(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                continue;
             }
+
+            commentData.LikedByCurrentUser = await _likeService.IsLiked(comment.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
         }
 
         commentDataCollection.Comments = commentDTOs;
@@ -104,40 +105,46 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
     // GET api/<CommentController>/FromPost={postId}&Page={page}&Size={size}
     // GET api/<CommentController>/FromPost={postId}&Page={page}
-    [HttpGet("FromPost={postId}&Page={page}")]
-    public ActionResult<CommentCollectionDTO> GetSomeCommentsByPostId(string postId, string page, string size = "5")
+    [HttpGet("FromPost={postId}&Page={page}&Size={size}")]
+    public async Task<ActionResult<ServerCommentCollectionDTO>> GetSomeCommentsByPostId(string postId, string page, string size = "5")
     {
-        var post = _postService.GetById(postId, [p => p.Comments]);
-
-        if (post == null || post.Comments == null)
-        {
-            return NotFound();
-        }
-
         if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
         {
             return BadRequest();
         }
 
-        var commentCollection = post.Comments
-        .Skip((int.Parse(page) - 1) * int.Parse(size))
-        .Take(int.Parse(size))
-        .ToList();
+        Post? post = await _postService.GetById(postId, 
+            [query => query.Include(p => p.Comments
+                .Skip(int.Parse(page) * int.Parse(size))
+                .Take(int.Parse(size)))
+                .ThenInclude(c => c.User)]);
 
-        var commentDataCollection = new CommentCollectionDTO(commentCollection);
+        if (post == null)
+        {
+            return NotFound();
+        }
 
-        Comment[] comments = new Comment[commentCollection.Count()];
+        ICollection<Comment> commentCollection = post.Comments;
+
+        ServerCommentCollectionDTO commentDataCollection = new(commentCollection);
+
+        ICollection<Comment> comments = new Comment[commentCollection.Count()];
         comments = commentCollection.ToArray();
 
-        CommentDTO[] commentDTOs = new CommentDTO[commentDataCollection.Comments.Count()];
+        IEnumerable<ServerCommentDTO> commentDTOs = new ServerCommentDTO[commentDataCollection.Comments.Count()];
         commentDTOs = commentDataCollection.Comments.ToArray();
 
-        for (int i = 0; i < commentCollection.Count; i++)
+
+        foreach (ServerCommentDTO commentData in commentDTOs)
         {
-            if (comments[i].Id == commentDTOs[i].Id)
+            Comment? comment = comments.FirstOrDefault(c => c.Id == commentData.Id);
+
+            if (comment == null)
             {
-                commentDTOs[i].LikedByCurrentUser = _likeService.IsLiked(comments[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                continue;
             }
+
+            commentData.LikedByCurrentUser = await _likeService.IsLiked(comment.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
         }
 
         commentDataCollection.Comments = commentDTOs;
@@ -150,13 +157,19 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
     // POST api/<CommentController>
     [HttpPost]
-    public ActionResult<CommentDTO> Create(CommentDTO commentData)
+    public async Task<ActionResult<ClientCommentDTO>> Create(ClientCommentDTO commentData)
     {
-        var post = _postService.GetById(commentData.ParentPostId, [c => c.User]);
+        Post? post = await _postService.GetById(commentData.ParentPostId, [query => query.Include(c => c.User)]);
 
         if (post == null)
         {
             return NotFound();
+        }
+
+        User? user = await _userManager.FindByIdAsync(User.Claims.First(c => c.Type.Equals("user_id")).Value);
+        if (user == null)
+        {
+            return Unauthorized();
         }
 
         string newGuid;
@@ -164,37 +177,36 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         {
             newGuid = Guid.NewGuid().ToString();
         }
-        while (_commentService.GetById(newGuid) != null);
+        while (await _commentService.GetById(newGuid) != null);
 
-        commentData.Id = newGuid;
-        var comment = new Comment
+        Comment comment = new()
         {
-            Id = commentData.Id,
+            Id = newGuid,
             Content = commentData.Content,
             DatePosted = DateTime.Now,
-            User = _userService.GetById(commentData.AuthorUserId),
+            User = user,
             ParentPostId = commentData.ParentPostId,
             ImageUrl = commentData.ImageUrl
         };
-        _commentService.Create(comment);
+        await _commentService.Create(comment);
 
         post.Comments.Add(comment);
-        _postService.Update(post);
+        await _postService.Update(post);
 
-        return CreatedAtAction(nameof(GetById), new { id = commentData.Id }, commentData);
+        return CreatedAtAction(nameof(GetById), new { id = newGuid }, commentData);
     }
 
     // PUT api/<CommentController>/{id}
     [HttpPut("{id}")]
-    public IActionResult Update(CommentDTO commentData)
+    public async Task<IActionResult> Update(string id, ClientCommentDTO commentData)
     {
-        var existingComment = _commentService.GetById(commentData.Id, [c => c.User]);
+        Comment? existingComment = await _commentService.GetById(id, [query => query.Include(c => c.User)]);
         if (existingComment == null)
         {
             return NotFound();
         }
 
-        var comment = new Comment 
+        Comment comment = new() 
         {
             Id = existingComment.Id,
             Content = commentData.Content,
@@ -206,21 +218,25 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
             ImageUrl = commentData.ImageUrl,
             LikedByUserID = existingComment.LikedByUserID
         };
-        _commentService.Update(comment);
+        await _commentService.Update(comment);
 
         return NoContent();
     }
 
     // PUT api/<CommentController>/Likes/{commentId}
     [HttpPut("Likes/{commentId}")]
-    public IActionResult Like(string commentId)
+    public async Task<IActionResult> Like(string commentId)
     {
-        var comment = _commentService.GetById(commentId, [c => c.User]);
+        Comment? comment = await _commentService.GetById(commentId, [query => query.Include(c => c.User)]);
         if (comment == null)
         {
             return NotFound();
         }
-        var userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
+        string? userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
 
         if (comment.LikedByUserID == null)
         {
@@ -234,21 +250,21 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         {
             comment.LikedByUserID.Add(userId);
         }
-        _commentService.Update(comment);
+        await _commentService.Update(comment);
         return NoContent();
     }
 
     // DELETE api/<CommentController>/{id}
     [HttpDelete("{id}")]
-    public IActionResult Delete(string id)
+    public async Task<IActionResult> Delete(string id)
     {
-        var existingComment = _commentService.GetById(id);
+        Comment? existingComment = await _commentService.GetById(id);
         if (existingComment == null)
         {
             return NotFound();
         }
 
-        _commentService.Delete(id);
+        await _commentService.Delete(id);
 
         return NoContent();
     }

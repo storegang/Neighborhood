@@ -1,21 +1,29 @@
-﻿namespace webapi.Models;
+﻿using Microsoft.AspNetCore.Identity;
+using webapi.DTOs;
 
-public class User : BaseEntity
+namespace webapi.Models;
+
+public class User : IdentityUser
 {
-    // INHERITS: public string Id { get; set; }
     public string Name { get; set; }
     public string? Avatar { get; set; }
     public string? NeighborhoodId { get; set; }
-    public int UserRole { get; set; }
 
     public User() { }
 
-    public User(string id = "", string name = "", string? avatar = null, string? neighborhoodId = null, int userRole = 0)
+    public User(UserDTO userDTO)
+    {
+        Id = userDTO.Id;
+        Name = userDTO.Name;
+        Avatar = userDTO.Avatar;
+        NeighborhoodId = userDTO.NeighborhoodId;
+    }
+
+    public User(string id, string name, string? avatar = null, string? neighborhoodId = null)
     {
         Id = id;
         Name = name;
         Avatar = avatar;
         NeighborhoodId = neighborhoodId;
-        UserRole = userRole;
     }
 }

@@ -2,36 +2,36 @@
 
 namespace webapi.DTOs;
 
-public class CommentDTO
+public class ServerCommentDTO
 {
     public string Id { get; set; }
     public string Content { get; set; }
     public DateTime? DatePosted { get; set; }
     public DateTime? DateLastEdited { get; set; }
     public string AuthorUserId { get; set; }
-    public User? AuthorUser { get; set; }
+    public UserDTO? AuthorUser { get; set; }
     public string ParentPostId { get; set; }
 
     public string? ImageUrl { get; set; }
     public int? LikedByUserCount { get; set; }
     public bool? LikedByCurrentUser { get; set; }
 
-    public CommentDTO(){}
+    public ServerCommentDTO(){}
 
-    public CommentDTO(Comment comment)
+    public ServerCommentDTO(Comment comment)
     {
         Id = comment.Id;
         Content = comment.Content;
         DatePosted = comment.DatePosted;
         DateLastEdited = comment.DateLastEdited;
-        AuthorUserId = comment.User.Id;
-        AuthorUser = comment.User;
+        AuthorUserId = comment.User.Id; // TODO: Errors if user that made the comment doesn't exist
+        AuthorUser = new UserDTO(comment.User);
         ParentPostId = comment.ParentPostId;
         ImageUrl = comment.ImageUrl;
         LikedByUserCount = comment.LikedByUserID?.Count();
     }
 
-    public CommentDTO(string id, string content, DateTime? datePosted, DateTime? dateLastEdited, 
+    public ServerCommentDTO(string id, string content, DateTime? datePosted, DateTime? dateLastEdited, 
         string authorUserId, User? authorUser, string parentPostId, string? imageUrl, ICollection<string>? likedByUserIds)
     {
         Id = id;
@@ -39,19 +39,19 @@ public class CommentDTO
         DatePosted = datePosted;
         DateLastEdited = dateLastEdited;
         AuthorUserId = authorUserId;
-        AuthorUser = authorUser;
+        AuthorUser = new UserDTO(authorUser);
         ParentPostId = parentPostId;
         ImageUrl = imageUrl;
         LikedByUserCount = likedByUserIds?.Count();
     }
 }
 
-public class CommentCollectionDTO
+public class ServerCommentCollectionDTO
 {
-    public IEnumerable<CommentDTO> Comments { get; set; }
+    public IEnumerable<ServerCommentDTO> Comments { get; set; }
 
-    public CommentCollectionDTO(ICollection<Comment> comments)
+    public ServerCommentCollectionDTO(ICollection<Comment> comments)
     {
-        Comments = comments.Select(comment => new CommentDTO(comment));
+        Comments = comments.Select(comment => new ServerCommentDTO(comment));
     }
 }

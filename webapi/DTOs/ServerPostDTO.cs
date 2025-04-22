@@ -3,7 +3,7 @@ using webapi.Models;
 
 namespace webapi.DTOs;
 
-public class PostDTO
+public class ServerPostDTO
 {
     public string Id { get; set; }
     public string Title { get; set; }
@@ -12,16 +12,16 @@ public class PostDTO
     public DateTime? DateLastEdited { get; set; }
 
     public string AuthorUserId { get; set; }
-    public User? AuthorUser { get; set; }
+    public UserDTO? AuthorUser { get; set; }
     public string CategoryId { get; set; }
     public IEnumerable<string>? ImageUrls { get; set; }
     public int? CommentCount { get; set; }
     public int? LikedByUserCount { get; set; }
     public bool? LikedByCurrentUser { get; set; }
 
-    public PostDTO(){}
+    public ServerPostDTO(){}
 
-    public PostDTO(Post post)
+    public ServerPostDTO(Post post)
     {
         Id = post.Id;
         Title = post.Title;
@@ -29,14 +29,14 @@ public class PostDTO
         DatePosted = post.DatePosted;
         DateLastEdited = post.DateLastEdited;
         AuthorUserId = post.User.Id;
-        AuthorUser = post.User;
+        AuthorUser = new UserDTO(post.User);
         CategoryId = post.CategoryId;
         ImageUrls = post.Images;
         CommentCount = post.Comments.Count();
         LikedByUserCount = post.LikedByUserID?.Count();
     }
 
-    public PostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, 
+    public ServerPostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, 
         User? authorUser, string categoryId, IEnumerable<string>? imageUrls, int? commentCount, int? likedByUserCount, bool likedByCurrentUser)
     {
         Id = id;
@@ -45,7 +45,7 @@ public class PostDTO
         DatePosted = datePosted;
         DateLastEdited = dateLastEdited;
         AuthorUserId = authorUser.Id;
-        AuthorUser = authorUser;
+        AuthorUser = new UserDTO(authorUser);
         CategoryId = categoryId;
         ImageUrls = imageUrls;
         CommentCount = commentCount;
@@ -53,7 +53,7 @@ public class PostDTO
         LikedByCurrentUser = likedByCurrentUser;
     }
 
-    public PostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, string authorUserId,
+    public ServerPostDTO(string id, string title, string? description, DateTime? datePosted, DateTime? dateLastEdited, string authorUserId,
         User? authorUser, string categoryId, IEnumerable<string>? imageUrls, int? commentCount, int? likedByUserCount, bool likedByCurrentUser)
     {
         Id = id;
@@ -62,7 +62,7 @@ public class PostDTO
         DatePosted = datePosted;
         DateLastEdited = dateLastEdited;
         AuthorUserId = authorUserId;
-        AuthorUser = authorUser;
+        AuthorUser = new UserDTO(authorUser);
         CategoryId = categoryId;
         ImageUrls = imageUrls;
         CommentCount = commentCount;
@@ -71,12 +71,12 @@ public class PostDTO
     }
 }
 
-public class PostCollectionDTO
+public class ServerPostCollectionDTO
 {
-    public IEnumerable<PostDTO> Posts { get; set; }
+    public IEnumerable<ServerPostDTO> Posts { get; set; }
 
-    public PostCollectionDTO(ICollection<Post> posts)
+    public ServerPostCollectionDTO(ICollection<Post> posts)
     {
-        Posts = posts.Select(post => new PostDTO(post));
+        Posts = posts.Select(post => new ServerPostDTO(post));
     }
 }

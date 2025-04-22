@@ -1,50 +1,65 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
-using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
+using webapi.Identity;
 
 namespace webapi.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class UserController(IBaseService<User> userService, IBaseService<Neighborhood> neighborhoodService, IUserSortService userSortService) : ControllerBase
+public class UserController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager, IBaseService<Neighborhood> neighborhoodService) : ControllerBase
 {
-    private readonly IBaseService<User> _userService = userService;
+    private readonly UserManager<User> _userManager = userManager;
+    private readonly RoleManager<IdentityRole> _roleManager = roleManager;
     private readonly IBaseService<Neighborhood> _neighborhoodService = neighborhoodService;
-    private readonly IUserSortService _userSortService = userSortService;
 
     // GET: api/<UserController>
     [HttpGet]
-    public ActionResult<UserCollectionDTO> GetAll()
+    public async Task<ActionResult<UserCollectionDTO>> GetAll()
     {
-        ICollection<User> users = _userService.GetAll();
-        
-        UserCollectionDTO userDataCollection = new UserCollectionDTO(users);
+        ICollection<User> users = _userManager.Users.ToArray();
+        UserCollectionDTO userDataCollection = new(users);
+        List<UserDTO> userDTOs = new();
+
+        foreach (var user in users)
+        {
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+            userDTOs.Add(new UserDTO(user, roles));
+        }
+
+        userDataCollection.Users = userDTOs;
+
         return Ok(userDataCollection);
     }
 
     // GET api/<UserController>/{id}
     [HttpGet("{id}")]
-    public ActionResult<UserDTO> GetById(string id)
+    public async Task<ActionResult<UserDTO>> GetById(string id)
     {
-        var user = _userService.GetById(id);
+        User? user = await _userManager.FindByIdAsync(id);
         
         if (user == null)
         {
             return NotFound();
         }
 
-        var userData = new UserDTO(user);
+        IEnumerable<string> roles = await _userManager.GetRolesAsync(user);
+
+        UserDTO userData = new(user);
+        userData.Roles = roles;
         return Ok(userData);
     }
 
-    // GET api/<UserController>/{id}
+    // GET api/<UserController>/FromNeighborhood={id}
     [HttpGet("FromNeighborhood={id}")]
-    public ActionResult<UserCollectionDTO> GetAllUsersOfNeighborhoodId(string id)
+    public async Task<ActionResult<UserCollectionDTO>> GetAllUsersOfNeighborhoodId(string id)
     {
-        Neighborhood neighborhood = _neighborhoodService.GetById(id, [c => c.Users]);
+        Neighborhood? neighborhood = await _neighborhoodService.GetById(id, [query => query.Include(c => c.Users)]);
 
         if (neighborhood == null || neighborhood.Users == null)
         {
@@ -52,22 +67,26 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         }
         ICollection<User> users = neighborhood.Users;
 
-        UserCollectionDTO userDataCollection = new UserCollectionDTO(users);
+        UserCollectionDTO userDataCollection = new(users);
 
         return Ok(userDataCollection);
     }
 
-    // GET api/<UserController>/{id}
-    [HttpGet("FromNeighborhood={id}&role={role}")]
-    public ActionResult<UserCollectionDTO> GetAllUsersOfNeighborhoodIdSortedByRole(string id, string role)
+    // GET api/<UserController>/FromNeighborhood={id}
+    // GET api/<UserController>/FromNeighborhood={id}&Page={page}&Size={size}
+    [HttpGet("FromNeighborhood={id}&Page={page}&Size={size}")]
+    public async Task<ActionResult<UserCollectionDTO>> GetSomeUsersOfNeighborhoodId(string id, string page = "0", string size = "8")
     {
-        if (!int.TryParse(role, out _))
+        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
         {
             return BadRequest();
         }
-        UserSortService.Role sortByRole = (UserSortService.Role)int.Parse(role);
 
-        Neighborhood neighborhood = _neighborhoodService.GetById(id, [c => c.Users]);
+        Neighborhood? neighborhood = await _neighborhoodService.GetById
+            (id, [query => query.Include(c => c.Users
+                .Skip(int.Parse(page) * int.Parse(size))
+                .Take(int.Parse(size)))]
+            );
 
         if (neighborhood == null || neighborhood.Users == null)
         {
@@ -75,133 +94,176 @@ public class UserController(IBaseService<User> userService, IBaseService<Neighbo
         }
         ICollection<User> users = neighborhood.Users;
 
-        UserCollectionDTO userDataCollection = new UserCollectionDTO(_userSortService.GetUsersFromRole(users, sortByRole));
-
-        return Ok(userDataCollection);
-    }
-
-    // GET api/<UserController>/{id}
-    [HttpGet("FromNeighborhood={id}&sort={role}")]
-    public ActionResult<UserCollectionDTO> GetAllUsersOfNeighborhoodIdSortedByGroup(string id, string role)
-    {
-        if (!int.TryParse(role, out _))
-        {
-            return BadRequest();
-        }
-        UserSortService.RoleGroup sortByRole = (UserSortService.RoleGroup)int.Parse(role);
-
-        Neighborhood neighborhood = _neighborhoodService.GetById(id, [c => c.Users]);
-
-        if (neighborhood == null || neighborhood.Users == null)
-        {
-            return NotFound();
-        }
-        ICollection<User> users = neighborhood.Users;
-
-        UserCollectionDTO userDataCollection = new UserCollectionDTO(_userSortService.GetUsersFromSort(users, sortByRole));
+        UserCollectionDTO userDataCollection = new(users);
 
         return Ok(userDataCollection);
     }
 
     // POST api/<UserController>
     [HttpPost]
-    public ActionResult<UserDTO> Create(UserDTO userData)
+    public async Task<ActionResult<UserDTO>> Create(UserDTO userData)
     {
-        // DEBUG: In this statement we make it so we can make fake users with custom Ids. Remove this in production.
         if (string.IsNullOrEmpty(userData.Id))
         {
-            // Get the user_id from the token
-            userData.Id = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
+            userData.Id = User.Claims.First(c => c.Type.Equals("user_id"))?.Value ?? "";
         }
 
-        var user = new User(
-            userData.Id,
-            userData.Name,
-            userData.Avatar,
-            userData.NeighborhoodId);
-        _userService.Create(user);
+        User? existingUser = await _userManager.FindByIdAsync(userData.Id);
+        if (existingUser != null)
+        {
+            return Conflict();
+        }
+
+        User newUser = new()
+        {
+            Id = userData.Id,
+            UserName = userData.Id,
+            Name = userData.Name,
+            Avatar = userData.Avatar
+        };
+
+        await _userManager.CreateAsync(newUser);
 
         return CreatedAtAction(nameof(GetById), new { id = userData.Id }, userData);
     }
 
     // PUT api/<UserController>/{id}
     [HttpPut("{id}")]
-    public IActionResult Update(string id, UserDTO userData)
+    public async Task<IActionResult> Update(string id, UserDTO userData)
     {
-        var existingUser = _userService.GetById(id);
+        User? existingUser = await _userManager.FindByIdAsync(userData.Id);
         if (existingUser == null)
         {
             return NotFound();
         }
 
         userData.Id = id;
-        var user = new User
-            (
-            userData.Id,
-            userData.Name,
-            userData.Avatar,
-            userData.NeighborhoodId
-            );
 
         if (userData.NeighborhoodId != null && userData.NeighborhoodId != existingUser.NeighborhoodId && existingUser.NeighborhoodId != null)
         {
             // Joining a neighborhood from another neighborhood
 
-            Neighborhood neighborhood = _neighborhoodService.GetById(userData.NeighborhoodId, [c => c.Users]);
-            Neighborhood existingNeighborhood = _neighborhoodService.GetById(existingUser.NeighborhoodId, [c => c.Users]);
+            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
+            Neighborhood? existingNeighborhood = await _neighborhoodService.GetById(existingUser.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
             if (neighborhood == null)
             {
                 return NotFound();
             }
-            existingNeighborhood.Users.Remove(user);
-            _neighborhoodService.Update(existingNeighborhood);
+            existingNeighborhood?.Users.Remove(existingUser);
+            await _neighborhoodService.Update(existingNeighborhood);
 
-            neighborhood.Users.Add(user);
-            _neighborhoodService.Update(neighborhood);
+            neighborhood.Users.Add(existingUser);
+            await _neighborhoodService.Update(neighborhood);
         }
         else if (userData.NeighborhoodId == null && userData.NeighborhoodId != existingUser.NeighborhoodId)
         {
             // Leaving a neighborhood
 
-            Neighborhood neighborhood = _neighborhoodService.GetById(userData.NeighborhoodId, [c => c.Users]);
+            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
 
             if (neighborhood != null)
             {
-                neighborhood.Users.Remove(user);
-                _neighborhoodService.Update(neighborhood);
+                neighborhood.Users.Remove(existingUser);
+                await _neighborhoodService.Update(neighborhood);
             }
         }
         else if (userData.NeighborhoodId != null && existingUser.NeighborhoodId == null)
         {
             // Joining a neighborhood without another neighborhood
 
-            Neighborhood neighborhood = _neighborhoodService.GetById(userData.NeighborhoodId, [c => c.Users]);
+            Neighborhood? neighborhood = await _neighborhoodService.GetById(userData.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
 
             if (neighborhood == null)
             {
                 return NotFound();
             }
 
-            neighborhood.Users.Add(user);
-            _neighborhoodService.Update(neighborhood);
+            neighborhood.Users.Add(existingUser);
+            await _neighborhoodService.Update(neighborhood);
         }
 
-        _userService.Update(user);
+
+        existingUser.Name = userData.Name;
+        existingUser.Avatar = userData.Avatar;
+        existingUser.NeighborhoodId = userData.NeighborhoodId;
+
+        await _userManager.UpdateAsync(existingUser);
 
         return NoContent();
     }
 
     // DELETE api/<UserController>/{id}
     [HttpDelete("{id}")]
-    public IActionResult Delete(string id)
+    public async Task<IActionResult> Delete(string id)
     {
-        var existingUser = _userService.GetById(id);
+        User? existingUser = await _userManager.FindByIdAsync(id);
         if (existingUser == null)
         {
             return NotFound();
         }
 
-        _userService.Delete(id);
+        await _userManager.DeleteAsync(existingUser);
+
+        return NoContent();
+    }
+
+
+
+
+
+    // Get api/<UserController>/{id}/GetRole
+    [HttpGet("{id}/GetRole")]
+    public async Task<IActionResult> GetRole(string id)
+    {
+        User? existingUser = await _userManager.FindByIdAsync(id);
+        if (existingUser == null)
+        {
+            return NotFound();
+        }
+
+        IList<string> userRoles = await _userManager.GetRolesAsync(existingUser);
+
+        return Ok(userRoles);
+    }
+
+    // PUT api/<UserController>/{id}/AddRole/{role}
+    [HttpPut("{id}/AddRole/{role}")]
+    public async Task<IActionResult> AddRole(string id, string role)
+    {
+        User? existingUser = await _userManager.FindByIdAsync(id);
+        if (existingUser == null)
+        {
+            return NotFound();
+        }
+
+        bool roleExists = await _roleManager.RoleExistsAsync(role);
+        if (!roleExists)
+        {
+            return NotFound();
+        }
+
+        await _userManager.AddToRoleAsync(existingUser, role);
+
+        return NoContent();
+    }
+
+    // PUT api/<UserController>/{id}/RemoveRole/{role}
+    [HttpPut("{id}/RemoveRole/{role}")]
+    public async Task<IActionResult> RemoveRole(string id, string role)
+    {
+        User? existingUser = await _userManager.FindByIdAsync(id);
+        if (existingUser == null)
+        {
+            return NotFound();
+        }
+
+        bool roleExists = await _roleManager.RoleExistsAsync(role);
+        if (!roleExists)
+        {
+            return NotFound();
+        }
+
+        await _userManager.RemoveFromRoleAsync(existingUser, role);
 
         return NoContent();
     }

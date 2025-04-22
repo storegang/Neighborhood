@@ -3,41 +3,45 @@ using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using webapi.Repositories;
 using Microsoft.Extensions.Hosting;
 using webapi.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace webapi.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class PostController(IBaseService<Post> postService, IBaseService<Category> categoryService, IBaseService<User> userService, ILikeService<Post> likeService) : ControllerBase
+public class PostController(IBaseService<Post> postService, IBaseService<Category> categoryService, ILikeService<Post> likeService, UserManager<User> userManager) : ControllerBase
 {
     private readonly IBaseService<Post> _postService = postService;
     private readonly IBaseService<Category> _categoryService = categoryService;
-    private readonly IBaseService<User> _userService = userService;
     private readonly ILikeService<Post> _likeService = likeService;
+    private readonly UserManager<User> _userManager = userManager;
 
     // GET: api/<PostController>
     [HttpGet]
-    public ActionResult<PostCollectionDTO> GetAll()
+    public async Task<ActionResult<ServerPostCollectionDTO>> GetAll()
     {
-        ICollection<Post> postCollection = _postService.GetAll([c => c.User]);
+        ICollection<Post> postCollection = await _postService.GetAll([query => query.Include(c => c.User)]);
 
-        PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
+        ServerPostCollectionDTO postDataCollection = new(postCollection);
 
         Post[] posts = new Post[postCollection.Count()];
         posts = postCollection.ToArray();
 
-        PostDTO[] postDTOs = new PostDTO[postDataCollection.Posts.Count()];
+        ServerPostDTO[] postDTOs = new ServerPostDTO[postDataCollection.Posts.Count()];
         postDTOs = postDataCollection.Posts.ToArray();
 
         for (int i = 0; i < postCollection.Count; i++)
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
-                postDTOs[i].LikedByCurrentUser = _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                postDTOs[i].CommentCount = await _postService.Count(p => p.Id == postDTOs[i].Id, p => p.Comments.Count());
+                postDTOs[i].LikedByCurrentUser = await _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -48,47 +52,49 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
     // GET api/<PostController>/{id}
     [HttpGet("{id}")]
-    public ActionResult<PostDTO> GetById(string id)
+    public async Task<ActionResult<ServerPostDTO>> GetById(string id)
     {
-        var post = _postService.GetById(id, [ c => c.User]);
+        Post? post = await _postService.GetById(id, [query => query.Include(c => c.User)]);
 
         if (post == null)
         {
             return NotFound();
         }
 
-        PostDTO postData = new PostDTO(post);
+        ServerPostDTO postData = new(post);
 
-        postData.LikedByCurrentUser = _likeService.IsLiked(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+        postData.CommentCount = await _postService.Count(p => p.Id == postData.Id, p => p.Comments.Count());
+        postData.LikedByCurrentUser = await _likeService.IsLiked(post.LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
 
         return Ok(postData);
     }
 
     // GET api/<PostController>/{id}
     [HttpGet("FromCategory={id}")]
-    public ActionResult<PostCollectionDTO> GetPostByCategoryId(string categoryId)
+    public async Task<ActionResult<ServerPostCollectionDTO>> GetPostByCategoryId(string id)
     {
-        var category = _categoryService.GetById(categoryId, [c => c.Posts]);
+        Category? category = await _categoryService.GetById(id, [query => query.Include(c => c.Posts).ThenInclude(p => p.User)]);
 
         if (category == null || category.Posts == null)
         {
             return NotFound();
         }
-        var postCollection = category.Posts;
+        Post[] postCollection = category.Posts.ToArray();
 
-        PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
+        ServerPostCollectionDTO postDataCollection = new(postCollection);
 
         Post[] posts = new Post[postCollection.Count()];
         posts = postCollection.ToArray();
 
-        PostDTO[] postDTOs = new PostDTO[postDataCollection.Posts.Count()];
+        ServerPostDTO[] postDTOs = new ServerPostDTO[postDataCollection.Posts.Count()];
         postDTOs = postDataCollection.Posts.ToArray();
 
-        for (int i = 0; i < postCollection.Count; i++)
+        for (int i = 0; i < postCollection.Count(); i++)
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
-                postDTOs[i].LikedByCurrentUser = _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                postDTOs[i].CommentCount = await _postService.Count(p => p.Id == postDTOs[i].Id, p => p.Comments.Count());
+                postDTOs[i].LikedByCurrentUser = await _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -100,38 +106,36 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
     // GET api/<PostController>/FromCategory={postId}&Page={page}&Size={size}
     // GET api/<PostController>/FromCategory={postId}&Page={page}
     [HttpGet("FromCategory={postId}&Page={page}")]
-    public ActionResult<PostCollectionDTO> GetSomeCommentsByPostId(string categoryId, string page, string size = "5")
+    public async Task<ActionResult<ServerPostCollectionDTO>> GetSomeCommentsByPostId(string categoryId, string page = "0", string size = "5")
     {
-        var category = _categoryService.GetById(categoryId, [c => c.Posts]);
+        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
+        {
+            return BadRequest();
+        }
+
+        Category? category = await _categoryService.GetById(categoryId, [query => query.Include(c => c.Posts).ThenInclude(c => c.User)]);
 
         if (category == null || category.Posts == null)
         {
             return NotFound();
         }
 
-        if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
-        {
-            return BadRequest();
-        }
+        ICollection<Post> postCollection = category.Posts;
 
-        var postCollection = category.Posts
-        .Skip((int.Parse(page) - 1) * int.Parse(size))
-        .Take(int.Parse(size))
-        .ToList();;
-
-        PostCollectionDTO postDataCollection = new PostCollectionDTO(postCollection);
+        ServerPostCollectionDTO postDataCollection = new(postCollection);
 
         Post[] posts = new Post[postCollection.Count()];
         posts = postCollection.ToArray();
 
-        PostDTO[] postDTOs = new PostDTO[postDataCollection.Posts.Count()];
+        ServerPostDTO[] postDTOs = new ServerPostDTO[postDataCollection.Posts.Count()];
         postDTOs = postDataCollection.Posts.ToArray();
 
-        for (int i = 0; i < postCollection.Count; i++)
+        for (int i = 0; i < postCollection.Count(); i++)
         {
             if (posts[i].Id == postDTOs[i].Id)
             {
-                postDTOs[i].LikedByCurrentUser = _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
+                postDTOs[i].CommentCount = await _postService.Count(p => p.Id == postDTOs[i].Id, p => p.Comments.Count());
+                postDTOs[i].LikedByCurrentUser = await _likeService.IsLiked(posts[i].LikedByUserID, User.Claims.First(c => c.Type.Equals("user_id"))?.Value);
             }
         }
 
@@ -142,13 +146,18 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
     // POST api/<PostController>
     [HttpPost]
-    public ActionResult<PostDTO> Create(PostDTO postData)
+    public async Task<ActionResult<ClientPostDTO>> Create(ClientPostDTO postData)
     {
-        var category = _categoryService.GetById(postData.CategoryId, [c => c.Posts]);
-
+        Category? category = await _categoryService.GetById(postData.CategoryId, [query => query.Include(c => c.Posts).ThenInclude(p => p.User)]);
         if (category == null)
         {
             return NotFound();
+        }
+
+        User? user = await _userManager.FindByIdAsync(User.Claims.First(c => c.Type.Equals("user_id")).Value);
+        if (user == null)
+        {
+            return Unauthorized();
         }
 
         string newGuid;
@@ -156,44 +165,41 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         {
             newGuid = Guid.NewGuid().ToString();
         }
-        while (_postService.GetById(newGuid) != null);
-
-        postData.Id = newGuid;
+        while (await _postService.GetById(newGuid) != null);
         
-        var post = new Post
+        Post post = new()
         {
-            Id = postData.Id,
+            Id = newGuid,
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = DateTime.Now,
-            User = _userService.GetById(postData.AuthorUserId),
+            User = user,
             CategoryId = postData.CategoryId,
             Category = category,
-            Images = (ICollection<string>)postData.ImageUrls
+            Images = (ICollection<string>?)postData.ImageUrls
         };
 
-        _postService.Create(post);
+        await _postService.Create(post);
 
         category.Posts.Add(post);
-        _categoryService.Update(category);
+        await _categoryService.Update(category);
 
-        return CreatedAtAction(nameof(GetById), new { id = postData.Id }, postData);
+        return CreatedAtAction(nameof(GetById), new { id = newGuid }, postData);
     }
 
     // PUT api/<PostController>/{id}
     [HttpPut("{id}")]
-    public IActionResult Update(string id, PostDTO postData)
+    public async Task<IActionResult> Update(string id, ClientPostDTO postData)
     {
-        var existingPost = _postService.GetById(id, [c => c.User]);
+        Post? existingPost = await _postService.GetById(id, [query => query.Include(c => c.User)]);
         if (existingPost == null)
         {
             return NotFound();
         }
 
-        postData.Id = id;
-        var post = new Post
+        Post post = new()
         {
-            Id = postData.Id,
+            Id = existingPost.Id,
             Title = postData.Title,
             Description = postData.Description,
             DatePosted = existingPost.DatePosted,
@@ -202,24 +208,29 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
             CategoryId = existingPost.CategoryId,
             Category = existingPost.Category,
             Comments = existingPost.Comments,
-            Images = (ICollection<string>)postData.ImageUrls,
+            Images = (ICollection<string>?)postData.ImageUrls,
             LikedByUserID = existingPost.LikedByUserID
         };
-        _postService.Update(post);
+        await _postService.Update(post);
 
         return NoContent();
     }
 
     // PUT api/<PostController>/Like/{postId}
     [HttpPut("Like/{postId}")]
-    public IActionResult Like(string postId)
+    public async Task<IActionResult> Like(string postId)
     {
-        var post = _postService.GetById(postId, [c => c.User]);
+        Post? post = await _postService.GetById(postId, [query => query.Include(c => c.User)]);
         if (post == null)
         {
             return NotFound();
         }
-        var userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
+        string? userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
+
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
 
         if (post.LikedByUserID == null)
         {
@@ -233,22 +244,22 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         {
             post.LikedByUserID.Add(userId);
         }
-        _postService.Update(post);
+        await _postService.Update(post);
         return NoContent();
     }
 
 
     // DELETE api/<PostController>/{id}
     [HttpDelete("{id}")]
-    public IActionResult Delete(string id)
+    public async Task<IActionResult> Delete(string id)
     {
-        var existingPost = _postService.GetById(id);
+        Post? existingPost = await _postService.GetById(id);
         if (existingPost == null)
         {
             return NotFound();
         }
 
-        _postService.Delete(id);
+        await _postService.Delete(id);
 
         return NoContent();
     }
