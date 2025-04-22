@@ -110,12 +110,15 @@ builder.Services.AddAuthentication(options =>
     };
 }));
 
-string? connectionString = builder.Configuration.GetConnectionString("ConnectionString");
+string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    throw new Exception("Connection string 'DefaultConnection' is not set.");
+}
 
 builder.Services.AddDbContext<NeighborhoodContext>(options =>
-{
-    options.UseSqlServer(connectionString);
-});
+    options.UseNpgsql(connectionString));
 
 string localFrontendCorsPolicy = "AllowSpecificOrigin";
 

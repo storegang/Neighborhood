@@ -183,7 +183,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         {
             Id = newGuid,
             Content = commentData.Content,
-            DatePosted = DateTime.Now,
+            DatePosted = DateTime.UtcNow,
             User = user,
             ParentPostId = commentData.ParentPostId,
             ImageUrl = commentData.ImageUrl
@@ -211,7 +211,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
             Id = existingComment.Id,
             Content = commentData.Content,
             DatePosted = existingComment.DatePosted,
-            DateLastEdited = DateTime.Now,
+            DateLastEdited = DateTime.UtcNow,
             User = existingComment.User,
             ParentPostId = existingComment.ParentPostId,
             ParentPost = existingComment.ParentPost,
