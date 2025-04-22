@@ -12,6 +12,7 @@ public interface IBaseService<T> where T : BaseEntity
     Task Create(T entity);
     Task Update(T entity);
     Task Delete(string id);
+    Task<int> Count(Expression<Func<T, bool>> parentFilter, Expression<Func<T, int>> childSelector);
 }
 
 public class BaseService<T>(IGenericRepository<T> repository) : IBaseService<T> where T : BaseEntity
@@ -46,5 +47,10 @@ public class BaseService<T>(IGenericRepository<T> repository) : IBaseService<T> 
         {
             await _repository.Delete(entity).ConfigureAwait(false);
         }
+    }
+
+    public async Task<int> Count(Expression<Func<T, bool>> parentFilter, Expression<Func<T, int>> childSelector)
+    {
+        return await _repository.Count(parentFilter, childSelector).ConfigureAwait(false);
     }
 }
