@@ -111,18 +111,16 @@ export function formatRelativeDate(date: Date): string {
     const seconds = Math.floor(diff / 1000)
     const minutes = Math.floor(seconds / 60)
     const hours = Math.floor(minutes / 60)
-    const days = Math.floor(hours / 24)
 
-    const isToday = isSameDay(date, now)
     const isTomorrow = isSameDay(date, addDays(now, 1))
 
+    if (diff >= 0 && seconds < 60) return "just now"
+    if (diff >= 0 && minutes < 60) return rtf.format(-minutes, "minute")
+    if (diff >= 0 && hours < 24) return rtf.format(-hours, "hour")
+
+    const isToday = isSameDay(date, now)
     if (isToday) return `today ${formatTime(date)}`
     if (isTomorrow) return `tomorrow ${formatTime(date)}`
-    if (diff < 0) return formatWithTime(date)
-    if (days >= 1) return formatWithTime(date)
-    if (hours >= 1) return rtf.format(-hours, "hour")
-    if (minutes >= 1) return rtf.format(-minutes, "minute")
-    if (seconds >= 1) return rtf.format(-seconds, "second")
 
-    return "just now"
+    return formatWithTime(date)
 }
