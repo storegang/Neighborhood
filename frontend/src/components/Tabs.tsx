@@ -1,11 +1,18 @@
-import { Children, cloneElement, isValidElement, ReactElement } from "react"
+import {
+    Children,
+    cloneElement,
+    isValidElement,
+    ReactElement,
+    ReactNode,
+} from "react"
 
 export const Tabs: React.FC<{
     name: string
-    children: ReactElement<TabPanelProps>[] | ReactElement<TabPanelProps>
+    children: ReactNode
 }> = ({ name, children }) => {
     const childrenWithName = Children.map(children, (child) => {
         if (isValidElement(child)) {
+            /* @ts-expect-error The name-attribute should always be passed to Tabs-children */
             return cloneElement(child, { name })
         }
 
