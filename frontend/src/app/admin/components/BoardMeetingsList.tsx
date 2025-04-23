@@ -47,7 +47,7 @@ export const BoardMeetingsList: React.FC = () => {
         <>
             <Tabs name="board-meetings">
                 {!!plannedMeetings?.length && (
-                    <TabPanel label="Planned meetings">
+                    <TabPanel label="Planned meetings" defaultChecked>
                         <ul className="list">
                             {plannedMeetings?.map((meeting) => (
                                 <MeetingItem
