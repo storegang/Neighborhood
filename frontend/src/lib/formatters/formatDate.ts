@@ -1,3 +1,6 @@
+/**
+ * Array of month names used for formatting dates.
+ */
 const monthNames = [
     "January",
     "February",
@@ -14,9 +17,77 @@ const monthNames = [
 ]
 
 /**
- * Formats a date with "dd.mm" format, and includes year only if it's not the current year.
- * @param date The value to format
- * @returns The value in "dd.mm" or "dd.mm.yyyy" format
+ * Relative time formatter for displaying time differences in a human-readable format.
+ */
+const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" })
+
+/**
+ * Checks if two dates are on the same calendar day.
+ *
+ * @param d1 - The first date to compare.
+ * @param d2 - The second date to compare.
+ * @returns `true` if the dates are on the same day, otherwise `false`.
+ */
+function isSameDay(d1: Date, d2: Date): boolean {
+    return (
+        d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate()
+    )
+}
+
+/**
+ * Adds a specified number of days to a given date.
+ *
+ * @param date - The date to modify.
+ * @param days - The number of days to add.
+ * @returns A new `Date` object with the added days.
+ */
+function addDays(date: Date, days: number): Date {
+    const copy = new Date(date)
+    copy.setDate(copy.getDate() + days)
+    return copy
+}
+
+/**
+ * Formats a date object into a time string (e.g., "02:30 PM").
+ *
+ * @param date - The date to format.
+ * @returns A string representing the time in "hh:mm AM/PM" format.
+ */
+function formatTime(date: Date): string {
+    return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+    })
+}
+
+/**
+ * Formats a date object into a string with time included.
+ *
+ * @param date - The date to format.
+ * @returns A string representing the date and time (e.g., "Apr 23, 2:30 PM").
+ */
+function formatWithTime(date: Date): string {
+    const now = new Date()
+    const includeYear = date.getFullYear() < now.getFullYear()
+
+    const options: Intl.DateTimeFormatOptions = {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+        ...(includeYear && { year: "numeric" }),
+    }
+
+    return date.toLocaleDateString("en-US", options)
+}
+
+/**
+ * Formats a date object into a human-readable string.
+ *
+ * @param date - The date to format.
+ * @returns A string representing the date (e.g., "April 23" or "April 23, 2024").
  */
 export function formatDate(date: Date): string {
     const day = date.getDate()
@@ -27,14 +98,11 @@ export function formatDate(date: Date): string {
     return year === currentYear ? `${month} ${day}` : `${month} ${day}, ${year}`
 }
 
-const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" })
-
 /**
- * Formats a date based on how much time has passed since the given date.
- * If the date is less than 24 hours ago, it shows "X hours ago", "X minutes ago", "just now", etc.
- * Otherwise, it formats the date in "dd.mm" format, adding the year only if it's not the current year.
- * @param date The date to format
- * @returns The formatted date string
+ * Formats a date object into a relative time string (e.g., "2 hours ago", "just now").
+ *
+ * @param date - The date to format.
+ * @returns A string representing the relative time or a formatted date and time.
  */
 export function formatRelativeDate(date: Date): string {
     const now = new Date()
@@ -45,9 +113,16 @@ export function formatRelativeDate(date: Date): string {
     const hours = Math.floor(minutes / 60)
     const days = Math.floor(hours / 24)
 
-    if (days >= 1) return formatDate(date)
+    const isToday = isSameDay(date, now)
+    const isTomorrow = isSameDay(date, addDays(now, 1))
+
+    if (isToday) return `today ${formatTime(date)}`
+    if (isTomorrow) return `tomorrow ${formatTime(date)}`
+    if (diff < 0) return formatWithTime(date)
+    if (days >= 1) return formatWithTime(date)
     if (hours >= 1) return rtf.format(-hours, "hour")
     if (minutes >= 1) return rtf.format(-minutes, "minute")
     if (seconds >= 1) return rtf.format(-seconds, "second")
+
     return "just now"
 }
