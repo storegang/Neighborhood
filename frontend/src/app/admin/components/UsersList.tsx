@@ -12,7 +12,7 @@ export const UsersList: React.FC = () => {
     const { data: users, isLoading, isError } = useGetUsers(user)
 
     return (
-        <div className="tabs tabs-lift h-80 w-1/2">
+        <div className="tabs tabs-border h-80 w-1/3">
             <input
                 type="radio"
                 name="my_tabs_3"
