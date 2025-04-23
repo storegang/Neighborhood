@@ -26,7 +26,15 @@ export const getPosts = async (
         accessToken: accessToken,
     })
 
-    return response.posts
+    const { posts } = response
+
+    const sortedPosts = posts.sort((a, b) => {
+        const dateA = new Date(a.datePosted)
+        const dateB = new Date(b.datePosted)
+
+        return dateB.getTime() - dateA.getTime()
+    })
+    return sortedPosts
 }
 
 /**
@@ -44,7 +52,14 @@ export const getComments = async (
         path: `/comment/allfrompost=${postId}`,
         accessToken: accessToken,
     })
-    return response.comments
+
+    const { comments } = response
+    const sortedComments = comments.sort((a, b) => {
+        const dateA = new Date(a.datePosted)
+        const dateB = new Date(b.datePosted)
+        return dateA.getTime() - dateB.getTime()
+    })
+    return sortedComments
 }
 
 /**
