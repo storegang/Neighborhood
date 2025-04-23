@@ -15,6 +15,7 @@ export const BoardMeetingsList: React.FC = () => {
                     name="my_tabs_2"
                     className="tab"
                     aria-label="Planned meetings"
+                    defaultChecked
                 />
                 <div className="tab-content border-base-300 bg-base-100 p-6">
                     <ul className="list">
@@ -34,7 +35,7 @@ export const BoardMeetingsList: React.FC = () => {
                                 />
                             </svg>
                             <div>
-                                <div>Friday May 2</div>
+                                <div>Friday May 2 2025</div>
                                 <div className="text-xs font-semibold uppercase opacity-60">
                                     20:00 - 21:00
                                 </div>
@@ -56,7 +57,7 @@ export const BoardMeetingsList: React.FC = () => {
                                 />
                             </svg>
                             <div>
-                                <div>Tuesday October 21</div>
+                                <div>Tuesday October 21 2025</div>
                                 <div className="text-xs font-semibold uppercase opacity-60">
                                     19:00 - 20:00
                                 </div>
@@ -70,7 +71,6 @@ export const BoardMeetingsList: React.FC = () => {
                     name="my_tabs_2"
                     className="tab"
                     aria-label="Previous meetings"
-                    defaultChecked
                 />
                 <div className="tab-content border-base-300 bg-base-100 p-6">
                     <ul className="list">
@@ -92,7 +92,7 @@ export const BoardMeetingsList: React.FC = () => {
                                 </svg>
                             </div>
                             <div>
-                                <div>Friday October 11</div>
+                                <div>Friday October 11 2024</div>
                                 <div className="text-xs font-semibold uppercase opacity-60">
                                     20:00 - 21:00
                                 </div>
@@ -116,7 +116,7 @@ export const BoardMeetingsList: React.FC = () => {
                                 </svg>
                             </div>
                             <div>
-                                <div>Wednesday March 6</div>
+                                <div>Wednesday March 6 2024</div>
                                 <div className="text-xs font-semibold uppercase opacity-60">
                                     19:00 - 20:00
                                 </div>
@@ -136,7 +136,7 @@ export const BoardMeetingsList: React.FC = () => {
 const ScheduleMeetingDialog: React.FC<{
     show: boolean
     onClose: () => void
-}> = ({ show, onClose }) => {
+}> = () => {
     return (
         <>
             <button
@@ -154,12 +154,23 @@ const ScheduleMeetingDialog: React.FC<{
             <dialog id="schedule-meeting-dialog" className="modal">
                 <div className="modal-box">
                     <h3 className="text-lg font-bold">Schedule a meeting</h3>
-                    <div className="py-4">
+                    <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
+                        <legend className="fieldset-legend">
+                            Meeting details
+                        </legend>
                         <DatePicker />
-                    </div>
+                        <legend className="fieldset-legend">Description</legend>
+                        <textarea
+                            className="textarea h-24"
+                            placeholder="Meeting description"
+                        ></textarea>
+                        <div className="label">Optional</div>
+                    </fieldset>
                     <div className="modal-action">
                         <form method="dialog">
-                            {/* if there is a button in form, it will close the modal */}
+                            <button className="btn btn-primary">
+                                Schedule
+                            </button>
                             <button className="btn">Close</button>
                         </form>
                     </div>
