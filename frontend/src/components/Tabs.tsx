@@ -2,7 +2,7 @@ import { Children, cloneElement, isValidElement, ReactElement } from "react"
 
 export const Tabs: React.FC<{
     name: string
-    children: ReactElement<TabPanelProps>[]
+    children: ReactElement<TabPanelProps>[] | ReactElement<TabPanelProps>
 }> = ({ name, children }) => {
     const childrenWithName = Children.map(children, (child) => {
         if (isValidElement(child)) {
