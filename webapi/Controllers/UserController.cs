@@ -50,8 +50,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
 
         IEnumerable<string> roles = await _userManager.GetRolesAsync(user);
 
-        ServerUserDTO userData = new(user);
-        userData.Roles = roles;
+        ServerUserDTO userData = new(user, roles);
         return Ok(userData);
     }
 
@@ -68,6 +67,14 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         ICollection<User> users = neighborhood.Users;
 
         ServerUserCollectionDTO userDataCollection = new(users);
+
+        List<ServerUserDTO> userDTOs = new();
+        foreach (var user in users)
+        {
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+            userDTOs.Add(new ServerUserDTO(user, roles));
+        }
+        userDataCollection.Users = userDTOs;
 
         return Ok(userDataCollection);
     }
@@ -95,6 +102,14 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         ICollection<User> users = neighborhood.Users;
 
         ServerUserCollectionDTO userDataCollection = new(users);
+
+        List<ServerUserDTO> userDTOs = new();
+        foreach (var user in users)
+        {
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+            userDTOs.Add(new ServerUserDTO(user, roles));
+        }
+        userDataCollection.Users = userDTOs;
 
         return Ok(userDataCollection);
     }
