@@ -23,7 +23,7 @@ export const HeaderNav: React.FC<HeaderNavProps> = () => {
     }
     const links = [
         { name: "Home", href: "/" },
-        { name: "Lend", href: "/lend" },
+        { name: "Admin", href: "/admin" },
     ]
 
     return (

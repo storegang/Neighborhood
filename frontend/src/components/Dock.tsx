@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation"
 export const Dock: React.FC = () => {
     const links = [
         { name: "Home", href: "/" },
-        { name: "Lend", href: "/lend" },
+        { name: "Admin", href: "/admin" },
     ]
 
     const currentPath = usePathname()
@@ -24,7 +24,7 @@ export const Dock: React.FC = () => {
                         {link.name === "Home" && (
                             <HomeIcon className="dock-icon" />
                         )}
-                        {link.name === "Lend" && (
+                        {link.name === "Admin" && (
                             <WrenchIcon className="dock-icon" />
                         )}
                         {link.name}
