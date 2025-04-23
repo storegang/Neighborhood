@@ -5,12 +5,8 @@ import { DatePicker } from "./DatePicker"
 import { TabPanel, Tabs } from "@/components/Tabs"
 import { useCreateMeeting, useGetMeetings } from "../queries"
 import { useUser } from "@/lib/getUser"
-import {
-    formatDate,
-    formatRelativeDate,
-} from "../../../lib/formatters/formatDate"
+import { formatRelativeDate } from "../../../lib/formatters/formatDate"
 import { Meeting } from "@/Models"
-import { createMeeting } from "../actions"
 
 export const BoardMeetingsList: React.FC = () => {
     const user = useUser()

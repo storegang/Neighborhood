@@ -6,4 +6,5 @@ export type User = FirebaseUser & {
     avatar?: string
     neighborhoodId?: string
     accessToken: string
+    roles: "BoardMember" | "Tenant"
 }

@@ -1,14 +1,15 @@
 import { formatPhoneNumber } from "@/lib/formatters/formatPhoneNumber"
+import { User } from "@/Models"
 import Link from "next/link"
 
 type UserListItemProps = {
-    name: string
+    name: User["name"]
+    role?: User["roles"]
+    avatar: User["avatar"]
     isBoardMember?: boolean
-    role?: string
     phoneNumber?: string
     countryCode?: string
     partial?: boolean
-    avatar: string
     email?: string
 }
 

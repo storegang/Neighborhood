@@ -1,10 +1,4 @@
-import {
-    Children,
-    cloneElement,
-    isValidElement,
-    ReactElement,
-    ReactNode,
-} from "react"
+import { Children, cloneElement, isValidElement, ReactNode } from "react"
 
 export const Tabs: React.FC<{
     name: string
@@ -30,12 +24,14 @@ type TabPanelProps = {
     children: React.ReactNode
     name?: string
     label: string
+    defaultChecked?: boolean
 }
 
 export const TabPanel: React.FC<TabPanelProps> = ({
     children,
     name,
     label,
+    defaultChecked,
 }) => {
     return (
         <>
@@ -44,7 +40,7 @@ export const TabPanel: React.FC<TabPanelProps> = ({
                 name={name}
                 className="tab"
                 aria-label={label}
-                defaultChecked
+                defaultChecked={defaultChecked}
             />
             <div className="tab-content border-base-300 bg-base-100 p-6">
                 {children}
