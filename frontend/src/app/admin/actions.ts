@@ -72,3 +72,27 @@ export const getMeetings = async (accessToken: string): Promise<Meeting[]> => {
     const meetings = await meetingsResponse
     return meetings
 }
+
+/**
+ *
+ * @param accessToken The accesToken to be used for the request
+ * @param meeting The meeting to be created
+ * @returns The created meeting
+ */
+export const createMeeting = async (
+    accessToken: string,
+    meeting: Omit<Meeting, "id">
+) => {
+    // Waiting for backend to implement meeting-related endpoints
+
+    const response = new Promise<Meeting>((resolve) => {
+        resolve({
+            id: "1",
+            date: meeting.date,
+            title: meeting.title,
+            type: meeting.type,
+        })
+    })
+
+    return await response
+}

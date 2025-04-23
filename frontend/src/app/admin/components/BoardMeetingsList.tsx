@@ -3,18 +3,16 @@
 import { useState } from "react"
 import { DatePicker } from "./DatePicker"
 import { TabPanel, Tabs } from "@/components/Tabs"
-import { useGetMeetings } from "../queries"
+import { useCreateMeeting, useGetMeetings } from "../queries"
 import { useUser } from "@/lib/getUser"
 import {
     formatDate,
     formatRelativeDate,
 } from "../../../lib/formatters/formatDate"
 import { Meeting } from "@/Models"
+import { createMeeting } from "../actions"
 
 export const BoardMeetingsList: React.FC = () => {
-    const [showScheduleMeetingDialog, setShowScheduleMeetingDialog] =
-        useState(false)
-
     const user = useUser()
     const { data: meetings, isLoading, isError } = useGetMeetings(user)
 
@@ -73,18 +71,46 @@ export const BoardMeetingsList: React.FC = () => {
                     </TabPanel>
                 )}
             </Tabs>
-            {/* <ScheduleMeetingDialog
-                show={showScheduleMeetingDialog}
-                onClose={() => setShowScheduleMeetingDialog(false)}
-            /> */}
+            <ScheduleMeetingDialog />
         </>
     )
 }
 
-const ScheduleMeetingDialog: React.FC<{
-    show: boolean
-    onClose: () => void
-}> = () => {
+const ScheduleMeetingDialog: React.FC = () => {
+    const user = useUser()
+    const { mutate: createMeeting, isPending, isError } = useCreateMeeting(user)
+
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        const formData = new FormData(e.currentTarget)
+        e.preventDefault()
+
+        const title = formData.get("title") as string
+
+        const type = formData.get("meeting-type") as string
+
+        if (!title || !selectedDate || !type) {
+            return
+        }
+
+        const meeting: Omit<Meeting, "id"> = {
+            title,
+            date: selectedDate,
+            type: type === "board-meeting" ? "BOARD_MEETING" : "TOWN_HALL",
+        }
+
+        createMeeting(meeting, {
+            onSuccess: () => {
+                return (
+                    document.getElementById(
+                        "schedule-meeting-dialog"
+                    ) as HTMLDialogElement
+                )?.close()
+            },
+        })
+    }
+
     return (
         <>
             <button
@@ -101,27 +127,97 @@ const ScheduleMeetingDialog: React.FC<{
             </button>
             <dialog id="schedule-meeting-dialog" className="modal">
                 <div className="modal-box">
-                    <h3 className="text-lg font-bold">Schedule a meeting</h3>
-                    <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-full border p-4">
-                        <legend className="fieldset-legend">
-                            Meeting details
-                        </legend>
-                        <DatePicker />
-                        <legend className="fieldset-legend">Description</legend>
-                        <textarea
-                            className="textarea h-24"
-                            placeholder="Meeting description"
-                        ></textarea>
-                        <div className="label">Optional</div>
-                    </fieldset>
-                    <div className="modal-action">
-                        <form method="dialog">
-                            <button className="btn btn-primary">
-                                Schedule
+                    <form onSubmit={handleSubmit}>
+                        <h3 className="text-lg font-bold">
+                            Schedule a meeting
+                        </h3>
+                        <div className="fieldset bg-base-200 border-base-300 rounded-box mt-4 w-full border p-4">
+                            <DatePicker
+                                selectedDate={selectedDate}
+                                setSelectedDate={setSelectedDate}
+                            />
+
+                            <label className="fieldset-legend" htmlFor="title">
+                                Title
+                            </label>
+                            <input
+                                name="title"
+                                type="text"
+                                className="input input-bordered"
+                                id="title"
+                            />
+                            <legend className="fieldset-legend">
+                                Meeting type
+                            </legend>
+                            <div className="flex w-fit flex-row-reverse gap-2">
+                                <label
+                                    htmlFor="board-meeting"
+                                    className="label cursor-pointer"
+                                >
+                                    <span className="label-text">
+                                        Board meeting
+                                    </span>
+                                </label>
+                                <input
+                                    type="radio"
+                                    name="meeting-type"
+                                    id="board-meeting"
+                                    className="radio"
+                                    value={"board-meeting"}
+                                />
+                            </div>
+                            <div className="flex w-fit flex-row-reverse gap-2">
+                                <label
+                                    htmlFor="town-hall"
+                                    className="label cursor-pointer"
+                                >
+                                    <span className="label-text">
+                                        Town Hall
+                                    </span>
+                                </label>
+                                <input
+                                    type="radio"
+                                    name="meeting-type"
+                                    id="town-hall"
+                                    className="radio"
+                                    value={"town-hall"}
+                                />
+                            </div>
+                        </div>
+                        {isError && (
+                            <div className="alert alert-error shadow-lg">
+                                <div>
+                                    <span>Something went wrong</span>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="modal-action">
+                            {isPending ? (
+                                <span>LOADIN</span>
+                            ) : (
+                                <button
+                                    className="btn btn-primary"
+                                    type="submit"
+                                >
+                                    Schedule
+                                </button>
+                            )}
+                            <button
+                                className="btn"
+                                type="button"
+                                onClick={() =>
+                                    (
+                                        document.getElementById(
+                                            "schedule-meeting-dialog"
+                                        ) as HTMLDialogElement
+                                    )?.close()
+                                }
+                            >
+                                Close
                             </button>
-                            <button className="btn">Close</button>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             </dialog>
         </>

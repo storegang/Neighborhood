@@ -7,25 +7,30 @@ import { formatDate } from "@/lib/formatters/formatDate"
 
 // TODO: Required on fields
 
-export function DatePicker() {
-    const [selected, setSelected] = useState<Date>()
+export const DatePicker: React.FC<{
+    selectedDate: Date
+    setSelectedDate: (date: Date) => void
+}> = ({ selectedDate, setSelectedDate }) => {
     const [timeValue, setTimeValue] = useState<string>("00:00")
 
     const handleTimeChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         const time = e.target.value
-        if (!selected) {
+        if (!selectedDate) {
             setTimeValue(time)
             return
         }
         const [hours, minutes] = time.split(":").map((str) => parseInt(str, 10))
-        const newSelectedDate = setHours(setMinutes(selected, minutes), hours)
-        setSelected(newSelectedDate)
+        const newSelectedDate = setHours(
+            setMinutes(selectedDate, minutes),
+            hours
+        )
+        setSelectedDate(newSelectedDate)
         setTimeValue(time)
     }
 
     const handleDaySelect = (date: Date | undefined) => {
         if (!timeValue || !date) {
-            setSelected(date)
+            setSelectedDate(selectedDate)
             return
         }
         const [hours, minutes] = timeValue
@@ -38,19 +43,20 @@ export function DatePicker() {
             hours,
             minutes
         )
-        setSelected(newDate)
+        setSelectedDate(newDate)
     }
 
     return (
         <div className="flex flex-col gap-2">
+            <legend className="fieldset-legend">Date and time</legend>
             <label className="input">
                 <span className="label">Date:</span>
                 <button
+                    type="button"
                     popoverTarget="rdp-popover"
-                    className=""
                     style={{ anchorName: "--rdp" } as React.CSSProperties}
                 >
-                    {selected ? formatDate(selected) : ""}
+                    {selectedDate ? formatDate(selectedDate) : ""}
                 </button>
             </label>
 
@@ -60,6 +66,7 @@ export function DatePicker() {
                     <input
                         type="time"
                         value={timeValue}
+                        name="time"
                         onChange={handleTimeChange}
                         className="input input-time input-sm"
                         required
@@ -80,7 +87,7 @@ export function DatePicker() {
                 <DayPicker
                     className="react-day-picker"
                     mode="single"
-                    selected={selected}
+                    selected={selectedDate}
                     onSelect={handleDaySelect}
                 />
             </div>
