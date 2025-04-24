@@ -58,7 +58,7 @@ export const UsersList: React.FC = () => {
                         <UserListItem
                             key={user.uid}
                             name={user.name}
-                            phoneNumber="899112233"
+                            phoneNumber="89911223"
                             avatar={user.avatar || ""}
                         />
                     ))}
