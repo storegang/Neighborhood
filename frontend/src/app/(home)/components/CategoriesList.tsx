@@ -14,27 +14,16 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
     return (
         <article>
             <aside>
-                <h2 className="text-lg font-semibold">Kategorier</h2>
+                <h2 className="text-lg font-semibold">Categories</h2>
                 <ul className="mt-2 flex flex-col gap-2 space-y-1">
                     {categories.length > 0 ? (
                         categories.map((category) => (
-                            <li
+                            <CategoriesListItem
                                 key={category.id}
-                                className={`badge badge-neutral h-fit w-fit cursor-pointer ${
-                                    selectedCategory === category
-                                        ? "badge-primary"
-                                        : ""
-                                }`}
-                                onClick={() =>
-                                    onSelectCategory(
-                                        category.id === selectedCategory?.id
-                                            ? null
-                                            : category
-                                    )
-                                }
-                            >
-                                {category.name}
-                            </li>
+                                category={category}
+                                selectedCategory={selectedCategory}
+                                onSelectCategory={onSelectCategory}
+                            />
                         ))
                     ) : (
                         <p className="text-sm text-gray-500">
@@ -44,5 +33,31 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
                 </ul>
             </aside>
         </article>
+    )
+}
+
+export const CategoriesListItem = ({
+    category,
+    selectedCategory,
+    onSelectCategory,
+}: {
+    category: CategoryResponse
+    selectedCategory: CategoryResponse | null
+    onSelectCategory: (category: CategoryResponse | null) => void
+}) => {
+    return (
+        <li
+            key={category.id}
+            className={`badge badge-neutral h-fit w-fit cursor-pointer ${
+                selectedCategory === category ? "badge-primary" : ""
+            }`}
+            onClick={() =>
+                onSelectCategory(
+                    category.id === selectedCategory?.id ? null : category
+                )
+            }
+        >
+            {category.name}
+        </li>
     )
 }

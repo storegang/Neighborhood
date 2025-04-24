@@ -1,6 +1,10 @@
 const nextConfig = {
     images: {
-        domains: ["pbs.twimg.com", "preview.redd.it"],
+        domains: [
+            "pbs.twimg.com",
+            "preview.redd.it",
+            "static.wikia.nocookie.net",
+        ],
     },
 }
 
