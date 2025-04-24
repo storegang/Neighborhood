@@ -8,10 +8,29 @@ import {
     getPosts,
     addComment,
     likePost,
+    getUser,
 } from "./actions"
 
 import { Category, User } from "@/Models"
 import { LikeRequest } from "@/Models/Likes"
+
+/**
+ * Gets the user from the server.
+ *
+ * @param user - User input, for the accessToken.
+ * @returns The query calling the getUser function.
+ */
+export const useGetUser = (firebaseUser: User | null) => {
+    const accessToken = firebaseUser?.accessToken
+    const uid = firebaseUser?.uid
+
+    return useQuery({
+        queryKey: ["user", uid],
+        enabled: !!accessToken && !!uid,
+        queryFn: () => getUser(accessToken!, uid!),
+        select: (data) => data ?? null,
+    })
+}
 
 /**
  * Gets the posts from the server.
@@ -86,7 +105,7 @@ export const useGetComments = (user: User | null, postId: string) => {
     })
 }
 
-export const useAddComment = (user: User, postId: string) => {
+export const useAddComment = (user: User | null, postId: string) => {
     const accessToken = user?.accessToken
     const queryClient = useQueryClient()
 

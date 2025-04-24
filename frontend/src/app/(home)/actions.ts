@@ -38,6 +38,18 @@ export const getPosts = async (
     return sortedPosts
 }
 
+export const getUser = async (
+    accessToken: string,
+    uid: string
+): Promise<User> => {
+    const response = await apiFetcher<User>({
+        path: `/user/${uid}`,
+        accessToken,
+    })
+
+    return response
+}
+
 /**
  * Fetches comments for a specific post.
  *
