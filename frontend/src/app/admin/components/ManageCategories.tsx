@@ -1,7 +1,7 @@
 "use client"
 
 import { useUser } from "@/lib/getUser"
-import { useCreateCategory, useDeleteCategories } from "../queries"
+import { useCreateCategory, useDeleteCategory } from "../queries"
 import { useQueryClient } from "@tanstack/react-query"
 import { useGetCategories } from "@/app/(home)/queries"
 import { useState } from "react"
@@ -13,7 +13,7 @@ export const ManageCategories: React.FC = () => {
 
     const { mutate: createCategory, isPending, isError } = useCreateCategory()
     const { data: categories } = useGetCategories(user ?? null)
-    const { mutate: deleteCategory } = useDeleteCategories(user ?? null)
+    const { mutate: deleteCategory } = useDeleteCategory(user ?? null)
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([])
 
