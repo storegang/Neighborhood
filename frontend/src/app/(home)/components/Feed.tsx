@@ -55,7 +55,7 @@ export const Feed: React.FC = () => {
                 </section>
             </section>
 
-            <aside className="w-1/2 lg:w-1/3">
+            <aside className="w-1/2 lg:w-1/4">
                 <CategoriesList
                     categories={categories}
                     selectedCategory={selectedCategory}
