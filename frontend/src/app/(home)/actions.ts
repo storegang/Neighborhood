@@ -19,14 +19,23 @@ import {
  */
 export const getPosts = async (
     accessToken: string,
-    category?: Category
+    category: Category | null
 ): Promise<PostResponse[]> => {
     const response = await apiFetcher<{ posts: PostResponse[] }>({
-        path: category ? "/post/fromcategory=" + category : "/post",
+        path: "/post",
+        query: category ? { fromCategory: category.id } : undefined,
         accessToken: accessToken,
     })
 
-    return response.posts
+    const { posts } = response
+
+    const sortedPosts = posts.sort((a, b) => {
+        const dateA = new Date(a.datePosted)
+        const dateB = new Date(b.datePosted)
+
+        return dateB.getTime() - dateA.getTime()
+    })
+    return sortedPosts
 }
 
 export const getUser = async (
@@ -56,7 +65,14 @@ export const getComments = async (
         path: `/comment/allfrompost=${postId}`,
         accessToken: accessToken,
     })
-    return response.comments
+
+    const { comments } = response
+    const sortedComments = comments.sort((a, b) => {
+        const dateA = new Date(a.datePosted)
+        const dateB = new Date(b.datePosted)
+        return dateA.getTime() - dateB.getTime()
+    })
+    return sortedComments
 }
 
 /**
@@ -121,8 +137,6 @@ export const createPost = async (
             description: input.content,
             categoryId: input.categoryId,
             imageUrls: [],
-            // AccessToken kan brukes til å hente brukerdata istedet
-            authorUserId: input.userUID,
         },
     })
 
@@ -142,8 +156,7 @@ export const createPost = async (
 export const addComment = async (
     comment: CommentRequest["content"],
     postId: PostResponse["id"],
-    accessToken: User["accessToken"],
-    userId: User["uid"]
+    accessToken: User["accessToken"]
 ): Promise<CommentResponse> => {
     const response = await apiFetcher<{ comment: CommentResponse }>({
         path: "/comment",
@@ -152,15 +165,8 @@ export const addComment = async (
 
         body: {
             content: comment,
-            authorUserId: userId,
             parentPostId: postId,
-
-            id: "",
-            datePosted: "2025-04-08T19:10:41.186Z",
-            dateLastEdited: "2025-04-08T19:10:41.186Z",
             imageUrl: "",
-            likedByUserCount: 0,
-            likedByCurrentUser: true,
         },
     })
 

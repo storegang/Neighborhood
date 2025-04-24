@@ -39,12 +39,12 @@ export const useGetUser = (firebaseUser: User | null) => {
  * @param category - Category input, for filtering posts if needed.
  * @returns The query calling the getPosts function.
  */
-export const useGetPosts = (user: User | null, category?: Category) => {
+export const useGetPosts = (user: User | null, category: Category | null) => {
     const accessToken = user?.accessToken
     return useQuery({
-        queryKey: ["posts", accessToken, category],
+        queryKey: ["posts", accessToken, category?.id],
         enabled: !!accessToken,
-        queryFn: () => getPosts(accessToken!),
+        queryFn: () => getPosts(accessToken!, category),
     })
 }
 

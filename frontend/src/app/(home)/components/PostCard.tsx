@@ -31,7 +31,7 @@ export const PostCard: React.FC<PostResponse> = ({
     const { mutate: likePost } = useLikePost(user ?? null)
 
     return (
-        <div className="card shadow-sm">
+        <article className="card shadow-sm">
             {imageUrls && imageUrls.length ? (
                 <div className="lg:hidden">
                     <figure className="lg:h-32 lg:w-32 lg:self-center">
@@ -130,6 +130,6 @@ export const PostCard: React.FC<PostResponse> = ({
                 </div>
                 {showCommentSection && <CommentSection postId={id} />}
             </div>
-        </div>
+        </article>
     )
 }
