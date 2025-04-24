@@ -16,7 +16,7 @@ export const getUsers = async (accessToken: string): Promise<User[]> => {
 
 /**
  *
- * @param accessToken The accesToken to be used for the request
+ * @param accessToken The accessToken to be used for the request
  * @returns All meetings from the server
  */
 export const getMeetings = async (accessToken: string): Promise<Meeting[]> => {
