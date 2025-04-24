@@ -1,6 +1,5 @@
 "use client"
 
-import Image from "next/image"
 import { HomeIcon } from "@heroicons/react/24/outline"
 import { WrenchIcon } from "@heroicons/react/24/outline"
 import { usePathname } from "next/navigation"
@@ -16,11 +15,11 @@ export const Dock: React.FC = () => {
     return (
         <div className="dock z-50 lg:hidden">
             {links.map((link) => (
-                <button
-                    className={`${currentPath === link.href ? "dock-active" : ""}`}
+                <div
+                    className={`${currentPath === link.href ? "dock-active" : ""} pb-1`}
                     key={link.name}
                 >
-                    <a href={link.href} className="dock-label">
+                    <a href={link.href} className={`dock-label`}>
                         {link.name === "Home" && (
                             <HomeIcon className="dock-icon" />
                         )}
@@ -29,7 +28,7 @@ export const Dock: React.FC = () => {
                         )}
                         {link.name}
                     </a>
-                </button>
+                </div>
             ))}
         </div>
     )
