@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using webapi.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using webapi.Identity;
 
 namespace webapi.Controllers;
 
@@ -55,7 +56,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         
         if (comment == null)
         {
-            return NotFound();
+            return NotFound("Comment not found.");
         }
 
         ServerCommentDTO commentData = new(comment);
@@ -73,7 +74,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
         if (post == null || post.Comments == null)
         {
-            return NotFound();
+            return NotFound("Post not found.");
         }
         ICollection<Comment>? commentCollection = post.Comments;
 
@@ -110,7 +111,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
     {
         if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
         {
-            return BadRequest();
+            return BadRequest("Could not parse page or size.");
         }
 
         Post? post = await _postService.GetById(postId, 
@@ -121,7 +122,7 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
         if (post == null)
         {
-            return NotFound();
+            return NotFound("Post not found.");
         }
 
         ICollection<Comment> commentCollection = post.Comments;
@@ -163,13 +164,13 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
 
         if (post == null)
         {
-            return NotFound();
+            return NotFound("Post not found.");
         }
 
         User? user = await _userManager.FindByIdAsync(User.Claims.First(c => c.Type.Equals("user_id")).Value);
         if (user == null)
         {
-            return Unauthorized();
+            return Unauthorized("User does not exist.");
         }
 
         string newGuid;
@@ -203,7 +204,20 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         Comment? existingComment = await _commentService.GetById(id, [query => query.Include(c => c.User)]);
         if (existingComment == null)
         {
-            return NotFound();
+            return NotFound("Comment not found.");
+        }
+
+        string claimsId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value ?? "";
+        if (claimsId != existingComment.User.Id)
+        {
+            User? claimsUser = await _userManager.FindByIdAsync(claimsId);
+            bool IsSameNeighborhood = claimsUser?.NeighborhoodId == existingComment.User.NeighborhoodId;
+            bool IsBoardMember = await _userManager.IsInRoleAsync(claimsUser, UserRoles.BoardMember);
+
+            if (!IsSameNeighborhood && !IsBoardMember)
+            {
+                return Unauthorized("User is not the owner of this comment or a board member in this neighborhood.");
+            }
         }
 
         Comment comment = new() 
@@ -230,12 +244,12 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         Comment? comment = await _commentService.GetById(commentId, [query => query.Include(c => c.User)]);
         if (comment == null)
         {
-            return NotFound();
+            return NotFound("Comment not found.");
         }
         string? userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
         if (userId == null)
         {
-            return Unauthorized();
+            return Unauthorized("User does not exist.");
         }
 
         if (comment.LikedByUserID == null)
@@ -261,7 +275,20 @@ public class CommentController(IBaseService<Comment> commentService, IBaseServic
         Comment? existingComment = await _commentService.GetById(id);
         if (existingComment == null)
         {
-            return NotFound();
+            return NotFound("Comment not found.");
+        }
+
+        string claimsId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value ?? "";
+        if (claimsId != existingComment.User.Id)
+        {
+            User? claimsUser = await _userManager.FindByIdAsync(claimsId);
+            bool IsSameNeighborhood = claimsUser?.NeighborhoodId == existingComment.User.NeighborhoodId;
+            bool IsBoardMember = await _userManager.IsInRoleAsync(claimsUser, UserRoles.BoardMember);
+
+            if (!IsSameNeighborhood && !IsBoardMember)
+            {
+                return Unauthorized("User is not the owner of this comment or a board member in this neighborhood.");
+            }
         }
 
         await _commentService.Delete(id);

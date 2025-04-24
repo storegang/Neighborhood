@@ -3,16 +3,19 @@ using webapi.Services;
 using webapi.Models;
 using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using webapi.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace webapi.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
 [ApiController]
-public class CategoryController(IBaseService<Category> categoryService, INeighborhoodService neighborhoodService) : ControllerBase
+public class CategoryController(IBaseService<Category> categoryService, INeighborhoodService neighborhoodService, UserManager<User> userManager) : ControllerBase
 {
     private readonly IBaseService<Category> _categoryService = categoryService;
     private readonly INeighborhoodService _neighborhoodService = neighborhoodService;
+    private readonly UserManager<User> _userManager = userManager;
 
     // GET: api/<CategoryController>
     [HttpGet]
@@ -31,7 +34,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         
         if (category == null)
         {
-            return NotFound();
+            return NotFound("Category not found.");
         }
 
         CategoryDTO categoryData = new(category);
@@ -46,7 +49,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
 
         if (neighborhood == null || neighborhood.Categories == null)
         {
-            return NotFound();
+            return NotFound("Neighborhood not found.");
         }
         ICollection<Category> categories = neighborhood.Categories;
 
@@ -54,6 +57,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         return Ok(categoryData);
     }
 
+    [Authorize(Roles = UserRoles.BoardMember)]
     // POST api/<CategoryController>
     [HttpPost]
     public async Task<ActionResult<CategoryDTO>> Create(CategoryDTO categoryData)
@@ -62,7 +66,14 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
 
         if (neighborhood == null)
         {
-            return NotFound();
+            return NotFound("Neighborhood not found.");
+        }
+
+        string claimsId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value ?? "";
+        User? claimsUser = await _userManager.FindByIdAsync(claimsId);
+        if (claimsUser?.NeighborhoodId != neighborhood.Id)
+        {
+            return Unauthorized("User is not a board member in this neighborhood.");
         }
 
         string newGuid;
@@ -92,6 +103,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         return CreatedAtAction(nameof(GetById), new { id = categoryData.Id }, categoryData);
     }
 
+    [Authorize(Roles = UserRoles.BoardMember)]
     // PUT api/<CategoryController>/{id}
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, CategoryDTO categoryData)
@@ -99,7 +111,14 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         Category? existingCategory = await _categoryService.GetById(id);
         if (existingCategory == null)
         {
-            return NotFound();
+            return NotFound("Category not found.");
+        }
+
+        string claimsId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value ?? "";
+        User? claimsUser = await _userManager.FindByIdAsync(claimsId);
+        if (claimsUser?.NeighborhoodId != existingCategory.NeighborhoodId)
+        {
+            return Unauthorized("User is not a board member in this neighborhood.");
         }
 
         categoryData.Id = id;
@@ -115,6 +134,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         return NoContent();
     }
 
+    [Authorize(Roles = UserRoles.BoardMember)]
     // DELETE api/<CategoryController>/{id}
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
@@ -122,7 +142,14 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
         Category? existingCategory = await _categoryService.GetById(id);
         if (existingCategory == null)
         {
-            return NotFound();
+            return NotFound("Category not found.");
+        }
+
+        string claimsId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value ?? "";
+        User? claimsUser = await _userManager.FindByIdAsync(claimsId);
+        if (claimsUser?.NeighborhoodId != existingCategory.NeighborhoodId)
+        {
+            return Unauthorized("User is not a board member in this neighborhood.");
         }
 
         await _categoryService.Delete(id);

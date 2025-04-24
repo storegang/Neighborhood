@@ -25,14 +25,26 @@ export const apiFetcher = async <T>({
     method,
     accessToken,
     body,
+    query,
 }: {
     path: string
     method?: string
     accessToken?: string
     body?: Record<string, unknown>
+    query?: Record<string, string>
 }): Promise<T> => {
+    const queryPath = query
+        ? "/" +
+          Object.entries(query)
+              .map(([key, value]) => `${key}=${value}`)
+              .join("/")
+        : ""
+
+    const fullUrl = `${url}${path}${queryPath}`
+
+    console.log(`Fetching: ${fullUrl}`)
     try {
-        const response = await fetch(`${url}${path}`, {
+        const response = await fetch(fullUrl, {
             method,
             headers: {
                 "Content-Type": "application/json",

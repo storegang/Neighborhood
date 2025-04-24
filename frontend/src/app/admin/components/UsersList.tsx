@@ -9,7 +9,7 @@ import { Alert } from "@/components"
 export const UsersList: React.FC = () => {
     const user = useUser()
 
-    const { data: users, isLoading, isError } = useGetUsers(user)
+    const { data: users, isLoading, isError } = useGetUsers(user ?? null)
 
     return (
         <div className="tabs tabs-lift h-80 w-1/2">
