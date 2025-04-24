@@ -69,7 +69,7 @@ export const useCreateCategory = () => {
     })
 }
 
-export const useDeleteCategories = (user: User | null) => {
+export const useDeleteCategory = (user: User | null) => {
     const accessToken = user?.accessToken
     const queryClient = useQueryClient()
     return useMutation({

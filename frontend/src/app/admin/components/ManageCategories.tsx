@@ -19,8 +19,6 @@ export const ManageCategories: React.FC = () => {
 
     const [categoryName, setCategoryName] = useState("")
 
-    console.log(selectedCategories)
-
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
@@ -40,7 +38,7 @@ export const ManageCategories: React.FC = () => {
                     setCategoryName("")
                 },
                 onError: (error) => {
-                    console.error("Error creating post:", error)
+                    console.error("Error creating category:", error)
                 },
             }
         )
