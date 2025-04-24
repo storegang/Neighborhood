@@ -10,7 +10,7 @@ import { Meeting } from "@/Models"
 
 export const BoardMeetingsList: React.FC = () => {
     const user = useUser()
-    const { data: meetings, isLoading, isError } = useGetMeetings(user)
+    const { data: meetings, isLoading, isError } = useGetMeetings(user ?? null)
 
     if (isError) {
         return <div className="alert alert-error shadow-lg"> ERROR ERROR </div>
@@ -74,7 +74,11 @@ export const BoardMeetingsList: React.FC = () => {
 
 const ScheduleMeetingDialog: React.FC = () => {
     const user = useUser()
-    const { mutate: createMeeting, isPending, isError } = useCreateMeeting(user)
+    const {
+        mutate: createMeeting,
+        isPending,
+        isError,
+    } = useCreateMeeting(user ?? null)
 
     const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
