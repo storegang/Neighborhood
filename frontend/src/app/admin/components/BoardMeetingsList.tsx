@@ -143,8 +143,9 @@ const ScheduleMeetingDialog: React.FC = () => {
                             <input
                                 name="title"
                                 type="text"
-                                className="input input-bordered"
+                                className="input input-bordered validator"
                                 id="title"
+                                required
                             />
                             <legend className="fieldset-legend">
                                 Meeting type
@@ -194,7 +195,11 @@ const ScheduleMeetingDialog: React.FC = () => {
 
                         <div className="modal-action">
                             {isPending ? (
-                                <span>LOADIN</span>
+                                <button className="btn btn-primary">
+                                    <span className="loading loading-spinner">
+                                        Scheduling
+                                    </span>
+                                </button>
                             ) : (
                                 <button
                                     className="btn btn-primary"

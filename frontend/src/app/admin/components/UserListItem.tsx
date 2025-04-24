@@ -23,13 +23,19 @@ export const UserListItem: React.FC<UserListItemProps> = ({
     email,
     isBoardMember,
 }) => {
+    const formattedRole = role?.includes("BoardMember") ? "Board Member" : role
+
     return (
         <li
             className={`list-row ${!isBoardMember ? "items-center" : ""}`}
             key={name}
         >
             <div>
-                <img alt={name} className="rounded-box size-10" src={avatar} />
+                <img
+                    alt={name}
+                    className="rounded-box size-10 object-cover"
+                    src={avatar}
+                />
             </div>
             <div>
                 <div>{name}</div>
@@ -37,7 +43,7 @@ export const UserListItem: React.FC<UserListItemProps> = ({
                     <>
                         {role && (
                             <div className="text-xs font-semibold uppercase opacity-60">
-                                {role}
+                                {formattedRole}
                             </div>
                         )}
                         <div className="list-col-wrap flex flex-col gap-2 text-xs">
