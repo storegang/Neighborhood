@@ -19,6 +19,8 @@ export const ManageCategories: React.FC = () => {
 
     const [categoryName, setCategoryName] = useState("")
 
+    console.log(selectedCategories)
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
@@ -33,6 +35,9 @@ export const ManageCategories: React.FC = () => {
                     queryClient.invalidateQueries({
                         queryKey: ["categories", user?.accessToken],
                     })
+                },
+                onSettled: () => {
+                    setCategoryName("")
                 },
                 onError: (error) => {
                     console.error("Error creating post:", error)
@@ -50,23 +55,36 @@ export const ManageCategories: React.FC = () => {
                 <h2 className="card-title">Manage categories</h2>
                 <ul className="mt-2 flex flex-wrap gap-2 space-y-1 overflow-auto">
                     {categories ? (
-                        categories.map((category) => (
-                            <li
-                                key={category.id}
-                                className="badge badge-soft badge-secondary h-fit w-fit cursor-pointer"
-                                onClick={() =>
-                                    setSelectedCategories((prev: string[]) =>
-                                        prev?.includes(category.id)
-                                            ? prev.filter(
-                                                  (id) => id !== category.id
-                                              )
-                                            : [...(prev || []), category.id]
-                                    )
-                                }
-                            >
-                                {category.name}
-                            </li>
-                        ))
+                        categories.map((category) => {
+                            return (
+                                <li
+                                    key={category.id}
+                                    className={`badge h-fit w-fit cursor-pointer ${
+                                        selectedCategories?.includes(
+                                            category.id
+                                        )
+                                            ? "badge-accent"
+                                            : "badge-neutral"
+                                    }`}
+                                    onClick={() =>
+                                        setSelectedCategories(
+                                            (prev: string[]) =>
+                                                prev?.includes(category.id)
+                                                    ? prev.filter(
+                                                          (id) =>
+                                                              id !== category.id
+                                                      )
+                                                    : [
+                                                          ...(prev || []),
+                                                          category.id,
+                                                      ]
+                                        )
+                                    }
+                                >
+                                    {category.name}
+                                </li>
+                            )
+                        })
                     ) : (
                         <p className="text-sm text-gray-500">
                             No categories available
@@ -76,14 +94,15 @@ export const ManageCategories: React.FC = () => {
                 <input
                     type="text"
                     placeholder="Type here"
-                    className="input"
+                    className="input validator"
                     onChange={(e) => setCategoryName(e.target.value)}
+                    required
                 />
                 <div className="card-actions justify-end">
                     <button type="submit" className="btn btn-secondary">
                         Create
                     </button>
-                    {selectedCategories && (
+                    {!!selectedCategories.length && (
                         <button
                             type="button"
                             className="btn btn-error"
