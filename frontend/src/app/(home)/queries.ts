@@ -111,7 +111,7 @@ export const useAddComment = (user: User | null, postId: string) => {
 
     return useMutation({
         mutationFn: (comment: string) =>
-            addComment(comment, postId, accessToken!, user?.uid!),
+            addComment(comment, postId, accessToken!),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["comments", postId] })
         },
