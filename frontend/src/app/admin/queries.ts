@@ -1,6 +1,12 @@
-import { Category, Meeting, User } from "@/Models"
+import { Meeting, User } from "@/Models"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createCategory, createMeeting, getMeetings, getUsers } from "./actions"
+import {
+    createCategory,
+    createMeeting,
+    deleteCategory,
+    getMeetings,
+    getUsers,
+} from "./actions"
 import { CategoryRequest } from "../../Models/Category"
 
 /**
@@ -59,6 +65,20 @@ export const useCreateCategory = () => {
     return useMutation({
         mutationFn: (input: CategoryRequest) => {
             return createCategory(input)
+        },
+    })
+}
+
+export const useDeleteCategories = (user: User | null) => {
+    const accessToken = user?.accessToken
+    const queryClient = useQueryClient()
+    return useMutation({
+        mutationFn: (categoryId: string) =>
+            deleteCategory(categoryId, accessToken!),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["categories", accessToken],
+            })
         },
     })
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useUser } from "@/lib/getUser"
-import { useCreateCategory } from "../queries"
+import { useCreateCategory, useDeleteCategories } from "../queries"
 import { useQueryClient } from "@tanstack/react-query"
 import { useGetCategories } from "@/app/(home)/queries"
 import { useState } from "react"
@@ -13,6 +13,9 @@ export const ManageCategories: React.FC = () => {
 
     const { mutate: createCategory, isPending, isError } = useCreateCategory()
     const { data: categories } = useGetCategories(user ?? null)
+    const { mutate: deleteCategory } = useDeleteCategories(user ?? null)
+
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([])
 
     const [categoryName, setCategoryName] = useState("")
 
@@ -45,6 +48,31 @@ export const ManageCategories: React.FC = () => {
         >
             <div className="card-body">
                 <h2 className="card-title">Manage categories</h2>
+                <ul className="mt-2 flex flex-wrap gap-2 space-y-1 overflow-auto">
+                    {categories ? (
+                        categories.map((category) => (
+                            <li
+                                key={category.id}
+                                className="badge badge-soft badge-secondary h-fit w-fit cursor-pointer"
+                                onClick={() =>
+                                    setSelectedCategories((prev: string[]) =>
+                                        prev?.includes(category.id)
+                                            ? prev.filter(
+                                                  (id) => id !== category.id
+                                              )
+                                            : [...(prev || []), category.id]
+                                    )
+                                }
+                            >
+                                {category.name}
+                            </li>
+                        ))
+                    ) : (
+                        <p className="text-sm text-gray-500">
+                            No categories available
+                        </p>
+                    )}
+                </ul>
                 <input
                     type="text"
                     placeholder="Type here"
@@ -55,6 +83,20 @@ export const ManageCategories: React.FC = () => {
                     <button type="submit" className="btn btn-secondary">
                         Create
                     </button>
+                    {selectedCategories && (
+                        <button
+                            type="button"
+                            className="btn btn-error"
+                            onClick={() => {
+                                selectedCategories.forEach((categoryId) => {
+                                    deleteCategory(categoryId)
+                                })
+                                setSelectedCategories([])
+                            }}
+                        >
+                            Delete
+                        </button>
+                    )}
                 </div>
             </div>
         </form>

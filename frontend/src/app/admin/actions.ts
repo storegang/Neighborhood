@@ -1,6 +1,7 @@
 import { apiFetcher } from "@/fetchers/apiFetcher"
 import { Category, Meeting, User } from "@/Models"
 import { CategoryRequest, CategoryResponse } from "@/Models/Category"
+import { ca } from "date-fns/locale"
 
 /**
  *
@@ -113,5 +114,17 @@ export const createCategory = async (
         },
     })
 
+    return response
+}
+
+export const deleteCategory = async (
+    categoryId: string,
+    accessToken: string
+) => {
+    const response = apiFetcher<any>({
+        path: `/category/${categoryId}`,
+        method: "DELETE",
+        accessToken: accessToken,
+    })
     return response
 }
