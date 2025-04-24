@@ -26,7 +26,7 @@ export default async function RootLayout({
     return (
         <html suppressHydrationWarning>
             <body
-                className={`${geistSans.variable} ${geistMono.variable} flex min-h-screen flex-col antialiased`}
+                className={`${geistSans.variable} ${geistMono.variable} mb-16 flex min-h-screen flex-col antialiased sm:mb-0`}
             >
                 <QueryProvider>
                     <header>
