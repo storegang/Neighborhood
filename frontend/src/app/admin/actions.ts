@@ -22,6 +22,7 @@ export const getUsers = async (accessToken: string): Promise<User[]> => {
  */
 export const getMeetings = async (accessToken: string): Promise<Meeting[]> => {
     // Waiting for backend to implement meeting-related endpoints
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
     const meetingsResponse = new Promise<Meeting[]>((resolve) => {
         resolve([
@@ -85,6 +86,7 @@ export const createMeeting = async (
     meeting: Omit<Meeting, "id">
 ) => {
     // Waiting for backend to implement meeting-related endpoints
+    await new Promise((resolve) => setTimeout(resolve, 1000))
 
     const response = new Promise<Meeting>((resolve) => {
         resolve({
@@ -94,6 +96,8 @@ export const createMeeting = async (
             type: meeting.type,
         })
     })
+
+    return response
 }
 
 export const createCategory = async (
@@ -101,6 +105,7 @@ export const createCategory = async (
 ): Promise<{
     category: CategoryResponse
 }> => {
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     const response = apiFetcher<{ category: CategoryResponse }>({
         path: "/category",
         method: "POST",
@@ -120,10 +125,13 @@ export const deleteCategory = async (
     categoryId: string,
     accessToken: string
 ) => {
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
     const response = apiFetcher<any>({
         path: `/category/${categoryId}`,
         method: "DELETE",
         accessToken: accessToken,
     })
+
     return response
 }

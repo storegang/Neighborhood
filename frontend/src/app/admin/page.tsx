@@ -13,10 +13,8 @@ export default function Page() {
                     newUsersThisMonth={2}
                 />
                 <BoardMeetingsList />
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    <ManageCategories />
-                    <UsersList />
-                </div>
+                <ManageCategories />
+                <UsersList />
             </section>
         </main>
     )

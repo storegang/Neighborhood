@@ -5,22 +5,36 @@ import { useCreateCategory, useDeleteCategory } from "../queries"
 import { useQueryClient } from "@tanstack/react-query"
 import { useGetCategories } from "@/app/(home)/queries"
 import { useState } from "react"
+import { ListItemSkeleton } from "./ListItemSkeleton"
 
 export const ManageCategories: React.FC = () => {
     const user = useUser()
 
     const queryClient = useQueryClient()
 
-    const { mutate: createCategory, isPending, isError } = useCreateCategory()
-    const { data: categories } = useGetCategories(user ?? null)
-    const { mutate: deleteCategory } = useDeleteCategory(user ?? null)
+    const {
+        mutate: createCategory,
+        isPending: isCreatingCategory,
+        isError: isCreatingCategoryError,
+    } = useCreateCategory()
+    const {
+        data: categories,
+        isLoading,
+        isError,
+    } = useGetCategories(user ?? null)
+    const {
+        mutate: deleteCategory,
+        isPending: isDeletingCategory,
+        isError: isDeletingCategoryError,
+    } = useDeleteCategory(user ?? null)
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-
+    const [categoryError, setCategoryError] = useState<string | null>(null)
     const [categoryName, setCategoryName] = useState("")
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setCategoryError(null)
 
         createCategory(
             {
@@ -33,14 +47,60 @@ export const ManageCategories: React.FC = () => {
                     queryClient.invalidateQueries({
                         queryKey: ["categories", user?.accessToken],
                     })
-                },
-                onSettled: () => {
                     setCategoryName("")
                 },
+
                 onError: (error) => {
                     console.error("Error creating category:", error)
+
+                    setCategoryError(
+                        "An error occurred while creating the category."
+                    )
                 },
             }
+        )
+    }
+
+    if (isError) {
+        return (
+            <div className="card card-border border-base-300">
+                <div className="card-body">
+                    <h2 className="card-title">Manage categories</h2>
+                    <div className="alert alert-error w-fit shadow-lg">
+                        Could not load categories.
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (isLoading) {
+        return (
+            <div className="card card-border border-base-300">
+                <div className="card-body">
+                    <h2 className="card-title">Manage categories</h2>
+                    <ul className="list">
+                        <ListItemSkeleton />
+                        <ListItemSkeleton />
+                        <ListItemSkeleton />
+                        <ListItemSkeleton />
+                        <ListItemSkeleton />
+                    </ul>
+                </div>
+            </div>
+        )
+    }
+
+    if (!categories?.length) {
+        return (
+            <div className="card card-border border-base-300">
+                <div className="card-body">
+                    <h2 className="card-title">Manage categories</h2>
+                    <div className="alert alert-info shadow-lg">
+                        No categories found{" "}
+                    </div>
+                </div>
+            </div>
         )
     }
 
@@ -57,7 +117,7 @@ export const ManageCategories: React.FC = () => {
                             return (
                                 <li
                                     key={category.id}
-                                    className={`badge h-fit w-fit cursor-pointer ${
+                                    className={`badge h-fit cursor-pointer ${
                                         selectedCategories?.includes(
                                             category.id
                                         )
@@ -89,32 +149,70 @@ export const ManageCategories: React.FC = () => {
                         </p>
                     )}
                 </ul>
-                <input
-                    type="text"
-                    placeholder="Type here"
-                    className="input validator"
-                    onChange={(e) => setCategoryName(e.target.value)}
-                    required
-                />
-                <div className="card-actions justify-end">
-                    <button type="submit" className="btn btn-secondary">
-                        Create
+
+                <div className="card-actions justify-start">
+                    <input
+                        type="text"
+                        placeholder="Type here"
+                        className="input validator"
+                        onChange={(e) => setCategoryName(e.target.value)}
+                        required
+                        value={categoryName}
+                    />
+                    <button
+                        type="submit"
+                        className="btn btn-secondary"
+                        disabled={isCreatingCategory}
+                    >
+                        {isCreatingCategory ? (
+                            <span className="loading loading-spinner">
+                                Creating
+                            </span>
+                        ) : (
+                            "Create"
+                        )}
                     </button>
                     {!!selectedCategories.length && (
                         <button
                             type="button"
                             className="btn btn-error"
                             onClick={() => {
+                                setCategoryError(null)
                                 selectedCategories.forEach((categoryId) => {
-                                    deleteCategory(categoryId)
+                                    deleteCategory(categoryId, {
+                                        onSuccess: () => {
+                                            setSelectedCategories([])
+                                        },
+                                        onError: (error) => {
+                                            setSelectedCategories([])
+                                            console.error(
+                                                "Error deleting category:",
+                                                error
+                                            )
+                                            setCategoryError(
+                                                "An error occurred while deleting the category."
+                                            )
+                                        },
+                                    })
                                 })
-                                setSelectedCategories([])
                             }}
+                            disabled={isDeletingCategory}
                         >
-                            Delete
+                            {isDeletingCategory ? (
+                                <span className="loading loading-spinner">
+                                    Deleting
+                                </span>
+                            ) : (
+                                "Delete"
+                            )}
                         </button>
                     )}
                 </div>
+                {categoryError && (
+                    <div className="alert alert-error w-fit shadow-lg">
+                        {categoryError}
+                    </div>
+                )}
             </div>
         </form>
     )

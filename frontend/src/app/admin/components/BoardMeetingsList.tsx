@@ -7,27 +7,51 @@ import { useCreateMeeting, useGetMeetings } from "../queries"
 import { useUser } from "@/lib/getUser"
 import { formatRelativeDate } from "../../../lib/formatters/formatDate"
 import { Meeting } from "@/Models"
+import { ListItemSkeleton } from "./ListItemSkeleton"
 
 export const BoardMeetingsList: React.FC = () => {
     const user = useUser()
     const { data: meetings, isLoading, isError } = useGetMeetings(user ?? null)
 
     if (isError) {
-        return <div className="alert alert-error shadow-lg"> ERROR ERROR </div>
+        return (
+            <div className="card card-border border-base-300">
+                <div className="card-body">
+                    <h2 className="card-title">Meetings</h2>
+                    <div className="alert alert-error w-fit shadow-lg">
+                        There was an error getting the meetings.
+                    </div>
+                </div>
+            </div>
+        )
     }
 
     if (isLoading) {
         return (
-            <div className="alert alert-info shadow-lg">
-                Loading meetings...
+            <div className="card card-border border-base-300">
+                <div className="card-body">
+                    <h2 className="card-title">Meetings</h2>
+                    <ul className="list">
+                        <ListItemSkeleton />
+                        <ListItemSkeleton />
+                        <ListItemSkeleton />
+                        <ListItemSkeleton />
+                        <ListItemSkeleton />
+                    </ul>
+                </div>
             </div>
         )
     }
 
     if (!meetings?.length) {
         return (
-            <div className="alert alert-info shadow-lg">
-                No meetings scheduled
+            <div className="card card-border border-base-300">
+                <div className="card-body">
+                    <h2 className="card-title">Meetings</h2>
+                    <div className="alert alert-info shadow-lg">
+                        No meetings scheduled
+                    </div>
+                </div>
             </div>
         )
     }
@@ -40,35 +64,38 @@ export const BoardMeetingsList: React.FC = () => {
     )
 
     return (
-        <>
-            <Tabs name="board-meetings">
-                {!!plannedMeetings?.length && (
-                    <TabPanel label="Planned meetings" defaultChecked>
-                        <ul className="list">
-                            {plannedMeetings?.map((meeting) => (
-                                <MeetingItem
-                                    key={meeting.id}
-                                    meeting={meeting}
-                                />
-                            ))}
-                        </ul>
-                    </TabPanel>
-                )}
-                {!!previousMeetings?.length && (
-                    <TabPanel label="Previous meetings">
-                        <ul className="list">
-                            {previousMeetings?.map((meeting) => (
-                                <MeetingItem
-                                    key={meeting.id}
-                                    meeting={meeting}
-                                />
-                            ))}
-                        </ul>
-                    </TabPanel>
-                )}
-            </Tabs>
-            <ScheduleMeetingDialog />
-        </>
+        <div className="card card-border border-base-300">
+            <div className="card-body">
+                <h2 className="card-title">Meetings</h2>
+                <Tabs name="board-meetings">
+                    {!!plannedMeetings?.length && (
+                        <TabPanel label="Planned meetings" defaultChecked>
+                            <ul className="list">
+                                {plannedMeetings?.map((meeting) => (
+                                    <MeetingItem
+                                        key={meeting.id}
+                                        meeting={meeting}
+                                    />
+                                ))}
+                            </ul>
+                        </TabPanel>
+                    )}
+                    {!!previousMeetings?.length && (
+                        <TabPanel label="Previous meetings">
+                            <ul className="list">
+                                {previousMeetings?.map((meeting) => (
+                                    <MeetingItem
+                                        key={meeting.id}
+                                        meeting={meeting}
+                                    />
+                                ))}
+                            </ul>
+                        </TabPanel>
+                    )}
+                </Tabs>
+                <ScheduleMeetingDialog />
+            </div>
+        </div>
     )
 }
 
@@ -143,8 +170,9 @@ const ScheduleMeetingDialog: React.FC = () => {
                             <input
                                 name="title"
                                 type="text"
-                                className="input input-bordered"
+                                className="input input-bordered validator"
                                 id="title"
+                                required
                             />
                             <legend className="fieldset-legend">
                                 Meeting type
@@ -194,7 +222,11 @@ const ScheduleMeetingDialog: React.FC = () => {
 
                         <div className="modal-action">
                             {isPending ? (
-                                <span>LOADIN</span>
+                                <button className="btn btn-primary">
+                                    <span className="loading loading-spinner">
+                                        Scheduling
+                                    </span>
+                                </button>
                             ) : (
                                 <button
                                     className="btn btn-primary"
@@ -250,7 +282,7 @@ const MeetingItem: React.FC<{ meeting: Meeting }> = ({ meeting }) => {
                     {formatRelativeDate(meeting.date)}
                 </time>
             </div>
-            <div className="badge badge-neutral badge-outline ml-4">
+            <div className="badge badge-neutral badge-outline ml-4 h-fit">
                 {meetingTypeLabel}
             </div>
         </li>
