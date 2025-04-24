@@ -5,4 +5,4 @@ export type Meeting = {
     type: "BOARD_MEETING" | "TOWN_HALL"
 }
 
-// The API will expose a details endpoint returning a MeetingDetails type, which includes more info, such as the agenda and attatchments, if any
+// The API will expose a details endpoint returning a MeetingDetails type, which includes more info, such as the agenda and attachments, if any
