@@ -4,8 +4,9 @@ import { useUser } from "@/lib/getUser"
 import { useCreateCategory } from "../queries"
 import { useQueryClient } from "@tanstack/react-query"
 import { useGetCategories } from "@/app/(home)/queries"
+import { useState } from "react"
 
-export const CreateCategory: React.FC = () => {
+export const ManageCategories: React.FC = () => {
     const user = useUser()
 
     const queryClient = useQueryClient()
@@ -13,12 +14,14 @@ export const CreateCategory: React.FC = () => {
     const { mutate: createCategory, isPending, isError } = useCreateCategory()
     const { data: categories } = useGetCategories(user ?? null)
 
+    const [categoryName, setCategoryName] = useState("")
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
         createCategory(
             {
-                name: e.currentTarget.categoryName.value as string,
+                name: categoryName,
                 accessToken: user?.accessToken,
                 neighborhoodId: user?.neighborhoodId,
             },
@@ -36,19 +39,24 @@ export const CreateCategory: React.FC = () => {
     }
 
     return (
-        <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-bold">Create Category</h2>
-            <form onSubmit={handleSubmit}>
+        <form
+            onSubmit={handleSubmit}
+            className="card card-border border-base-300"
+        >
+            <div className="card-body">
+                <h2 className="card-title">Manage categories</h2>
                 <input
                     type="text"
-                    name="categoryName"
-                    placeholder="Category Name"
-                    required
+                    placeholder="Type here"
+                    className="input"
+                    onChange={(e) => setCategoryName(e.target.value)}
                 />
-                <button type="submit" disabled={isPending}>
-                    {isPending ? "Creating..." : "Create Category"}
-                </button>
-            </form>
-        </div>
+                <div className="card-actions justify-end">
+                    <button type="submit" className="btn btn-secondary">
+                        Create
+                    </button>
+                </div>
+            </div>
+        </form>
     )
 }
