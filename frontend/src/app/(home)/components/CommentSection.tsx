@@ -40,7 +40,7 @@ export const CommentSection: React.FC<CommentSectionProps> = ({ postId }) => {
                         addComment(comment)
                         e.currentTarget.reset()
                     }}
-                    className="flex w-1/2 gap-2"
+                    className="flex w-full gap-2"
                 >
                     <div className="chat-bubble w-full p-1">
                         <textarea
