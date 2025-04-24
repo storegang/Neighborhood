@@ -1,6 +1,6 @@
-import { User } from "@/Models"
-import { useQuery } from "@tanstack/react-query"
-import { gettUsers } from "./actions"
+import { Meeting, User } from "@/Models"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { createMeeting, getMeetings, getUsers } from "./actions"
 
 /**
  *
@@ -11,7 +11,45 @@ export const useGetUsers = (user: User | null) => {
     const accessToken = user?.accessToken
     return useQuery({
         queryKey: ["users", accessToken],
-        queryFn: () => gettUsers(accessToken!),
+        queryFn: () => getUsers(accessToken!),
         enabled: !!accessToken,
+    })
+}
+
+/**
+ *
+ * @param user The user to be used for the request
+ * @return Query for getting meetings
+ */
+export const useGetMeetings = (user: User | null) => {
+    const accessToken = user?.accessToken
+    return useQuery({
+        queryKey: ["meetings", accessToken],
+        queryFn: () => getMeetings(accessToken!),
+        enabled: !!accessToken,
+    })
+}
+
+/**
+ *
+ * @param user The user to be used for the request
+ * @returns Mutation for creating a meeting
+ */
+export const useCreateMeeting = (user: User | null) => {
+    const accessToken = user?.accessToken
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (meeting: Omit<Meeting, "id">) =>
+            createMeeting(accessToken!, meeting),
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["meetings", accessToken],
+            })
+        },
+        onError: (error) => {
+            console.error("Error adding meeting:", error)
+        },
     })
 }

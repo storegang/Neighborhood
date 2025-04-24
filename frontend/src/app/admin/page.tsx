@@ -1,4 +1,5 @@
 import { UsersList, DashboardStats } from "./components"
+import { BoardMeetingsList } from "./components/BoardMeetingsList"
 
 export default function Page() {
     return (
@@ -10,7 +11,10 @@ export default function Page() {
                     totalProperites={100}
                     newUsersThisMonth={2}
                 />
-                <UsersList />
+                <BoardMeetingsList />
+                <div className="flex gap-4">
+                    <UsersList />
+                </div>
             </section>
         </main>
     )
