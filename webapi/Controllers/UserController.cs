@@ -45,13 +45,12 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         
         if (user == null)
         {
-            return NotFound();
+            return NotFound("User not found.");
         }
 
         IEnumerable<string> roles = await _userManager.GetRolesAsync(user);
 
-        ServerUserDTO userData = new(user);
-        userData.Roles = roles;
+        ServerUserDTO userData = new(user, roles);
         return Ok(userData);
     }
 
@@ -63,11 +62,19 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
 
         if (neighborhood == null || neighborhood.Users == null)
         {
-            return NotFound();
+            return NotFound("Neighborhood not found.");
         }
         ICollection<User> users = neighborhood.Users;
 
         ServerUserCollectionDTO userDataCollection = new(users);
+
+        List<ServerUserDTO> userDTOs = new();
+        foreach (var user in users)
+        {
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+            userDTOs.Add(new ServerUserDTO(user, roles));
+        }
+        userDataCollection.Users = userDTOs;
 
         return Ok(userDataCollection);
     }
@@ -79,7 +86,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
     {
         if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
         {
-            return BadRequest();
+            return BadRequest("Can not parse page or size.");
         }
 
         Neighborhood? neighborhood = await _neighborhoodService.GetById
@@ -90,11 +97,19 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
 
         if (neighborhood == null || neighborhood.Users == null)
         {
-            return NotFound();
+            return NotFound("Neighborhood not found.");
         }
         ICollection<User> users = neighborhood.Users;
 
         ServerUserCollectionDTO userDataCollection = new(users);
+
+        List<ServerUserDTO> userDTOs = new();
+        foreach (var user in users)
+        {
+            IList<string> roles = await _userManager.GetRolesAsync(user);
+            userDTOs.Add(new ServerUserDTO(user, roles));
+        }
+        userDataCollection.Users = userDTOs;
 
         return Ok(userDataCollection);
     }
@@ -114,7 +129,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         User? existingUser = await _userManager.FindByIdAsync(claimsId);
         if (existingUser != null)
         {
-            return Conflict();
+            return Conflict("User already exists.");
         }
 
         User newUser = new()
@@ -137,7 +152,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         User? existingUser = await _userManager.FindByIdAsync(id);
         if (existingUser == null)
         {
-            return NotFound();
+            return NotFound("User not found.");
         }
 
         existingUser.Name = userData.Name;
@@ -155,7 +170,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         User? existingUser = await _userManager.FindByIdAsync(id);
         if (existingUser == null)
         {
-            return NotFound();
+            return NotFound("User not found.");
         }
 
         await _userManager.DeleteAsync(existingUser);
@@ -165,7 +180,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
 
 
 
-
+    // TODO: Consider relocating some or most of the bellow functions.
 
     // PUT api/<UserController>/{userId}&SetNeighborhood={neighborhoodId}
     [HttpPut("{userId}&SetNeighborhood={neighborhoodId}")]
@@ -174,7 +189,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         User? existingUser = await _userManager.FindByIdAsync(userId);
         if (existingUser == null)
         {
-            return NotFound();
+            return NotFound("User not found.");
         }
 
         if (neighborhoodId == existingUser.NeighborhoodId)
@@ -185,7 +200,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         Neighborhood? newNeighborhood = await _neighborhoodService.GetById(neighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
         if (newNeighborhood == null)
         {
-            return NotFound();
+            return NotFound("Neighborhood not found.");
         }
 
         // Belongs to a neighborhood already and need to leave that one.
@@ -195,6 +210,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
             
             if (previousNeighborhood != null)
             {
+                // TODO: Check if this is the last board member in the neighborhood and don't allow them to leave if so.
                 previousNeighborhood?.Users.Remove(existingUser);
                 await _neighborhoodService.Update(previousNeighborhood);
             }
@@ -217,7 +233,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         User? existingUser = await _userManager.FindByIdAsync(userId);
         if (existingUser == null)
         {
-            return NotFound();
+            return NotFound("User not found.");
         }
 
         Neighborhood? neighborhood = await _neighborhoodService.GetById(existingUser.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
@@ -228,8 +244,87 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
             await _neighborhoodService.Update(neighborhood);
         }
 
+        // TODO: Check if this is the last board member in the neighborhood and don't allow them to leave if so.
+
         existingUser.NeighborhoodId = null;
-        await _userManager.RemoveFromRoleAsync(existingUser, UserRoles.Tenant);
+        await _userManager.RemoveFromRolesAsync(existingUser, [UserRoles.Tenant, UserRoles.BoardMember]);
+        await _userManager.UpdateAsync(existingUser);
+
+        return NoContent();
+    }
+
+    [Authorize(Roles = UserRoles.BoardMember)]
+    // PUT api/<UserController>/{userId}&AssignAsBoardMember
+    [HttpPut("{userId}&AssignAsBoardMember")]
+    public async Task<IActionResult> AssignAsBoardMember(string userId)
+    {
+        User? existingUser = await _userManager.FindByIdAsync(userId);
+        if (existingUser == null)
+        {
+            return NotFound("Target user not found.");
+        }
+
+        string claimsId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value ?? "";
+        User? claimUser = await _userManager.FindByIdAsync(claimsId);
+        if (claimUser == null)
+        {
+            return NotFound("Requesting user not found.");
+        }
+
+        if (existingUser.NeighborhoodId != claimUser.NeighborhoodId)
+        {
+            return BadRequest("User is not a member of this neighborhood.");
+        }
+
+        Neighborhood? neighborhood = await _neighborhoodService.GetById(existingUser.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
+
+        if (neighborhood == null)
+        {
+            return NotFound("Requesting user has no neighborhood.");
+        }
+
+        await _userManager.AddToRoleAsync(existingUser, UserRoles.BoardMember);
+        await _userManager.UpdateAsync(existingUser);
+
+        return NoContent();
+    }
+
+    [Authorize(Roles = UserRoles.BoardMember)]
+    // PUT api/<UserController>/{userId}&UnassignAsBoardMember
+    [HttpPut("{userId}&UnassignAsBoardMember")]
+    public async Task<IActionResult> UnassignAsBoardMember(string userId)
+    {
+        string claimsId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value ?? "";
+        if (userId == claimsId)
+        {
+            return Unauthorized("Users can not remove their own board member role.");
+        }
+
+        User? existingUser = await _userManager.FindByIdAsync(userId);
+        if (existingUser == null)
+        {
+            return NotFound("Target user not found.");
+        }
+
+        User? claimUser = await _userManager.FindByIdAsync(claimsId);
+        if (claimUser == null)
+        {
+            return NotFound("Requesting user not found.");
+        }
+
+        if (existingUser.NeighborhoodId != claimUser.NeighborhoodId)
+        {
+            return BadRequest("User is not a member of this neighborhood.");
+        }
+
+        Neighborhood? neighborhood = await _neighborhoodService.GetById(existingUser.NeighborhoodId, [query => query.AsNoTracking().Include(c => c.Users)]);
+
+        if (neighborhood == null)
+        {
+            return NotFound("Requesting user has no neighborhood.");
+        }
+
+        await _userManager.RemoveFromRoleAsync(existingUser, UserRoles.BoardMember);
         await _userManager.UpdateAsync(existingUser);
 
         return NoContent();
@@ -246,7 +341,7 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         User? existingUser = await _userManager.FindByIdAsync(id);
         if (existingUser == null)
         {
-            return NotFound();
+            return NotFound("User not found.");
         }
 
         IList<string> userRoles = await _userManager.GetRolesAsync(existingUser);
@@ -261,13 +356,13 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         User? existingUser = await _userManager.FindByIdAsync(id);
         if (existingUser == null)
         {
-            return NotFound();
+            return NotFound("User not found.");
         }
 
         bool roleExists = await _roleManager.RoleExistsAsync(role);
         if (!roleExists)
         {
-            return NotFound();
+            return NotFound("Role not found.");
         }
 
         await _userManager.AddToRoleAsync(existingUser, role);
@@ -282,13 +377,13 @@ public class UserController(UserManager<User> userManager, RoleManager<IdentityR
         User? existingUser = await _userManager.FindByIdAsync(id);
         if (existingUser == null)
         {
-            return NotFound();
+            return NotFound("User not found.");
         }
 
         bool roleExists = await _roleManager.RoleExistsAsync(role);
         if (!roleExists)
         {
-            return NotFound();
+            return NotFound("Role not found.");
         }
 
         await _userManager.RemoveFromRoleAsync(existingUser, role);

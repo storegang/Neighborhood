@@ -19,10 +19,10 @@ export const Feed: React.FC = () => {
         data: posts = [],
         isLoading: postsLoading,
         isError: postsError,
-    } = useGetPosts(user, selectedCategory)
+    } = useGetPosts(user ?? null, selectedCategory)
 
     const { data: categories = [], isLoading: categoriesLoading } =
-        useGetCategories(user)
+        useGetCategories(user ?? null)
 
     if (!user || postsLoading || categoriesLoading) {
         return (

@@ -9,7 +9,7 @@ import { TabPanel, Tabs } from "@/components/Tabs"
 export const UsersList: React.FC = () => {
     const user = useUser()
 
-    const { data: users, isLoading, isError } = useGetUsers(user)
+    const { data: users, isLoading, isError } = useGetUsers(user ?? null)
 
     const boardMembers = users?.filter((user) =>
         user.roles.includes("BoardMember")

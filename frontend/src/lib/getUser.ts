@@ -4,32 +4,32 @@ import { onAuthStateChanged } from "firebase/auth"
 import { useEffect, useState } from "react"
 
 import { auth } from "@/lib/firebase/clientApp.js"
-import { useRouter } from "next/navigation"
 import { User } from "@/Models/User"
+import { useGetUser } from "@/app/(home)/queries"
 
 /**
  * Custom hook to get the user from firebase auth
  *
  * @returns The user object
  */
-export const useUser = () => {
-    const [user, setUser] = useState<User | null>(null)
-
-    const router = useRouter()
+export const useUser = (): User | undefined => {
+    const [firebaseUser, setFirebaseUser] = useState<User | null>(null)
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (authUser) => {
-            setUser(authUser as User)
+            setFirebaseUser(authUser as User)
         })
 
         return () => unsubscribe()
     }, [])
 
-    /*   useEffect(() => {
-        if (!user?.accessToken) {
-            router.push("/")
-        }
-    }, [user]) */
+    const { data: serverUser } = useGetUser(firebaseUser)
 
-    return user
+    if (!serverUser || !firebaseUser) return
+
+    return {
+        ...firebaseUser,
+        roles: serverUser?.roles ?? [],
+        neighborhoodId: serverUser?.neighborhoodId,
+    }
 }

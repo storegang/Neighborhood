@@ -18,16 +18,24 @@ namespace webapi.DataContexts
         {
             base.OnModelCreating(modelBuilder);
 
+            // Neighborhood to User relationship
+            modelBuilder.Entity<Neighborhood>()
+                .HasMany(n => n.Users)
+                .WithOne()
+                .HasForeignKey(c => c.NeighborhoodId)
+                .OnDelete(DeleteBehavior.SetNull);
             // Neighborhood to Category relationship
             modelBuilder.Entity<Neighborhood>()
                 .HasMany(n => n.Categories)
                 .WithOne(c => c.Neighborhood)
-                .HasForeignKey(c => c.NeighborhoodId);
+                .HasForeignKey(c => c.NeighborhoodId)
+                .OnDelete(DeleteBehavior.Cascade);
             // Category to Post relationship
             modelBuilder.Entity<Category>()
                 .HasMany(c => c.Posts)
                 .WithOne(p => p.Category)
-                .HasForeignKey(p => p.CategoryId);
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
             // Post to Comment relationship
             modelBuilder.Entity<Post>()
                 .HasMany(p => p.Comments)

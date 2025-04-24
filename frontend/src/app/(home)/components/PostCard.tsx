@@ -26,9 +26,9 @@ export const PostCard: React.FC<PostResponse> = ({
 
     const user = useUser()
 
-    const { data: categories = [] } = useGetCategories(user)
+    const { data: categories = [] } = useGetCategories(user ?? null)
 
-    const { mutate: likePost } = useLikePost(user)
+    const { mutate: likePost } = useLikePost(user ?? null)
 
     return (
         <article className="card shadow-sm">
