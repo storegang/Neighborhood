@@ -48,7 +48,7 @@ export const CategoriesListItem = ({
     return (
         <li
             key={category.id}
-            className={`badge badge-neutral h-fit w-fit cursor-pointer ${
+            className={`badge badge-neutral h-fit cursor-pointer ${
                 selectedCategory === category ? "badge-primary" : ""
             }`}
             onClick={() =>

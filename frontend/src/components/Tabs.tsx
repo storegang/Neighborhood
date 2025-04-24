@@ -42,7 +42,7 @@ export const TabPanel: React.FC<TabPanelProps> = ({
                 aria-label={label}
                 defaultChecked={defaultChecked}
             />
-            <div className="tab-content border-base-300 bg-base-100 p-6">
+            <div className="tab-content border-base-300 bg-base-100 max-h-96 overflow-scroll p-6">
                 {children}
             </div>
         </>
