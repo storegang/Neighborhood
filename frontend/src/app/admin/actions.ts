@@ -1,5 +1,6 @@
 import { apiFetcher } from "@/fetchers/apiFetcher"
 import { Meeting, User } from "@/Models"
+import { CategoryRequest, CategoryResponse } from "@/Models/Category"
 
 /**
  *
@@ -93,6 +94,36 @@ export const createMeeting = async (
             type: meeting.type,
         })
     })
+}
 
-    return await response
+export const createCategory = async (
+    input: CategoryRequest
+): Promise<{
+    category: CategoryResponse
+}> => {
+    const response = apiFetcher<{ category: CategoryResponse }>({
+        path: "/category",
+        method: "POST",
+        accessToken: input.accessToken,
+        body: {
+            name: input.name,
+            neighborhoodId: input.neighborhoodId,
+            color: "",
+            id: "",
+        },
+    })
+
+    return response
+}
+
+export const deleteCategory = async (
+    categoryId: string,
+    accessToken: string
+) => {
+    const response = apiFetcher<any>({
+        path: `/category/${categoryId}`,
+        method: "DELETE",
+        accessToken: accessToken,
+    })
+    return response
 }

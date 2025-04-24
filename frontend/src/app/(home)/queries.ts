@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 
 import {
     createPost,
-    CreatePostInput,
     getCategories,
     getComments,
     getPosts,
@@ -11,7 +10,7 @@ import {
     getUser,
 } from "./actions"
 
-import { Category, User } from "@/Models"
+import { CategoryResponse, PostRequest, User } from "@/Models"
 import { LikeRequest } from "@/Models/Likes"
 
 /**
@@ -39,7 +38,10 @@ export const useGetUser = (firebaseUser: User | null) => {
  * @param category - Category input, for filtering posts if needed.
  * @returns The query calling the getPosts function.
  */
-export const useGetPosts = (user: User | null, category: Category | null) => {
+export const useGetPosts = (
+    user: User | null,
+    category: CategoryResponse | null
+) => {
     const accessToken = user?.accessToken
     return useQuery({
         queryKey: ["posts", accessToken, category?.id],
@@ -48,7 +50,6 @@ export const useGetPosts = (user: User | null, category: Category | null) => {
     })
 }
 
-// TODO: Add specific neighborhood to the query
 /**
  * Gets the categories, in the specific neighborhood, from the server.
  *
@@ -71,7 +72,7 @@ export const useGetCategories = (user: User | null) => {
  */
 export const useCreatePost = () => {
     return useMutation({
-        mutationFn: (input: CreatePostInput) => {
+        mutationFn: (input: PostRequest) => {
             return createPost(input)
         },
     })

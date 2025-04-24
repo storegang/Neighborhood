@@ -1,5 +1,6 @@
 import { UsersList, DashboardStats } from "./components"
 import { BoardMeetingsList } from "./components/BoardMeetingsList"
+import { ManageCategories } from "./components/ManageCategories"
 
 export default function Page() {
     return (
@@ -12,7 +13,8 @@ export default function Page() {
                     newUsersThisMonth={2}
                 />
                 <BoardMeetingsList />
-                <div className="flex gap-4">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                    <ManageCategories />
                     <UsersList />
                 </div>
             </section>

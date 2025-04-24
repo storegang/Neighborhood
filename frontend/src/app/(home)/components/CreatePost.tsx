@@ -1,6 +1,6 @@
 "use client"
 
-import { User, PostRequest, Category } from "@/Models"
+import { User, PostRequest, CategoryResponse } from "@/Models"
 import { useState } from "react"
 import { useCreatePost, useGetCategories } from "../queries"
 import { useQueryClient } from "@tanstack/react-query"
@@ -12,7 +12,8 @@ type CreatePostProps = {
 }
 
 export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
-    const [selectedCategory, setSelectedCategory] = useState<Category["id"]>("")
+    const [selectedCategory, setSelectedCategory] =
+        useState<CategoryResponse["id"]>("")
     const [title, setTitle] = useState("")
     const [content, setContent] = useState("")
     const [categoryWarning, setCategoryWarning] = useState(false)

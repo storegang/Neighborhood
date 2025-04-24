@@ -1,4 +1,5 @@
-export type { Category } from "./Category"
+export type { CategoryRequest } from "./Category"
+export type { CategoryResponse } from "./Category"
 export type { LikeRequest } from "./Likes"
 export type { CommentRequest } from "./Comment"
 export type { CommentResponse } from "./Comment"

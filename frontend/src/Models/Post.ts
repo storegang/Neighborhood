@@ -1,11 +1,12 @@
-import { Category } from "./Category"
+import { CategoryResponse } from "./Category"
 import { User } from "./User"
 
 export type PostRequest = {
     title: string
-    description: string
-    categoryId: Category["id"]
-    imageUrls: string[]
+    content: string
+    categoryId: string
+    userUID: string
+    accessToken: string
 }
 
 export type PostResponse = {
@@ -16,7 +17,7 @@ export type PostResponse = {
     dateLastEdited: string | null
     authorUserId: User["uid"]
     authorUser: User
-    categoryId: Category["id"]
+    categoryId: CategoryResponse["id"]
     imageUrls: string[]
     commentCount: number
     likedByUserCount: number

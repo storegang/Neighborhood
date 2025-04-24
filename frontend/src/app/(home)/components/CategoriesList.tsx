@@ -1,9 +1,9 @@
-import { Category } from "@/Models"
+import { CategoryResponse } from "@/Models"
 
 type CategoriesListProps = {
-    selectedCategory: Category | null
-    onSelectCategory: (category: Category | null) => void
-    categories: Category[]
+    selectedCategory: CategoryResponse | null
+    onSelectCategory: (category: CategoryResponse | null) => void
+    categories: CategoryResponse[]
 }
 
 export const CategoriesList: React.FC<CategoriesListProps> = ({
@@ -20,7 +20,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
                         categories.map((category) => (
                             <li
                                 key={category.id}
-                                className={`badge badge-soft badge-secondary h-fit w-fit cursor-pointer ${
+                                className={`badge badge-neutral h-fit w-fit cursor-pointer ${
                                     selectedCategory === category
                                         ? "badge-primary"
                                         : ""
@@ -38,7 +38,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
                         ))
                     ) : (
                         <p className="text-sm text-gray-500">
-                            Ingen kategorier
+                            No categories available
                         </p>
                     )}
                 </ul>

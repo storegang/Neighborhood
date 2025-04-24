@@ -60,7 +60,7 @@ export const PostCard: React.FC<PostResponse> = ({
                         </div>
                     </div>
                     <p className="w-1/2 truncate text-sm">{name}</p>
-                    <div className="badge badge-soft badge-primary fit-content">
+                    <div className="badge badge-neutral fit-content">
                         {categories.find((c) => c.id === categoryId)?.name}
                     </div>
                 </div>

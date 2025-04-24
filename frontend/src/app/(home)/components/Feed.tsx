@@ -6,14 +6,13 @@ import { PostCard, CreatePost, CategoriesList } from "./index"
 import { useUser } from "@/lib/getUser"
 import { useGetCategories, useGetPosts } from "../queries"
 import { Alert, CardSkeletonLoader } from "@/components"
-import { Category } from "@/Models"
+import { CategoryResponse } from "@/Models"
 
 export const Feed: React.FC = () => {
     const user = useUser()
 
-    const [selectedCategory, setSelectedCategory] = useState<Category | null>(
-        null
-    )
+    const [selectedCategory, setSelectedCategory] =
+        useState<CategoryResponse | null>(null)
 
     const {
         data: posts = [],
