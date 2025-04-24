@@ -1,5 +1,6 @@
 import { UsersList, DashboardStats } from "./components"
 import { BoardMeetingsList } from "./components/BoardMeetingsList"
+import { CreateCategory } from "./components/CreateCategory"
 
 export default function Page() {
     return (
@@ -14,6 +15,7 @@ export default function Page() {
                 <BoardMeetingsList />
                 <div className="flex gap-4">
                     <UsersList />
+                    <CreateCategory />
                 </div>
             </section>
         </main>

@@ -1,6 +1,7 @@
-import { Meeting, User } from "@/Models"
+import { Category, Meeting, User } from "@/Models"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { createMeeting, getMeetings, getUsers } from "./actions"
+import { createCategory, createMeeting, getMeetings, getUsers } from "./actions"
+import { CategoryRequest } from "../../Models/Category"
 
 /**
  *
@@ -50,6 +51,14 @@ export const useCreateMeeting = (user: User | null) => {
         },
         onError: (error) => {
             console.error("Error adding meeting:", error)
+        },
+    })
+}
+
+export const useCreateCategory = () => {
+    return useMutation({
+        mutationFn: (input: CategoryRequest) => {
+            return createCategory(input)
         },
     })
 }
