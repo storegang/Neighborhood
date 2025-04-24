@@ -4,11 +4,9 @@ using webapi.Models;
 using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using webapi.Repositories;
-using Microsoft.Extensions.Hosting;
 using webapi.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using webapi.Identity;
 
 namespace webapi.Controllers;
 
@@ -58,7 +56,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
         if (post == null)
         {
-            return NotFound();
+            return NotFound("Post not found.");
         }
 
         ServerPostDTO postData = new(post);
@@ -77,7 +75,7 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
 
         if (category == null || category.Posts == null)
         {
-            return NotFound();
+            return NotFound("Category not found.");
         }
         Post[] postCollection = category.Posts.ToArray();
 
@@ -110,14 +108,14 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
     {
         if (!int.TryParse(page, out _) || !int.TryParse(size, out _))
         {
-            return BadRequest();
+            return BadRequest("Could not parse page or size.");
         }
 
         Category? category = await _categoryService.GetById(categoryId, [query => query.Include(c => c.Posts).ThenInclude(c => c.User)]);
 
         if (category == null || category.Posts == null)
         {
-            return NotFound();
+            return NotFound("Category not found.");
         }
 
         ICollection<Post> postCollection = category.Posts;
@@ -151,13 +149,13 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         Category? category = await _categoryService.GetById(postData.CategoryId, [query => query.Include(c => c.Posts).ThenInclude(p => p.User)]);
         if (category == null)
         {
-            return NotFound();
+            return NotFound("Category not found.");
         }
 
         User? user = await _userManager.FindByIdAsync(User.Claims.First(c => c.Type.Equals("user_id")).Value);
         if (user == null)
         {
-            return Unauthorized();
+            return Unauthorized("User does not exist.");
         }
 
         string newGuid;
@@ -194,7 +192,20 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         Post? existingPost = await _postService.GetById(id, [query => query.Include(c => c.User)]);
         if (existingPost == null)
         {
-            return NotFound();
+            return NotFound("Post not found.");
+        }
+
+        string claimsId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value ?? "";
+        if (claimsId != existingPost.User.Id)
+        {
+            User? claimsUser = await _userManager.FindByIdAsync(claimsId);
+            bool IsSameNeighborhood = claimsUser?.NeighborhoodId == existingPost.User.NeighborhoodId;
+            bool IsBoardMember = await _userManager.IsInRoleAsync(claimsUser, UserRoles.BoardMember);
+
+            if (!IsSameNeighborhood && !IsBoardMember)
+            {
+                return Unauthorized("User is not the owner of this post or a board member in this neighborhood.");
+            }
         }
 
         Post post = new()
@@ -223,13 +234,13 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         Post? post = await _postService.GetById(postId, [query => query.Include(c => c.User)]);
         if (post == null)
         {
-            return NotFound();
+            return NotFound("Post not found.");
         }
         string? userId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value;
 
         if (userId == null)
         {
-            return Unauthorized();
+            return Unauthorized("User does not exist.");
         }
 
         if (post.LikedByUserID == null)
@@ -256,7 +267,20 @@ public class PostController(IBaseService<Post> postService, IBaseService<Categor
         Post? existingPost = await _postService.GetById(id);
         if (existingPost == null)
         {
-            return NotFound();
+            return NotFound("Post not found.");
+        }
+
+        string claimsId = User.Claims.First(c => c.Type.Equals("user_id"))?.Value ?? "";
+        if (claimsId != existingPost.User.Id)
+        {
+            User? claimsUser = await _userManager.FindByIdAsync(claimsId);
+            bool IsSameNeighborhood = claimsUser?.NeighborhoodId == existingPost.User.NeighborhoodId;
+            bool IsBoardMember = await _userManager.IsInRoleAsync(claimsUser, UserRoles.BoardMember);
+
+            if (!IsSameNeighborhood && !IsBoardMember)
+            {
+                return Unauthorized("User is not the owner of this post or a board member in this neighborhood.");
+            }
         }
 
         await _postService.Delete(id);

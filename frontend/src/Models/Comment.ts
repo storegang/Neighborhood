@@ -1,21 +1,18 @@
 import { User } from "./User"
 
 export type CommentRequest = {
-    id: string
-    authorUserId: string
     content: string
-    datePosted?: Date
-    dateLastEdited?: Date
     parentPostId: string
+    imageUrl: string[]
 }
 
 export type CommentResponse = {
+    id: string
+    content: string
     authorUser: User
     authorUserId: User["uid"]
-    content: string
     dateLastEdited: Date
     datePosted: Date
-    id: string
     imageUrls: string[]
     likedByCurrentUser: boolean
     likedByUserCount: number
