@@ -7,6 +7,7 @@ import { useUser } from "@/lib/getUser"
 import { useGetCategories, useGetPosts } from "../queries"
 import { Alert, CardSkeletonLoader } from "@/components"
 import { CategoryResponse } from "@/Models"
+import { MobileCategoriesList } from "./CategoriesList"
 
 export const Feed: React.FC = () => {
     const user = useUser()
@@ -41,9 +42,14 @@ export const Feed: React.FC = () => {
     }
 
     return (
-        <div className="mx-auto mt-6 flex flex-col gap-6 lg:w-2/3 lg:flex-row">
+        <div className="mx-auto mt-6 mb-16 flex flex-col gap-6 md:mb-0 lg:w-2/3 lg:flex-row">
             <section className="flex-1">
                 <CreatePost user={user} />
+                <MobileCategoriesList
+                    categories={categories}
+                    selectedCategory={selectedCategory}
+                    onSelectCategory={setSelectedCategory}
+                />
                 <section aria-label="Post feed">
                     {posts.length > 0 ? (
                         posts.map((post) => (

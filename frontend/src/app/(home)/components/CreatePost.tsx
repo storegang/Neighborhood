@@ -64,18 +64,8 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
         )
     }
 
-    const colorClasses: Record<string, string> = {
-        neutral: "btn-neutral",
-        primary: "btn-primary",
-        secondary: "btn-secondary",
-        accent: "btn-accent",
-        info: "btn-info",
-        success: "btn-success",
-        warning: "btn-warning",
-        error: "btn-error",
-    }
     return (
-        <section className="border-base-300 collapse-arrow collapse border">
+        <section className="border-base-300 collapse-arrow collapse mb-2 border sm:mb-8">
             <input type="checkbox" />
             <div className="border-base-300 collapse-title border-b border-dashed">
                 <p className="flex items-center gap-2 text-sm font-medium">
@@ -123,9 +113,9 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                             type="button"
                             className={`btn btn-xs ${
                                 selectedCategory === category.id
-                                    ? "btn-active"
+                                    ? "btn-neutral"
                                     : "btn-soft"
-                            } ${colorClasses[category.color.toLowerCase()] || "btn-neutral"}`}
+                            } "btn-neutral"}`}
                             onClick={() => setSelectedCategory(category.id)}
                             key={category.id}
                         >

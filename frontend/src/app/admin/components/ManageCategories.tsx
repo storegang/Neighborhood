@@ -121,8 +121,8 @@ export const ManageCategories: React.FC = () => {
                                         selectedCategories?.includes(
                                             category.id
                                         )
-                                            ? "badge-accent"
-                                            : "badge-neutral"
+                                            ? "badge-neutral"
+                                            : "badge-soft"
                                     }`}
                                     onClick={() =>
                                         setSelectedCategories(
