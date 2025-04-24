@@ -10,7 +10,7 @@ import {
     getUser,
 } from "./actions"
 
-import { Category, PostRequest, User } from "@/Models"
+import { CategoryResponse, PostRequest, User } from "@/Models"
 import { LikeRequest } from "@/Models/Likes"
 
 /**
@@ -38,7 +38,10 @@ export const useGetUser = (firebaseUser: User | null) => {
  * @param category - Category input, for filtering posts if needed.
  * @returns The query calling the getPosts function.
  */
-export const useGetPosts = (user: User | null, category: Category | null) => {
+export const useGetPosts = (
+    user: User | null,
+    category: CategoryResponse | null
+) => {
     const accessToken = user?.accessToken
     return useQuery({
         queryKey: ["posts", accessToken, category?.id],

@@ -4,11 +4,11 @@ import { apiFetcher } from "@/fetchers/apiFetcher"
 import {
     PostResponse,
     PostRequest,
-    Category,
     User,
     LikeRequest,
     CommentRequest,
     CommentResponse,
+    CategoryResponse,
 } from "@/Models"
 
 /**
@@ -19,7 +19,7 @@ import {
  */
 export const getPosts = async (
     accessToken: string,
-    category: Category | null
+    category: CategoryResponse | null
 ): Promise<PostResponse[]> => {
     const response = await apiFetcher<{ posts: PostResponse[] }>({
         path: "/post",
@@ -101,8 +101,8 @@ export const likePost = async (
  */
 export const getCategories = async (
     accessToken: string
-): Promise<Category[]> => {
-    const response = await apiFetcher<{ categories: Category[] }>({
+): Promise<CategoryResponse[]> => {
+    const response = await apiFetcher<{ categories: CategoryResponse[] }>({
         path: "/category",
         accessToken: accessToken,
     })
