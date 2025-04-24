@@ -1,7 +1,6 @@
 import { apiFetcher } from "@/fetchers/apiFetcher"
-import { Category, Meeting, User } from "@/Models"
+import { Meeting, User } from "@/Models"
 import { CategoryRequest, CategoryResponse } from "@/Models/Category"
-import { ca } from "date-fns/locale"
 
 /**
  *
