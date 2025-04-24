@@ -109,14 +109,6 @@ export const getCategories = async (
     return response.categories
 }
 
-export type CreatePostInput = {
-    title: string
-    content: string
-    categoryId: string
-    userUID: string
-    accessToken: string
-}
-
 /**
  * Creates a post on the server.
  *
@@ -124,7 +116,7 @@ export type CreatePostInput = {
  * @returns The created post
  */
 export const createPost = async (
-    input: CreatePostInput
+    input: PostRequest
 ): Promise<{
     post: PostRequest
 }> => {
