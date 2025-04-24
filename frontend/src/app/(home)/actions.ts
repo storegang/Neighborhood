@@ -125,8 +125,6 @@ export const createPost = async (
             description: input.content,
             categoryId: input.categoryId,
             imageUrls: [],
-            // AccessToken kan brukes til å hente brukerdata istedet
-            authorUserId: input.userUID,
         },
     })
 
@@ -146,8 +144,7 @@ export const createPost = async (
 export const addComment = async (
     comment: CommentRequest["content"],
     postId: PostResponse["id"],
-    accessToken: User["accessToken"],
-    userId: User["uid"]
+    accessToken: User["accessToken"]
 ): Promise<CommentResponse> => {
     const response = await apiFetcher<{ comment: CommentResponse }>({
         path: "/comment",
@@ -156,15 +153,8 @@ export const addComment = async (
 
         body: {
             content: comment,
-            authorUserId: userId,
             parentPostId: postId,
-
-            id: "",
-            datePosted: "2025-04-08T19:10:41.186Z",
-            dateLastEdited: "2025-04-08T19:10:41.186Z",
             imageUrl: "",
-            likedByUserCount: 0,
-            likedByCurrentUser: true,
         },
     })
 
