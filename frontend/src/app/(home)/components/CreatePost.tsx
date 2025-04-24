@@ -109,7 +109,6 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                         onChange={(e) => setTitle(e.target.value)}
                         required
                     />
-                    <button className="btn btn-xs">Add files</button>
                 </div>
                 <textarea
                     className="textarea textarea-border w-full resize-none"
@@ -133,9 +132,9 @@ export const CreatePost: React.FC<CreatePostProps> = ({ user }) => {
                         </button>
                     ))}
                 </div>
-                <div className="flex justify-end gap-4">
+                <div className="flex flex-col justify-end gap-4">
                     <button
-                        className="btn btn-sm btn-primary"
+                        className="btn btn-sm btn-primary self-start"
                         type="submit"
                         disabled={isPending}
                     >
