@@ -12,21 +12,15 @@ export const ManageCategories: React.FC = () => {
 
     const queryClient = useQueryClient()
 
-    const {
-        mutate: createCategory,
-        isPending: isCreatingCategory,
-        isError: isCreatingCategoryError,
-    } = useCreateCategory()
+    const { mutate: createCategory, isPending: isCreatingCategory } =
+        useCreateCategory()
     const {
         data: categories,
         isLoading,
         isError,
     } = useGetCategories(user ?? null)
-    const {
-        mutate: deleteCategory,
-        isPending: isDeletingCategory,
-        isError: isDeletingCategoryError,
-    } = useDeleteCategory(user ?? null)
+    const { mutate: deleteCategory, isPending: isDeletingCategory } =
+        useDeleteCategory(user ?? null)
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([])
     const [categoryError, setCategoryError] = useState<string | null>(null)
@@ -97,7 +91,7 @@ export const ManageCategories: React.FC = () => {
                 <div className="card-body">
                     <h2 className="card-title">Manage categories</h2>
                     <div className="alert alert-info shadow-lg">
-                        No categories found{" "}
+                        No categories found
                     </div>
                 </div>
             </div>
@@ -112,42 +106,29 @@ export const ManageCategories: React.FC = () => {
             <div className="card-body">
                 <h2 className="card-title">Manage categories</h2>
                 <ul className="mt-2 flex flex-wrap gap-2 space-y-1 overflow-auto">
-                    {categories ? (
-                        categories.map((category) => {
-                            return (
-                                <li
-                                    key={category.id}
-                                    className={`badge h-fit cursor-pointer ${
-                                        selectedCategories?.includes(
-                                            category.id
-                                        )
-                                            ? "badge-neutral"
-                                            : "badge-soft"
-                                    }`}
-                                    onClick={() =>
-                                        setSelectedCategories(
-                                            (prev: string[]) =>
-                                                prev?.includes(category.id)
-                                                    ? prev.filter(
-                                                          (id) =>
-                                                              id !== category.id
-                                                      )
-                                                    : [
-                                                          ...(prev || []),
-                                                          category.id,
-                                                      ]
-                                        )
-                                    }
-                                >
-                                    {category.name}
-                                </li>
-                            )
-                        })
-                    ) : (
-                        <p className="text-sm text-gray-500">
-                            No categories available
-                        </p>
-                    )}
+                    {categories.map((category) => {
+                        return (
+                            <li
+                                key={category.id}
+                                className={`badge h-fit cursor-pointer ${
+                                    selectedCategories?.includes(category.id)
+                                        ? "badge-neutral"
+                                        : "badge-soft"
+                                }`}
+                                onClick={() =>
+                                    setSelectedCategories((prev: string[]) =>
+                                        prev?.includes(category.id)
+                                            ? prev.filter(
+                                                  (id) => id !== category.id
+                                              )
+                                            : [...(prev || []), category.id]
+                                    )
+                                }
+                            >
+                                {category.name}
+                            </li>
+                        )
+                    })}
                 </ul>
 
                 <div className="card-actions justify-start">
