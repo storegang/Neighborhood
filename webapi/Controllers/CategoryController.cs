@@ -5,6 +5,7 @@ using webapi.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using webapi.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace webapi.Controllers;
 
@@ -45,7 +46,7 @@ public class CategoryController(IBaseService<Category> categoryService, INeighbo
     [HttpGet("FromNeighborhood={neighborhoodId}")]
     public async Task<ActionResult<CategoryCollectionDTO>> GetCategoryByNeighborhoodId(string neighborhoodId)
     {
-        Neighborhood? neighborhood = await _neighborhoodService.GetById(neighborhoodId);
+        Neighborhood? neighborhood = await _neighborhoodService.GetById(neighborhoodId, [query => query.AsNoTracking().Include(n => n.Categories)]);
 
         if (neighborhood == null || neighborhood.Categories == null)
         {
